@@ -450,6 +450,40 @@ namespace EagleShot.Forms
                         pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
                         e.Graphics.DrawRectangle(pen, _selection);
                     }
+
+                    // Draw dimensions
+                    string dimText = $"{_selection.Width} x {_selection.Height}";
+                    using (Font font = new Font("Segoe UI", 9)) // Use a standard system font
+                    {
+                        SizeF textSize = e.Graphics.MeasureString(dimText, font);
+                        
+                        // Default position: Top-Right of selection
+                        float x = _selection.Right - textSize.Width; 
+                        float y = _selection.Top - textSize.Height - 5; // Slightly above
+
+                        // Adjust if going off-screen (Top)
+                        if (y < 0) y = _selection.Top + 5; // Move inside
+                        
+                        // Adjust if going off-screen (Left side check for small selections/screen edge)
+                        if (x < 0) x = 0;
+
+                         // Check right edge
+                        if (x + textSize.Width > this.Width) x = this.Width - textSize.Width;
+
+
+                        // Draw background
+                        RectangleF bgRect = new RectangleF(x, y, textSize.Width, textSize.Height);
+                        using (Brush bgBrush = new SolidBrush(Color.FromArgb(180, 0, 0, 0)))
+                        {
+                            e.Graphics.FillRectangle(bgBrush, bgRect);
+                        }
+
+                        // Draw text
+                        using (Brush textBrush = new SolidBrush(Color.White))
+                        {
+                            e.Graphics.DrawString(dimText, font, textBrush, x, y);
+                        }
+                    }
                 }
                 else if (!_hoverWindowRect.IsEmpty && !_isSelecting)
                 {

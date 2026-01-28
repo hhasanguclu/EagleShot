@@ -54,9 +54,29 @@ namespace EagleShot
 
         private void InitializeHotkeys()
         {
+            EnsurePrintScreenAvailable();
             _hotkeyHandler = new HotkeyHandler();
             _hotkeyHandler.HotkeyPressed += (s, e) => ShowOverlay();
             _hotkeyHandler.RegisterPrintScreen();
+        }
+
+        private void EnsurePrintScreenAvailable()
+        {
+            try
+            {
+                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Control Panel\Keyboard", true))
+                {
+                    if (key != null)
+                    {
+                        var val = key.GetValue("PrintScreenKeyForSnippingEnabled");
+                        if (val != null && (int)val == 1)
+                        {
+                            key.SetValue("PrintScreenKeyForSnippingEnabled", 0);
+                        }
+                    }
+                }
+            }
+            catch { /* Best effort */ }
         }
 
         private void ShowOverlay()

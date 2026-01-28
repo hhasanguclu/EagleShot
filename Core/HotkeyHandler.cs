@@ -17,10 +17,10 @@ namespace EagleShot.Core
             this.Load += (s, e) => this.Hide();
         }
 
-        public void RegisterPrintScreen()
+        public bool RegisterPrintScreen()
         {
             // ID 1, No modifiers, PrintScreen
-            NativeMethods.RegisterHotKey(this.Handle, 1, 0, NativeMethods.VK_SNAPSHOT);
+            return NativeMethods.RegisterHotKey(this.Handle, 1, 0, NativeMethods.VK_SNAPSHOT);
         }
 
         public void Unregister()
