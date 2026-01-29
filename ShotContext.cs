@@ -8,8 +8,8 @@ namespace EagleShot
 {
     public class ShotContext : ApplicationContext
     {
-        private NotifyIcon _trayIcon;
-        private HotkeyHandler _hotkeyHandler;
+        private NotifyIcon _trayIcon = null!;
+        private HotkeyHandler _hotkeyHandler = null!;
 
         public ShotContext()
         {

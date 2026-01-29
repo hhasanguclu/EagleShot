@@ -9,7 +9,7 @@ namespace EagleShot.Forms
 {
     public class OverlayForm : Form
     {
-        private Bitmap _screenCapture;
+        private Bitmap? _screenCapture;
         private Rectangle _selection = Rectangle.Empty;
         private Point _startPoint;
         private bool _isSelecting;
@@ -21,16 +21,30 @@ namespace EagleShot.Forms
         // Drawing
         private List<EagleShot.Core.Shape> _shapes = new List<EagleShot.Core.Shape>();
         private EagleShot.Core.ToolType _currentTool = EagleShot.Core.ToolType.None;
-        private EagleShot.Core.Shape _currentShape;
+        private EagleShot.Core.Shape? _currentShape;
         private Point _shapeStartPoint;
-        private ToolbarControl _toolbar;
+        private ToolbarControl? _toolbar;
         private Color _currentColor = Color.Red;
         private float _currentFontSize = 12f;
         
         // Inline Text
-        private TextBox _activeTextBox;
-        private ModernButton _btnTextSizeUp;
-        private ModernButton _btnTextSizeDown;
+        private TextBox? _activeTextBox;
+        private ModernButton? _btnTextSizeUp;
+        private ModernButton? _btnTextSizeDown;
+
+        // Moving Shapes
+        private EagleShot.Core.Shape? _movingShape;
+        private Point _dragOffset;
+        private bool _isMovingShape;
+
+        // Numbering Tool
+        private int _numberCounter = 1;
+
+        // Pen Width
+        private float _currentPenWidth = 3f;
+
+
+
 
 
         public OverlayForm()
@@ -86,6 +100,30 @@ namespace EagleShot.Forms
                  {
                      StartDrawing(e.Location);
                  }
+                 else if (_currentTool == EagleShot.Core.ToolType.None)
+                 {
+                     // Check for shape hit
+                     for (int i = _shapes.Count - 1; i >= 0; i--)
+                     {
+                         var shape = _shapes[i];
+                         if (shape is EagleShot.Core.TextShape textShape)
+                         {
+                             if (textShape.GetBounds().Contains(e.Location))
+                             {
+                                 _movingShape = shape;
+                                 _dragOffset = new Point(e.X - textShape.Location.X, e.Y - textShape.Location.Y);
+                                 _isMovingShape = true;
+                                 
+                                 // Bring to front (optional, but good for UX)
+                                 _shapes.RemoveAt(i);
+                                 _shapes.Add(shape);
+                                 
+                                 Invalidate();
+                                 break;
+                             }
+                         }
+                     }
+                 }
             }
         }
 
@@ -127,6 +165,28 @@ namespace EagleShot.Forms
                 
                 // Always invalidate for magnifier update if enabled
                 if (_showMagnifier) Invalidate();
+
+                // Cursor feedback for moving
+                 if (_currentTool == EagleShot.Core.ToolType.None && !_isSelecting && !_isMovingShape)
+                 {
+                     bool hoveringShape = false;
+                     for (int i = _shapes.Count - 1; i >= 0; i--)
+                     {
+                         if (_shapes[i] is EagleShot.Core.TextShape textShape && textShape.GetBounds().Contains(e.Location))
+                         {
+                             hoveringShape = true;
+                             break;
+                         }
+                     }
+                     this.Cursor = hoveringShape ? Cursors.SizeAll : Cursors.Default; // Or Cross?
+                     if (hoveringShape) return; // Skip other cursor logic
+                 }
+            }
+            
+            if (_isMovingShape && _movingShape is EagleShot.Core.TextShape ts)
+            {
+                 ts.Location = new Point(e.X - _dragOffset.X, e.Y - _dragOffset.Y);
+                 Invalidate();
             }
         }
 
@@ -157,6 +217,13 @@ namespace EagleShot.Forms
                 _currentShape = null;
                 Invalidate();
             }
+            
+            if (_isMovingShape)
+            {
+                _isMovingShape = false;
+                _movingShape = null;
+                Invalidate();
+            }
         }
 
         private void ShowToolbar()
@@ -174,15 +241,38 @@ namespace EagleShot.Forms
                 _toolbar.ActionSave += (s, e) => SaveScreenshot();
                 _toolbar.ActionCopy += (s, e) => CopyToClipboard();
                 _toolbar.ActionUndo += (s, e) => { if (_shapes.Count > 0) { _shapes.RemoveAt(_shapes.Count - 1); Invalidate(); } };
+                _toolbar.PenWidthChanged += (s, width) => _currentPenWidth = width;
                 this.Controls.Add(_toolbar);
             }
             
-            // Position toolbar
+            // Get the screen that contains the selection
+            Screen currentScreen = Screen.FromRectangle(_selection);
+            Rectangle screenBounds = currentScreen.Bounds;
+            
+            // Calculate initial position: bottom-right of selection
             int x = _selection.Right - _toolbar.Width;
             int y = _selection.Bottom + 5;
             
-            if (x < _selection.Left) x = _selection.Left;
-            if (y + _toolbar.Height > this.Height) y = _selection.Top - _toolbar.Height - 5;
+            // Ensure toolbar stays within screen bounds
+            // Check left boundary
+            if (x < screenBounds.Left) 
+                x = screenBounds.Left + 5;
+            
+            // Check right boundary
+            if (x + _toolbar.Width > screenBounds.Right)
+                x = screenBounds.Right - _toolbar.Width - 5;
+            
+            // Check bottom boundary - if toolbar goes off bottom, place it above the selection
+            if (y + _toolbar.Height > screenBounds.Bottom)
+                y = _selection.Top - _toolbar.Height - 5;
+            
+            // Check top boundary - if still off screen, place inside selection at bottom
+            if (y < screenBounds.Top)
+                y = _selection.Bottom - _toolbar.Height - 5;
+            
+            // Final safety check - ensure x is within selection area at minimum
+            if (x < _selection.Left && _selection.Left >= screenBounds.Left)
+                x = _selection.Left;
             
             _toolbar.Location = new Point(x, y);
             _toolbar.Visible = true;
@@ -220,7 +310,10 @@ namespace EagleShot.Forms
              using (Graphics g = Graphics.FromImage(bmp))
              {
                  // Draw screen
-                 g.DrawImage(_screenCapture, new Rectangle(0, 0, bmp.Width, bmp.Height), _selection, GraphicsUnit.Pixel);
+                 if (_screenCapture != null)
+                 {
+                     g.DrawImage(_screenCapture, new Rectangle(0, 0, bmp.Width, bmp.Height), _selection, GraphicsUnit.Pixel);
+                 }
                  
                  // Draw shapes relative to selection
                  g.TranslateTransform(-_selection.X, -_selection.Y);
@@ -238,17 +331,17 @@ namespace EagleShot.Forms
             switch (_currentTool)
             {
                 case EagleShot.Core.ToolType.Pen:
-                    _currentShape = new EagleShot.Core.PenShape { Color = _currentColor, PenWidth = 3 };
+                    _currentShape = new EagleShot.Core.PenShape { Color = _currentColor, PenWidth = _currentPenWidth };
                     ((EagleShot.Core.PenShape)_currentShape).Points.Add(loc);
                     break;
                 case EagleShot.Core.ToolType.Line:
-                    _currentShape = new EagleShot.Core.LineShape { Color = _currentColor, PenWidth = 3, Start = loc, End = loc };
+                    _currentShape = new EagleShot.Core.LineShape { Color = _currentColor, PenWidth = _currentPenWidth, Start = loc, End = loc };
                     break;
                 case EagleShot.Core.ToolType.Arrow:
-                    _currentShape = new EagleShot.Core.ArrowShape { Color = _currentColor, PenWidth = 3, Start = loc, End = loc };
+                    _currentShape = new EagleShot.Core.ArrowShape { Color = _currentColor, PenWidth = _currentPenWidth, Start = loc, End = loc };
                     break;
                 case EagleShot.Core.ToolType.Rectangle:
-                    _currentShape = new EagleShot.Core.RectangleShape { Color = _currentColor, PenWidth = 3, Rect = new Rectangle(loc, Size.Empty) };
+                    _currentShape = new EagleShot.Core.RectangleShape { Color = _currentColor, PenWidth = _currentPenWidth, Rect = new Rectangle(loc, Size.Empty) };
                     break;
                 case EagleShot.Core.ToolType.Text:
                     CreateInlineTextBox(loc);
@@ -258,6 +351,26 @@ namespace EagleShot.Forms
                     break;
                 case EagleShot.Core.ToolType.Blur:
                     _currentShape = new EagleShot.Core.BlurShape { Rect = new Rectangle(loc, Size.Empty) };
+                    break;
+                case EagleShot.Core.ToolType.Number:
+                    // Create number shape immediately on click
+                    var numShape = new EagleShot.Core.NumberShape 
+                    { 
+                        Color = _currentColor, 
+                        Center = loc, 
+                        Number = _numberCounter++,
+                        Radius = (int)(16 + _currentPenWidth * 2) // Scale with pen width
+                    };
+                    _shapes.Add(numShape);
+                    Invalidate();
+                    break;
+                case EagleShot.Core.ToolType.Mosaic:
+                    _currentShape = new EagleShot.Core.MosaicShape 
+                    { 
+                        Rect = new Rectangle(loc, Size.Empty),
+                        PixelSize = (int)(8 + _currentPenWidth),
+                        SourceBitmap = _screenCapture
+                    };
                     break;
             }
         }
@@ -288,6 +401,7 @@ namespace EagleShot.Forms
                 if (_currentShape is EagleShot.Core.RectangleShape rect) rect.Rect = r;
                 else if (_currentShape is EagleShot.Core.HighlightShape high) high.Rect = r;
                 else if (_currentShape is EagleShot.Core.BlurShape blur) blur.Rect = r;
+                else if (_currentShape is EagleShot.Core.MosaicShape mosaic) mosaic.Rect = r;
             }
         }
 
@@ -333,8 +447,8 @@ namespace EagleShot.Forms
             _btnTextSizeDown = new ModernButton { Text = "-", IsSymbol = false, Size = new Size(24, 24), BackColor = Color.White };
             
             // Set styles
-            _btnTextSizeUp.Click += (s,e) => { ChangeFontSize(2f); _activeTextBox.Focus(); };
-            _btnTextSizeDown.Click += (s,e) => { ChangeFontSize(-2f); _activeTextBox.Focus(); };
+            _btnTextSizeUp.Click += (s,e) => { ChangeFontSize(2f); _activeTextBox?.Focus(); };
+            _btnTextSizeDown.Click += (s,e) => { ChangeFontSize(-2f); _activeTextBox?.Focus(); };
 
             this.Controls.Add(_btnTextSizeUp);
             this.Controls.Add(_btnTextSizeDown);
@@ -346,7 +460,7 @@ namespace EagleShot.Forms
 
         private void UpdateFloatingControlsPos()
         {
-            if (_activeTextBox == null || _btnTextSizeUp == null) return;
+            if (_activeTextBox == null || _btnTextSizeUp == null || _btnTextSizeDown == null) return;
             
             int x = _activeTextBox.Right + 5;
             int y = _activeTextBox.Top;
@@ -359,20 +473,24 @@ namespace EagleShot.Forms
         {
             if (_activeTextBox != null)
             {
-                this.Controls.Remove(_activeTextBox);
-                _activeTextBox.Dispose();
+                var tb = _activeTextBox;
+                _activeTextBox = null; // Prevent re-entrancy from Leave event
+                this.Controls.Remove(tb);
+                tb.Dispose();
             }
             if (_btnTextSizeUp != null)
             {
-                this.Controls.Remove(_btnTextSizeUp);
-                _btnTextSizeUp.Dispose();
+                var btn = _btnTextSizeUp;
                 _btnTextSizeUp = null;
+                this.Controls.Remove(btn);
+                btn.Dispose();
             }
              if (_btnTextSizeDown != null)
             {
-                this.Controls.Remove(_btnTextSizeDown);
-                _btnTextSizeDown.Dispose();
+                var btn = _btnTextSizeDown;
                 _btnTextSizeDown = null;
+                this.Controls.Remove(btn);
+                btn.Dispose();
             }
         }
 
@@ -409,12 +527,14 @@ namespace EagleShot.Forms
 
             if (!string.IsNullOrWhiteSpace(textContent))
             {
+                Size textSize = TextRenderer.MeasureText(textContent, textFont);
                 var textShape = new EagleShot.Core.TextShape 
                 { 
                     Color = textColor, 
                     Location = textLoc, 
                     Text = textContent,
-                    Font = textFont
+                    Font = textFont,
+                    Size = textSize
                 };
                 _shapes.Add(textShape);
             }
@@ -516,6 +636,8 @@ namespace EagleShot.Forms
 
         private void DrawMagnifier(Graphics g, Point cursor)
         {
+            if (_screenCapture == null) return;
+            
             // Calculate source rectangle
             int srcW = MAGNIFIER_SIZE / ZOOM_FACTOR;
             int srcH = MAGNIFIER_SIZE / ZOOM_FACTOR;
@@ -564,6 +686,13 @@ namespace EagleShot.Forms
             {
                  _activeTextBox.Font = new Font("Arial", _currentFontSize);
             }
+        }
+
+
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
         }
     }
 }

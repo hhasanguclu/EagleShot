@@ -5,7 +5,7 @@ namespace EagleShot.Core
 {
     public class HotkeyHandler : Form
     {
-        public event EventHandler HotkeyPressed;
+        public event EventHandler? HotkeyPressed;
 
         public HotkeyHandler()
         {
