@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="EagleShot.Views.SplashWindow"
+        Title="EagleShot"
+        Width="400" Height="400"
+        WindowStartupLocation="CenterScreen"
+        SystemDecorations="None"
+        Background="Black"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Topmost="True"
+        TransparencyLevelHint="Transparent"
+        Name="SplashRoot">
+    <Panel>
+        <Image Source="avares://EagleShot/Resources/splash_logo.jpg"
+               Stretch="Uniform"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center" />
+        
+        <!-- Modern loading indicator -->
+        <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,30">
+            <TextBlock Text="EagleShot"
+                       Foreground="White"
+                       FontSize="18"
+                       FontWeight="Light"
+                       HorizontalAlignment="Center"
+                       Opacity="0.8" />
+            <ProgressBar IsIndeterminate="True"
+                         Width="120"
+                         Height="3"
+                         Margin="0,8,0,0"
+                         Foreground="#6495ED" />
+        </StackPanel>
+    </Panel>
+</Window>
