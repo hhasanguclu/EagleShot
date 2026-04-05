@@ -28,8 +28,25 @@ foreach ($rid in $rids) {
 }
 
 Write-Host "`n=== All platforms published to $OutBase ===" -ForegroundColor Green
+
+# Create release zips
+$distDir = Join-Path $ProjectRoot "dist"
+if (Test-Path $distDir) { Remove-Item -Recurse -Force $distDir }
+New-Item -ItemType Directory -Path $distDir | Out-Null
+
+Write-Host "`nCreating release archives..." -ForegroundColor Yellow
+foreach ($rid in $rids) {
+    $srcPath = Join-Path $OutBase $rid
+    $zipName = "EagleShot_v${Version}_${rid}.zip"
+    $zipPath = Join-Path $distDir $zipName
+    Compress-Archive -Path "$srcPath\*" -DestinationPath $zipPath -Force
+    $size = [math]::Round((Get-Item $zipPath).Length / 1MB, 1)
+    Write-Host "  $zipName ($size MB)"
+}
+
+Write-Host "`n=== Release files ready in $distDir ===" -ForegroundColor Green
 Write-Host ""
-Write-Host "Next steps:"
-Write-Host "  Windows : Inno Setup ile installers/windows/setup.iss derle"
-Write-Host "  Linux   : installers/linux/install.sh calistir"
-Write-Host "  macOS   : installers/macos/create-app.sh calistir"
+Write-Host "Upload these to GitHub Releases:"
+Get-ChildItem $distDir -Filter "*.zip" | ForEach-Object { Write-Host "  $_" }
+Write-Host ""
+Write-Host "Windows installer: Inno Setup ile installers/windows/setup.iss derle"
