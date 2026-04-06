@@ -32,6 +32,9 @@ public class App : Application
             var splash = new SplashWindow();
             splash.Show();
 
+            // Check macOS permissions (no-op on other platforms)
+            MacPermissionService.EnsurePermissions();
+
             // Setup tray
             SetupTrayIcon(desktop);
 

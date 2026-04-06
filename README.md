@@ -97,7 +97,7 @@ chmod +x scripts/build-all.sh
 ### 🎮 Usage
 
 1. The app sits in the system tray after launch.
-2. Press **PrintScreen** or click the tray icon.
+2. Press **PrintScreen** (or **F12** on macOS) or click the tray icon.
 3. The screen dims — drag to select a region.
 4. A toolbar appears — annotate, draw, add text.
 5. Click **Copy** or **Save**. Press **Escape** to cancel.
@@ -206,7 +206,7 @@ chmod +x scripts/build-all.sh
 ### 🎮 Kullanım
 
 1. Uygulama sistem tepsisine yerleşir.
-2. **PrintScreen** tuşuna basın veya tepsi ikonuna tıklayın.
+2. **PrintScreen** (macOS'ta **F12**) tuşuna basın veya tepsi ikonuna tıklayın.
 3. Ekran kararır, fare ile alan seçin.
 4. Araç çubuğu belirir — çizim yapın, metin ekleyin.
 5. **Kopyala** veya **Kaydet** ile çıktı alın. **Escape** ile iptal edin.
