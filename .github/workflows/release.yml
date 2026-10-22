@@ -1,28 +1,44 @@
 name: Release
 
+# Releases are made by pushing a v* tag, by running the workflow manually,
+# or by pushing a commit whose message contains "[release]" (the tag is then
+# created from the <Version> in EagleShot.csproj).
 on:
   push:
     tags:
       - "v*"
+    branches:
+      - "**"
   workflow_dispatch:
-    inputs:
-      tag:
-        description: "Existing tag to release (e.g. v3.0.0)"
-        required: true
 
 permissions:
   contents: write
 
-env:
-  TAG: ${{ github.event.inputs.tag || github.ref_name }}
-
 jobs:
-  windows:
-    runs-on: windows-latest
+  prepare:
+    if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.TAG }}
+      - id: version
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="v$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' EagleShot.csproj | head -1)"
+          fi
+          echo "Releasing $TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+  windows:
+    needs: prepare
+    runs-on: windows-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
@@ -50,11 +66,12 @@ jobs:
           path: dist/*
 
   linux:
+    needs: prepare
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.TAG }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
@@ -80,11 +97,12 @@ jobs:
           path: dist/*
 
   macos:
+    needs: prepare
     runs-on: macos-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.TAG }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
@@ -108,12 +126,12 @@ jobs:
           path: dist/*.dmg
 
   release:
-    needs: [windows, linux, macos]
+    needs: [prepare, windows, linux, macos]
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.TAG }}
 
       - uses: actions/download-artifact@v4
         with:
@@ -129,6 +147,7 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
           name: EagleShot ${{ env.TAG }} 🦅
           body_path: .github/release-notes/${{ env.TAG }}.md
           files: artifacts/*
