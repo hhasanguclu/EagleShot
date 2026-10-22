@@ -127,7 +127,8 @@ public partial class OverlayWindow : Window
             .ToList();
 
         // A single monitor is covered most reliably (panels, docks) by real full screen.
-        if (all.Count == 1)
+        // Not on macOS: there it opens a new Space with a slide animation.
+        if (all.Count == 1 && !OperatingSystem.IsMacOS())
             WindowState = WindowState.FullScreen;
     }
 
