@@ -103,6 +103,9 @@ public partial class OverlayWindow : Window
         UpdateUndoButtons();
     }
 
+    private PixelRect _desktop;
+    private List<PixelRect> _screenRects = new();
+
     private void CoverAllScreens()
     {
         var all = Screens?.All;
@@ -114,27 +117,45 @@ public partial class OverlayWindow : Window
 
         int minX = all.Min(s => s.Bounds.X), minY = all.Min(s => s.Bounds.Y);
         int maxX = all.Max(s => s.Bounds.Right), maxY = all.Max(s => s.Bounds.Bottom);
+        _desktop = new PixelRect(minX, minY, maxX - minX, maxY - minY);
+        _screenRects = all.Select(s => s.Bounds).ToList();
+
+        // First guess; corrected in OnOpened once the real render scaling is known.
         double scaling = (Screens!.ScreenFromPoint(new PixelPoint(minX, minY)) ?? Screens.Primary ?? all[0]).Scaling;
-        if (scaling <= 0) scaling = 1;
-
-        Position = new PixelPoint(minX, minY);
-        Width = (maxX - minX) / scaling;
-        Height = (maxY - minY) / scaling;
-
-        _canvas.MonitorRects = all
-            .Select(s => new Rect((s.Bounds.X - minX) / scaling, (s.Bounds.Y - minY) / scaling,
-                                  s.Bounds.Width / scaling, s.Bounds.Height / scaling))
-            .ToList();
+        ApplyLayout(scaling);
 
         // A single monitor is covered most reliably (panels, docks) by real full screen.
         // Not on macOS: there it opens a new Space with a slide animation.
         if (all.Count == 1 && !OperatingSystem.IsMacOS())
             WindowState = WindowState.FullScreen;
+        else
+            ScalingChanged += (_, _) => ApplyLayout(RenderScaling);
+    }
+
+    /// <summary>
+    /// Sizes the window to the whole desktop in physical pixels. With monitors at different DPI
+    /// (e.g. 100% + 150%) the window uses a single render scaling, so canvas units map linearly
+    /// to screen pixels and the selection lines up with the screenshot.
+    /// </summary>
+    private void ApplyLayout(double scaling)
+    {
+        if (_desktop.Width <= 0 || WindowState == WindowState.FullScreen) return;
+        if (scaling <= 0) scaling = 1;
+
+        Position = _desktop.Position;
+        Width = _desktop.Width / scaling;
+        Height = _desktop.Height / scaling;
+
+        _canvas.MonitorRects = _screenRects
+            .Select(b => new Rect((b.X - _desktop.X) / scaling, (b.Y - _desktop.Y) / scaling,
+                                  b.Width / scaling, b.Height / scaling))
+            .ToList();
     }
 
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
+        ApplyLayout(RenderScaling);
         Activate();
         _canvas.Focus();
     }

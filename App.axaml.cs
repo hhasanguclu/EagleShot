@@ -44,8 +44,8 @@ public class App : Application
             if (Settings.ShowSplash && !quietStart)
                 new SplashWindow().Show();
 
-            // Check macOS permissions (no-op on other platforms)
-            MacPermissionService.EnsurePermissions();
+            // macOS privacy permissions (no-op on other platforms)
+            var missingPermissions = MacPermissionService.EnsurePermissions();
 
             Hotkeys = new GlobalHotkeyService();
             Hotkeys.UpdateBindings(Settings.Hotkeys);
@@ -58,6 +58,10 @@ public class App : Application
 
             SetupTrayIcon();
             SingleInstance.StartServer(args => Dispatcher.UIThread.Post(() => RunCommand(CommandLine.Parse(args) ?? CommandLine.Show)));
+
+            foreach (var p in missingPermissions)
+                DispatcherTimer.RunOnce(() => ToastWindow.Show(p.Title, p.Message, onClick: () => ShellHelper.Open(p.SettingsUrl)),
+                    TimeSpan.FromSeconds(2));
 
             if (command != null)
                 Dispatcher.UIThread.Post(() => RunCommand(command), DispatcherPriority.Background);

@@ -1,6 +1,9 @@
 using Avalonia;
 using Avalonia.Media.Imaging;
+using SkiaSharp;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -109,6 +112,13 @@ public static class ScreenCaptureService
             new[] { "scrot", "-o", "{0}" },
         };
 
+        if (wayland)
+        {
+            // The desktop portal is the supported way to read the screen on Wayland.
+            var portal = CapturePortal();
+            if (portal != null) return portal;
+        }
+
         foreach (var tool in wayland ? waylandTools : x11Tools)
         {
             var result = RunCaptureTool(tool);
@@ -117,15 +127,106 @@ public static class ScreenCaptureService
         return null;
     }
 
-    private static ScreenCapture? CaptureMacOS()
+    private static ScreenCapture? CapturePortal()
     {
-        var result = RunCaptureTool(new[] { "screencapture", "-x", "{0}" });
-        return result == null ? null : new ScreenCapture(result, new PixelPoint(0, 0));
+        try
+        {
+            var path = PortalScreenshot.CaptureAsync(TimeSpan.FromSeconds(30)).GetAwaiter().GetResult();
+            if (path == null) return null;
+            try
+            {
+                var bmp = ImageHelper.LoadFile(path);
+                return bmp == null ? null : new ScreenCapture(bmp, new PixelPoint(0, 0));
+            }
+            finally
+            {
+                // The portal saves into the user's Pictures folder; we only needed the pixels.
+                try { File.Delete(path); } catch { }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Portal screenshot failed: {ex.Message}");
+            return null;
+        }
     }
 
-    private static WriteableBitmap? RunCaptureTool(string[] command)
+    private static ScreenCapture? CaptureMacOS()
     {
-        var tmpFile = Path.Combine(Path.GetTempPath(), $"eagleshot_{Guid.NewGuid():N}.png");
+        var displays = MacDisplays();
+        if (displays.Count <= 1)
+        {
+            var single = RunCaptureTool(new[] { "screencapture", "-x", "{0}" });
+            return single == null ? null : new ScreenCapture(single, new PixelPoint(0, 0));
+        }
+
+        // screencapture grabs one display per call (-D is 1-based, main display first,
+        // same order as CGGetActiveDisplayList). Stitch them using the global layout in points.
+        var shots = new List<(SKBitmap Bitmap, MacRect Bounds)>();
+        try
+        {
+            for (int i = 0; i < displays.Count; i++)
+            {
+                var file = Path.Combine(Path.GetTempPath(), $"eagleshot_{Guid.NewGuid():N}.png");
+                try
+                {
+                    if (!RunToFile(new[] { "screencapture", "-x", "-D", (i + 1).ToString(), "{0}" }, file)) continue;
+                    var bmp = SKBitmap.Decode(file);
+                    if (bmp != null) shots.Add((bmp, displays[i]));
+                }
+                finally
+                {
+                    try { if (File.Exists(file)) File.Delete(file); } catch { }
+                }
+            }
+            if (shots.Count == 0) return null;
+
+            double minX = shots.Min(s => s.Bounds.X), minY = shots.Min(s => s.Bounds.Y);
+            double maxX = shots.Max(s => s.Bounds.X + s.Bounds.Width), maxY = shots.Max(s => s.Bounds.Y + s.Bounds.Height);
+            // Keep Retina resolution: use the highest pixels-per-point of all displays.
+            double scale = shots.Max(s => s.Bitmap.Width / Math.Max(1, s.Bounds.Width));
+
+            int width = (int)Math.Round((maxX - minX) * scale), height = (int)Math.Round((maxY - minY) * scale);
+            using var canvasBitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul));
+            using (var canvas = new SKCanvas(canvasBitmap))
+            using (var paint = new SKPaint { FilterQuality = SKFilterQuality.High })
+            {
+                canvas.Clear(SKColors.Black);
+                foreach (var (bmp, b) in shots)
+                {
+                    var dest = SKRect.Create((float)((b.X - minX) * scale), (float)((b.Y - minY) * scale),
+                                             (float)(b.Width * scale), (float)(b.Height * scale));
+                    canvas.DrawBitmap(bmp, dest, paint);
+                }
+            }
+            return new ScreenCapture(ImageHelper.FromSkBitmap(canvasBitmap), new PixelPoint(0, 0));
+        }
+        finally
+        {
+            foreach (var (bmp, _) in shots) bmp.Dispose();
+        }
+    }
+
+    /// <summary>Active displays in global coordinates (points, top-left origin), main display first.</summary>
+    private static List<MacRect> MacDisplays()
+    {
+        var result = new List<MacRect>();
+        try
+        {
+            var ids = new uint[16];
+            if (CGGetActiveDisplayList((uint)ids.Length, ids, out uint count) != 0) return result;
+            for (int i = 0; i < count; i++)
+                result.Add(CGDisplayBounds(ids[i]));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Display list failed: {ex.Message}");
+        }
+        return result;
+    }
+
+    private static bool RunToFile(string[] command, string file)
+    {
         try
         {
             var psi = new ProcessStartInfo
@@ -137,29 +238,47 @@ public static class ScreenCaptureService
                 RedirectStandardOutput = true
             };
             for (int i = 1; i < command.Length; i++)
-                psi.ArgumentList.Add(command[i].Replace("{0}", tmpFile));
+                psi.ArgumentList.Add(command[i].Replace("{0}", file));
 
             using var proc = Process.Start(psi);
-            if (proc == null) return null;
+            if (proc == null) return false;
             if (!proc.WaitForExit(8000))
             {
                 try { proc.Kill(); } catch { }
-                return null;
+                return false;
             }
-
-            if (File.Exists(tmpFile) && new FileInfo(tmpFile).Length > 0)
-                return ImageHelper.LoadFile(tmpFile);
+            return File.Exists(file) && new FileInfo(file).Length > 0;
         }
         catch (Exception ex)
         {
-            // Tool not installed — try the next one.
+            // Tool not installed — the caller tries the next one.
             Debug.WriteLine($"{command[0]} failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    private static WriteableBitmap? RunCaptureTool(string[] command)
+    {
+        var tmpFile = Path.Combine(Path.GetTempPath(), $"eagleshot_{Guid.NewGuid():N}.png");
+        try
+        {
+            return RunToFile(command, tmpFile) ? ImageHelper.LoadFile(tmpFile) : null;
         }
         finally
         {
             try { if (File.Exists(tmpFile)) File.Delete(tmpFile); } catch { }
         }
-        return null;
+    }
+
+    // macOS P/Invoke
+    private const string CoreGraphicsLib = "/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics";
+    [DllImport(CoreGraphicsLib)] private static extern int CGGetActiveDisplayList(uint maxDisplays, [Out] uint[] displays, out uint displayCount);
+    [DllImport(CoreGraphicsLib)] private static extern MacRect CGDisplayBounds(uint display);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MacRect
+    {
+        public double X, Y, Width, Height;
     }
 
     // Windows P/Invoke

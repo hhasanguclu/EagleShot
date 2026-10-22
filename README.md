@@ -93,7 +93,7 @@ chmod +x installers/linux/install.sh
 ```
 
 Dependencies:
-- Screen capture: `scrot`, `maim` or ImageMagick `import` (X11); `grim` or `gnome-screenshot` (Wayland)
+- Screen capture: `scrot`, `maim` or ImageMagick `import` (X11). On Wayland, EagleShot uses xdg-desktop-portal (built into GNOME and KDE) and falls back to `grim` or `gnome-screenshot`
 - Clipboard: `xclip` (X11) or `wl-clipboard` (Wayland)
 
 #### macOS
@@ -238,7 +238,7 @@ chmod +x installers/linux/install.sh
 ```
 
 Bağımlılıklar:
-- Ekran yakalama: `scrot`, `maim` veya ImageMagick `import` (X11); `grim` veya `gnome-screenshot` (Wayland)
+- Ekran yakalama: `scrot`, `maim` veya ImageMagick `import` (X11). Wayland'da EagleShot xdg-desktop-portal'ı kullanır (GNOME ve KDE'de hazır gelir), olmazsa `grim` veya `gnome-screenshot` dener
 - Pano: `xclip` (X11) veya `wl-clipboard` (Wayland)
 
 #### macOS
