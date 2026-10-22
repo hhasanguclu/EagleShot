@@ -73,7 +73,7 @@ If EagleShot is already running, the command goes to that instance. On Wayland, 
 #### Windows
 
 **Using the installer:**
-1. Download `EagleShot_Setup_v3.0.0_win-x64.exe` from [Releases](https://github.com/hhasanguclu/EagleShot/releases).
+1. Download `EagleShot_Setup_v3.0.1_win-x64.exe` from [Releases](https://github.com/hhasanguclu/EagleShot/releases).
 2. Run the installer and follow the steps.
 
 **Manual:**
@@ -218,7 +218,7 @@ EagleShot zaten çalışıyorsa komut o örneğe iletilir. Global klavye kancala
 #### Windows
 
 **Installer ile:**
-1. [Releases](https://github.com/hhasanguclu/EagleShot/releases) sayfasından `EagleShot_Setup_v3.0.0_win-x64.exe` indirin.
+1. [Releases](https://github.com/hhasanguclu/EagleShot/releases) sayfasından `EagleShot_Setup_v3.0.1_win-x64.exe` indirin.
 2. Installer'ı çalıştırın ve adımları takip edin.
 
 **Manuel:**

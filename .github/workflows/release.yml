@@ -109,8 +109,9 @@ jobs:
 
       - name: Publish
         run: |
+          # Not single-file on macOS: native dylibs stay inside the .app so they are signed with it.
           for RID in osx-arm64 osx-x64; do
-            dotnet publish -c Release -r $RID --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/$RID
+            dotnet publish -c Release -r $RID --self-contained true -o publish/$RID
           done
 
       - name: Create .app and .dmg
@@ -119,6 +120,21 @@ jobs:
           chmod +x installers/macos/create-app.sh
           ./installers/macos/create-app.sh
           ls -l dist
+
+      - name: Smoke test (Apple Silicon)
+        run: |
+          # Mount the DMG like a user would and make sure the app starts and stays up.
+          VERSION="${TAG#v}"
+          hdiutil attach "dist/EagleShot_v${VERSION}_osx-arm64.dmg" -mountpoint /tmp/eagleshot -nobrowse
+          codesign --verify --deep --strict --verbose=2 /tmp/eagleshot/EagleShot.app
+          /tmp/eagleshot/EagleShot.app/Contents/MacOS/EagleShot > /tmp/eagleshot.log 2>&1 &
+          PID=$!
+          sleep 20
+          if ! kill -0 $PID 2>/dev/null; then
+            echo "EagleShot exited early:"; cat /tmp/eagleshot.log; exit 1
+          fi
+          kill $PID || true
+          hdiutil detach /tmp/eagleshot
 
       - uses: actions/upload-artifact@v4
         with:

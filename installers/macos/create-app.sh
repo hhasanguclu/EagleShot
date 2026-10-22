@@ -1,9 +1,9 @@
 #!/bin/bash
-# EagleShot v3.0.0 - macOS .app Bundle & DMG Creator
+# EagleShot v3.0.1 - macOS .app Bundle & DMG Creator
 set -e
 
 APP_NAME="EagleShot"
-VERSION="${VERSION:-3.0.0}"
+VERSION="${VERSION:-3.0.1}"
 BUNDLE_ID="com.eagleshot.app"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -94,7 +94,7 @@ PLIST_HEADER
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>LSUIElement</key>
-    <true/>
+    <false/>
     <key>NSScreenCaptureUsageDescription</key>
     <string>EagleShot needs Screen Recording permission to capture your screen.</string>
     <key>NSAccessibilityUsageDescription</key>
@@ -107,6 +107,15 @@ EOF
 
     echo "  App bundle created: $APP_DIR"
 
+    # Ad-hoc sign the whole bundle. Apple Silicon refuses to run unsigned code, and a bundle
+    # whose contents changed after signing is reported as "damaged" by Gatekeeper.
+    if command -v codesign &> /dev/null; then
+        xattr -cr "$APP_DIR" 2>/dev/null || true
+        codesign --force --deep --sign - --timestamp=none "$APP_DIR"
+        codesign --verify --deep --strict --verbose=2 "$APP_DIR"
+        echo "  Bundle signed (ad-hoc)"
+    fi
+
     # Create DMG
     if command -v hdiutil &> /dev/null; then
         echo "  Creating DMG..."
@@ -115,7 +124,8 @@ EOF
         mkdir -p "$DMG_TEMP"
 
         # Copy .app with correct name
-        cp -r "$APP_DIR" "$DMG_TEMP/$APP_NAME.app"
+        # ditto keeps the code signature intact
+        ditto "$APP_DIR" "$DMG_TEMP/$APP_NAME.app"
         ln -s /Applications "$DMG_TEMP/Applications"
 
         rm -f "$OUTPUT_DMG"
