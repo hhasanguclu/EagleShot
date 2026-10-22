@@ -1,9 +1,9 @@
 #!/bin/bash
-# EagleShot v2.0.0 - Cross-platform build script
+# EagleShot v3.0.0 - Cross-platform build script
 # Run from project root: ./scripts/build-all.sh
 set -e
 
-VERSION="2.0.0"
+VERSION="3.0.0"
 echo "=== EagleShot v$VERSION - Building all platforms ==="
 
 rm -rf publish

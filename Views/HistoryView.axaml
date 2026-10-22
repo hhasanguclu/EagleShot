@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="EagleShot.Views.HistoryView">
+    <DockPanel Margin="36,32,22,0">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,14,20">
+            <StackPanel>
+                <TextBlock Classes="h1" Text="History"/>
+                <TextBlock Classes="sub" Name="CountText" Margin="0,4,0,0" Text="0 captures"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                <TextBox Name="SearchBox" Width="220" Watermark="Search file names or links…"/>
+                <Button Classes="ghost" Click="OnOpenFolderClick" ToolTip.Tip="Open screenshot folder">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <PathIcon Data="{StaticResource IconFolder}"/>
+                        <TextBlock Text="Folder" FontSize="12"/>
+                    </StackPanel>
+                </Button>
+                <Button Classes="ghost" Click="OnClearClick" ToolTip.Tip="Remove all entries (files are kept)">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <PathIcon Data="{StaticResource IconDelete}"/>
+                        <TextBlock Text="Clear" FontSize="12"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Panel>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                <WrapPanel Name="ItemsPanel" Margin="0,0,0,24"/>
+            </ScrollViewer>
+            <StackPanel Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Margin="0,0,0,80">
+                <Border Classes="icon-badge" Width="56" Height="56" CornerRadius="16" HorizontalAlignment="Center">
+                    <PathIcon Data="{StaticResource IconImage}" Width="26" Height="26"/>
+                </Border>
+                <TextBlock Classes="h2" Text="No captures yet" HorizontalAlignment="Center"/>
+                <TextBlock Classes="muted" Text="Saved and uploaded screenshots appear here." HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Panel>
+    </DockPanel>
+</UserControl>

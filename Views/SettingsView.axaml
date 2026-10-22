@@ -1,0 +1,156 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="EagleShot.Views.SettingsView">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="36,32,36,32" MaxWidth="820" HorizontalAlignment="Left">
+            <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,22">
+                <StackPanel>
+                    <TextBlock Classes="h1" Text="Settings"/>
+                    <TextBlock Classes="sub" Margin="0,4,0,0" Text="Changes are saved automatically."/>
+                </StackPanel>
+                <TextBlock Grid.Column="1" Name="SavedText" Classes="muted" Text="✓ Saved" Opacity="0" VerticalAlignment="Bottom" Foreground="{StaticResource SuccessBrush}"/>
+            </Grid>
+
+            <!-- General -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="h2" Text="General"/>
+                    <CheckBox Name="StartWithSystem" Content="Start EagleShot when I sign in"/>
+                    <CheckBox Name="ShowMainOnStartup" Content="Open this window on startup (otherwise start in the tray)"/>
+                    <CheckBox Name="ShowSplash" Content="Show splash screen"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Capture -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="h2" Text="Capture"/>
+                    <CheckBox Name="ShowMagnifier" Content="Show magnifier with pixel color while selecting"/>
+                    <CheckBox Name="ShowCrosshair" Content="Show crosshair lines"/>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <TextBlock Classes="label" Text="Delayed capture countdown"/>
+                        <NumericUpDown Name="DelaySeconds" Minimum="1" Maximum="60" Increment="1" FormatString="0" Width="130"/>
+                        <TextBlock Classes="muted" Text="seconds" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- After capture -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="h2" Text="After capture tasks"/>
+                    <TextBlock Classes="muted" Text="Run when you confirm in the editor (✓ / Enter / double-click) and for full-screen, monitor and repeat captures. Toolbar buttons like Copy or Save run only their own task."/>
+                    <CheckBox Name="AfterCopy" Content="Copy image to clipboard"/>
+                    <CheckBox Name="AfterSave" Content="Save image to the screenshot folder"/>
+                    <CheckBox Name="AfterUpload" Content="Upload image"/>
+                    <CheckBox Name="AfterCopyUrl" Content="Copy the link after uploading (replaces the image on the clipboard)" Margin="26,0,0,0"/>
+                    <CheckBox Name="AfterPin" Content="Pin image to screen"/>
+                    <CheckBox Name="AfterNotify" Content="Show a notification"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Output -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="h2" Text="Files"/>
+                    <Grid ColumnDefinitions="150,*,Auto,Auto" Classes="form">
+                        <TextBlock Classes="label" Text="Screenshot folder"/>
+                        <TextBox Grid.Column="1" Name="SaveFolder"/>
+                        <Button Grid.Column="2" Classes="ghost" Content="Browse…" Click="OnBrowseFolder"/>
+                        <Button Grid.Column="3" Classes="ghost" Content="Open" Click="OnOpenFolder"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="150,*" Classes="form" RowDefinitions="Auto,Auto,Auto">
+                        <TextBlock Classes="label" Text="File name pattern"/>
+                        <TextBox Grid.Column="1" Name="FileNamePattern" FontFamily="Consolas, Menlo, monospace"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Name="PatternPreview" Classes="sub" Margin="0,6,0,0"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Name="PatternHelp" Classes="muted" Margin="0,4,0,0"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="150,Auto,Auto,*,Auto" Classes="form">
+                        <TextBlock Classes="label" Text="Image format"/>
+                        <ComboBox Grid.Column="1" Name="ImageFormat" Width="120">
+                            <ComboBoxItem Content="PNG"/>
+                            <ComboBoxItem Content="JPEG"/>
+                            <ComboBoxItem Content="WebP"/>
+                        </ComboBox>
+                        <TextBlock Grid.Column="2" Classes="label" Text="Quality" Margin="16,0,0,0" Name="QualityLabel"/>
+                        <Slider Grid.Column="3" Name="JpegQuality" Minimum="10" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True"/>
+                        <TextBlock Grid.Column="4" Name="QualityValue" Classes="label" MinWidth="34"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Upload -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="h2" Text="Upload"/>
+                    <Grid ColumnDefinitions="150,*" Classes="form">
+                        <TextBlock Classes="label" Text="Destination"/>
+                        <ComboBox Grid.Column="1" Name="Uploader" Width="220">
+                            <ComboBoxItem Content="None"/>
+                            <ComboBoxItem Content="Imgur"/>
+                            <ComboBoxItem Content="Custom uploader (HTTP)"/>
+                        </ComboBox>
+                    </Grid>
+
+                    <StackPanel Name="ImgurPanel" Spacing="8">
+                        <Grid ColumnDefinitions="150,*" Classes="form">
+                            <TextBlock Classes="label" Text="Client ID"/>
+                            <TextBox Grid.Column="1" Name="ImgurClientId" Watermark="Imgur application Client ID"/>
+                        </Grid>
+                        <TextBlock Classes="muted" Margin="158,0,0,0" Text="Register a free application at api.imgur.com/oauth2/addclient (choose “anonymous usage”) and paste its Client ID."/>
+                    </StackPanel>
+
+                    <StackPanel Name="CustomPanel" Spacing="8">
+                        <Grid ColumnDefinitions="150,*" Classes="form">
+                            <TextBlock Classes="label" Text="Request URL"/>
+                            <TextBox Grid.Column="1" Name="CustomUrl" Watermark="https://example.com/upload"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="150,*" Classes="form">
+                            <TextBlock Classes="label" Text="File form field"/>
+                            <TextBox Grid.Column="1" Name="CustomField" Watermark="file"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="150,*" Classes="form">
+                            <TextBlock Classes="label" Text="Headers" VerticalAlignment="Top" Margin="0,6,0,0"/>
+                            <TextBox Grid.Column="1" Name="CustomHeaders" AcceptsReturn="True" Height="70" TextWrapping="Wrap"
+                                     Watermark="Authorization: Bearer xxx  (one per line)"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="150,*" Classes="form">
+                            <TextBlock Classes="label" Text="URL from response"/>
+                            <TextBox Grid.Column="1" Name="CustomJsonPath" Watermark="JSON path, e.g. data.url or files[0].url — empty uses the whole body"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="158,0,0,0" Name="TestUploadRow">
+                        <Button Classes="ghost" Content="Test upload" Click="OnTestUpload"/>
+                        <TextBlock Name="TestUploadResult" Classes="muted" VerticalAlignment="Center" MaxWidth="460"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Hotkeys -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="h2" Text="Hotkeys"/>
+                    <TextBlock Classes="muted" Text="Click a box and press the new key combination. Esc cancels, the × button clears."/>
+                    <Grid Name="HotkeyGrid" ColumnDefinitions="200,Auto,Auto"/>
+                    <TextBlock Classes="muted" Name="HotkeyStatus"/>
+                    <TextBlock Classes="muted" TextWrapping="Wrap"
+                               Text="Command line (handy on Wayland or for desktop shortcuts): eagleshot --region · --fullscreen · --monitor · --delay · --repeat · --color · --show"/>
+                </StackPanel>
+            </Border>
+
+            <!-- About -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="h2" Text="About"/>
+                    <TextBlock Classes="sub" Name="AboutText"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Classes="ghost" Content="Open settings folder" Click="OnOpenConfigFolder"/>
+                        <Button Classes="ghost" Content="GitHub" Click="OnOpenGitHub"/>
+                        <Button Classes="ghost" Content="Reset to defaults" Click="OnResetDefaults"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

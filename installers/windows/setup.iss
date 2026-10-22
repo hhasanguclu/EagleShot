@@ -1,5 +1,5 @@
 #define MyAppName "EagleShot"
-#define MyAppVersion "2.0.0"
+#define MyAppVersion "3.0.0"
 #define MyAppPublisher "Hasan Guclu"
 #define MyAppURL "https://github.com/hhasanguclu/EagleShot"
 #define MyAppExeName "EagleShot.exe"
