@@ -12,14 +12,27 @@ A lightweight, modern, cross-platform screenshot tool for Windows, macOS and Lin
 
 ### 🌟 Features
 
-- **Main window:** a dashboard with capture modes, recent captures, a searchable **History** gallery and a **Settings** page. Closing it keeps EagleShot running in the tray.
+- **Main window:** a dashboard with capture modes, recent captures, a searchable **History** gallery (with video and GIF previews), a **Tools** page and a **Settings** page. Closing it keeps EagleShot running in the tray. Drop files on it to upload them, or images to edit them.
 - **Capture modes:**
   - **Region:** drag to select, or click to grab a whole monitor
   - **Full screen:** all monitors at once
   - **Active monitor:** the monitor under the mouse
   - **Delayed region:** configurable countdown (default 3 s)
   - **Repeat last region:** same area again, no editor
+  - **Window:** hover to highlight a window, click to capture it (Windows, macOS, X11)
+  - **Scrolling capture:** scrolls a page or document automatically and stitches it into one long image
+  - **Auto capture:** a screenshot every N seconds (full screen, last region or active monitor)
   - **Color picker:** copies the HEX value of any pixel
+- **Screen recording:** record a region to **MP4** or an animated **GIF** (via ffmpeg). A floating bar shows the timer with Stop and Cancel, and a frame marks the recorded area.
+- **Tools:**
+  - **Text recognition (OCR):** select text anywhere on screen and copy it (via Tesseract)
+  - **QR codes:** scan QR codes and barcodes from the screen, or create QR codes
+  - **Ruler:** measures width, height, diagonal and angle in pixels
+  - **Image editor:** open any image file (or a history item) and annotate it
+  - **Image combiner:** joins images vertically or horizontally
+  - **Hash checker:** MD5 / SHA-1 / SHA-256 / SHA-512 of a file, with comparison
+  - **Link shortener** (is.gd) and **file upload** for any file type
+- **Image effects:** padding and background, rounded corners, drop shadow, border and a text watermark, with a live preview.
 - **Selection:** magnifier with pixel grid, HEX color and coordinates, crosshair, live size in real pixels, 8 resize handles, drag to move, arrow keys to nudge.
 - **Annotation tools:** Pen, Marker, Line, Arrow, Rectangle, Ellipse (optionally filled), Text (editable, A+/A−), Highlight, Step numbers, Pixelate and Blur.
   - Shift snaps lines and arrows to 45° and makes squares and circles
@@ -28,7 +41,7 @@ A lightweight, modern, cross-platform screenshot tool for Windows, macOS and Lin
 - **Outputs (toolbar):** Pin to screen, Upload, Copy, Quick save, Save as (PNG / JPEG / WebP), Done.
 - **After-capture tasks** (ShareX-style): copy to clipboard, save to folder, upload and copy the link, pin to screen, notification. Toggle them from the home page or in Settings.
 - **Pin to screen:** an always-on-top floating screenshot. Wheel zooms, Ctrl+wheel changes opacity, double-click closes.
-- **Upload:** Imgur (Client ID) or a **custom HTTP uploader** (URL, form field, headers, JSON path for the link), with a test button.
+- **Upload:** Imgur (Client ID) or a **custom HTTP uploader** (POST/PUT/PATCH, multipart or binary body, headers, form arguments, `{json:…}` / `{regex:…}` link extraction), with a test button. **ShareX `.sxcu` uploaders can be imported directly**, giving access to hundreds of ShareX-compatible hosts. Optional link shortening.
 - **File naming:** patterns such as `EagleShot_%y-%mo-%d_%h-%mi-%s`, with a live preview, plus a configurable folder, format and quality.
 - **Configurable global hotkeys:** click a box and press the combination; PrintScreen works too.
 - **Command line and single instance:** `eagleshot --region` and the other switches below are forwarded to the running app. Useful for desktop shortcuts and Wayland.
@@ -63,17 +76,20 @@ A lightweight, modern, cross-platform screenshot tool for Windows, macOS and Lin
 ### 🖥️ Command line
 
 ```bash
-eagleshot --region | --fullscreen | --monitor | --delay | --repeat | --color | --show
+eagleshot --region | --fullscreen | --monitor | --window | --delay | --repeat | --color | --show
+eagleshot --record | --gif | --scroll | --ocr | --qr | --ruler
+eagleshot --editor [image]      # open an image in the editor
+eagleshot --upload <files…>     # upload files
 ```
 
-If EagleShot is already running, the command goes to that instance. On Wayland, where global keyboard hooks aren't available, bind these commands to your desktop's own shortcuts.
+`--record` and `--gif` start a recording; run the same command again to stop it. If EagleShot is already running, the command goes to that instance. On Wayland, where global keyboard hooks aren't available, bind these commands to your desktop's own shortcuts.
 
 ### 🚀 Installation
 
 #### Windows
 
 **Using the installer:**
-1. Download `EagleShot_Setup_v3.0.1_win-x64.exe` from [Releases](https://github.com/hhasanguclu/EagleShot/releases).
+1. Download `EagleShot_Setup_v3.1.0_win-x64.exe` from [Releases](https://github.com/hhasanguclu/EagleShot/releases).
 2. Run the installer and follow the steps.
 
 **Manual:**
@@ -95,6 +111,9 @@ chmod +x installers/linux/install.sh
 Dependencies:
 - Screen capture: `scrot`, `maim` or ImageMagick `import` (X11). On Wayland, EagleShot uses xdg-desktop-portal (built into GNOME and KDE) and falls back to `grim` or `gnome-screenshot`
 - Clipboard: `xclip` (X11) or `wl-clipboard` (Wayland)
+- Optional: `ffmpeg` (screen recording, X11 only) and `tesseract-ocr` (text recognition)
+
+**Optional tools on every platform:** screen recording needs [ffmpeg](https://ffmpeg.org) and text recognition needs [Tesseract](https://github.com/tesseract-ocr/tesseract). Windows: `winget install Gyan.FFmpeg UB-Mannheim.TesseractOCR`. macOS: `brew install ffmpeg tesseract tesseract-lang`. EagleShot finds them on PATH and in the usual install folders, or you can set their paths in Settings.
 
 #### macOS
 
@@ -157,14 +176,27 @@ Windows, macOS ve Linux'ta çalışan, hafif, modern ve kullanıcı dostu bir ek
 
 ### 🌟 Özellikler
 
-- **Ana pencere:** yakalama modları, son yakalamalar, aranabilir **Geçmiş** galerisi ve **Ayarlar** sayfasından oluşan bir panel. Pencereyi kapatınca EagleShot tepside çalışmaya devam eder.
+- **Ana pencere:** yakalama modları, son yakalamalar, aranabilir **Geçmiş** galerisi (video ve GIF önizlemeli), **Araçlar** ve **Ayarlar** sayfalarından oluşan bir panel. Pencereyi kapatınca EagleShot tepside çalışmaya devam eder. Pencereye bırakılan dosyalar yüklenir, resimler editörde açılır.
 - **Yakalama modları:**
   - **Bölge:** sürükleyerek seçin ya da bir monitörü tıklayıp tamamını alın
   - **Tam ekran:** tüm monitörler tek seferde
   - **Aktif monitör:** farenin bulunduğu monitör
   - **Gecikmeli bölge:** ayarlanabilir geri sayım (varsayılan 3 sn)
   - **Son bölgeyi tekrarla:** aynı alanı editör açmadan tekrar alır
+  - **Pencere:** üzerine gelinen pencere vurgulanır, tıklayınca o pencere yakalanır (Windows, macOS, X11)
+  - **Kaydırmalı yakalama:** sayfayı otomatik kaydırıp tek uzun görüntüde birleştirir
+  - **Otomatik yakalama:** her N saniyede bir görüntü (tam ekran, son bölge veya aktif monitör)
   - **Renk seçici:** herhangi bir pikselin HEX değerini kopyalar
+- **Ekran kaydı:** bir bölgeyi **MP4** ya da animasyonlu **GIF** olarak kaydeder (ffmpeg ile). Süre sayacı, Durdur ve İptal butonlu bir çubuk çıkar; kaydedilen alan çerçeveyle gösterilir.
+- **Araçlar:**
+  - **Metin tanıma (OCR):** ekrandaki metni seçip kopyalar (Tesseract ile)
+  - **QR kod:** ekrandaki QR kod ve barkodları okur, yeni QR kod oluşturur
+  - **Cetvel:** genişlik, yükseklik, köşegen ve açıyı piksel cinsinden ölçer
+  - **Resim editörü:** herhangi bir resim dosyasını (veya geçmişteki bir kaydı) açıp düzenler
+  - **Resim birleştirici:** resimleri alt alta ya da yan yana birleştirir
+  - **Hash kontrolü:** dosyanın MD5 / SHA-1 / SHA-256 / SHA-512 değerlerini hesaplar ve karşılaştırır
+  - **Link kısaltma** (is.gd) ve her türden **dosya yükleme**
+- **Görsel efektler:** kenar boşluğu ve arka plan, yuvarlatılmış köşeler, gölge, çerçeve ve filigran; canlı önizlemeli.
 - **Seçim:** piksel ızgaralı büyüteç (HEX renk ve koordinatlarla), artı imleci, gerçek piksel cinsinden canlı boyut, 8 boyutlandırma tutamacı, sürükleyerek taşıma, ok tuşlarıyla ince ayar.
 - **Düzenleme araçları:** Kalem, Fosforlu kalem, Çizgi, Ok, Dikdörtgen, Elips (isteğe bağlı dolgulu), Metin (düzenlenebilir, A+/A−), Vurgulama, Adım numarası, Mozaik ve Bulanıklaştırma.
   - Shift ile çizgi ve oklar 45°'ye kilitlenir, kare ve daire çizilir
@@ -173,7 +205,7 @@ Windows, macOS ve Linux'ta çalışan, hafif, modern ve kullanıcı dostu bir ek
 - **Çıktılar (araç çubuğu):** Ekrana sabitle, Yükle, Kopyala, Hızlı kaydet, Farklı kaydet (PNG / JPEG / WebP), Bitti.
 - **Yakalama sonrası görevler** (ShareX tarzı): panoya kopyala, klasöre kaydet, yükleyip bağlantıyı kopyala, ekrana sabitle, bildirim göster. Ana sayfadan ya da Ayarlar'dan açıp kapatılır.
 - **Ekrana sabitleme:** her zaman üstte duran, yüzen ekran görüntüsü. Fare tekerleği yakınlaştırır, Ctrl+tekerlek saydamlığı değiştirir, çift tıklama kapatır.
-- **Yükleme:** Imgur (Client ID) veya **özel HTTP yükleyici** (URL, form alanı, başlıklar, bağlantı için JSON yolu); test butonuyla birlikte.
+- **Yükleme:** Imgur (Client ID) veya **özel HTTP yükleyici** (POST/PUT/PATCH, multipart veya binary gövde, başlıklar, form alanları, `{json:…}` / `{regex:…}` ile bağlantı çıkarma); test butonuyla birlikte. **ShareX `.sxcu` yükleyicileri doğrudan içe aktarılabilir**, böylece ShareX uyumlu yüzlerce servis kullanılabilir. İsteğe bağlı link kısaltma.
 - **Dosya adlandırma:** `EagleShot_%y-%mo-%d_%h-%mi-%s` gibi kalıplar ve canlı önizleme; klasör, format ve kalite de ayarlanabilir.
 - **Ayarlanabilir global kısayollar:** kutuya tıklayıp tuş kombinasyonuna basın; PrintScreen de çalışır.
 - **Komut satırı ve tek örnek:** `eagleshot --region` ve aşağıdaki diğer parametreler çalışan uygulamaya iletilir. Masaüstü kısayolları ve Wayland için kullanışlıdır.
@@ -208,17 +240,20 @@ Windows, macOS ve Linux'ta çalışan, hafif, modern ve kullanıcı dostu bir ek
 ### 🖥️ Komut satırı
 
 ```bash
-eagleshot --region | --fullscreen | --monitor | --delay | --repeat | --color | --show
+eagleshot --region | --fullscreen | --monitor | --window | --delay | --repeat | --color | --show
+eagleshot --record | --gif | --scroll | --ocr | --qr | --ruler
+eagleshot --editor [resim]      # resmi editörde aç
+eagleshot --upload <dosyalar…>  # dosya yükle
 ```
 
-EagleShot zaten çalışıyorsa komut o örneğe iletilir. Global klavye kancalarının çalışmadığı Wayland'da bu komutları masaüstünüzün kendi kısayollarına atayın.
+`--record` ve `--gif` kaydı başlatır; aynı komut tekrar çalıştırılınca kayıt durur. EagleShot zaten çalışıyorsa komut o örneğe iletilir. Global klavye kancalarının çalışmadığı Wayland'da bu komutları masaüstünüzün kendi kısayollarına atayın.
 
 ### 🚀 Kurulum
 
 #### Windows
 
 **Installer ile:**
-1. [Releases](https://github.com/hhasanguclu/EagleShot/releases) sayfasından `EagleShot_Setup_v3.0.1_win-x64.exe` indirin.
+1. [Releases](https://github.com/hhasanguclu/EagleShot/releases) sayfasından `EagleShot_Setup_v3.1.0_win-x64.exe` indirin.
 2. Installer'ı çalıştırın ve adımları takip edin.
 
 **Manuel:**
@@ -240,6 +275,9 @@ chmod +x installers/linux/install.sh
 Bağımlılıklar:
 - Ekran yakalama: `scrot`, `maim` veya ImageMagick `import` (X11). Wayland'da EagleShot xdg-desktop-portal'ı kullanır (GNOME ve KDE'de hazır gelir), olmazsa `grim` veya `gnome-screenshot` dener
 - Pano: `xclip` (X11) veya `wl-clipboard` (Wayland)
+- İsteğe bağlı: `ffmpeg` (ekran kaydı, yalnızca X11) ve `tesseract-ocr` (metin tanıma)
+
+**Tüm platformlarda isteğe bağlı araçlar:** ekran kaydı için [ffmpeg](https://ffmpeg.org), metin tanıma için [Tesseract](https://github.com/tesseract-ocr/tesseract) gerekir. Windows: `winget install Gyan.FFmpeg UB-Mannheim.TesseractOCR`. macOS: `brew install ffmpeg tesseract tesseract-lang`. EagleShot bunları PATH'te ve yaygın kurulum klasörlerinde kendisi bulur; yolları Ayarlar'dan da girebilirsiniz.
 
 #### macOS
 
@@ -315,11 +353,23 @@ EagleShot/
 │   ├── ShellHelper.cs             # Open files, folders and links
 │   ├── SingleInstance.cs          # Single instance + command forwarding
 │   ├── ToolType.cs                # Tool enum
-│   └── UploadService.cs           # Imgur + custom HTTP uploader
+│   ├── UploadService.cs           # Imgur, custom/.sxcu uploaders, link shortener
+│   ├── ScreenRecorder.cs          # MP4 / GIF recording with ffmpeg
+│   ├── ScrollingCapture.cs        # Scroll + stitch long captures
+│   ├── WindowEnumerator.cs        # Window rectangles (Win32 / CoreGraphics / X11)
+│   ├── TextTools.cs               # OCR (Tesseract), QR (QRCoder / ZXing), hashes
+│   ├── ImageEffects.cs            # Shadow, corners, border, watermark, combiner
+│   ├── AutoCaptureService.cs      # Interval captures
+│   ├── PortalScreenshot.cs        # Wayland capture via xdg-desktop-portal
+│   └── ToolLocator.cs             # Finds ffmpeg / tesseract
 ├── Views/
-│   ├── MainWindow.axaml(.cs)      # Dashboard: capture, history, settings
+│   ├── MainWindow.axaml(.cs)      # Dashboard: capture, history, tools, settings
 │   ├── HistoryView.axaml(.cs)     # History gallery
 │   ├── SettingsView.axaml(.cs)    # Settings page
+│   ├── ToolsView.cs               # Tools page
+│   ├── ToolWindows.cs             # QR generator, hash checker, image combiner
+│   ├── TextResultWindow.cs        # OCR / QR results
+│   ├── RecordingBar.cs            # Recording controls + frame
 │   ├── OverlayCanvas.cs           # Region selection + annotation canvas
 │   ├── OverlayWindow.axaml(.cs)   # Capture overlay + toolbar
 │   ├── PinWindow.cs               # Pin to screen

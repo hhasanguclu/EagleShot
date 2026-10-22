@@ -101,6 +101,22 @@
                     </StackPanel>
 
                     <StackPanel Name="CustomPanel" Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="158,0,0,0">
+                            <Button Classes="ghost" Content="Import ShareX uploader (.sxcu)…" Click="OnImportSxcu"/>
+                            <TextBlock Name="CustomName" Classes="muted" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Grid ColumnDefinitions="150,Auto,Auto,Auto" Classes="form">
+                            <TextBlock Classes="label" Text="Method / body"/>
+                            <ComboBox Grid.Column="1" Name="CustomMethod" Width="110">
+                                <ComboBoxItem Content="POST"/>
+                                <ComboBoxItem Content="PUT"/>
+                                <ComboBoxItem Content="PATCH"/>
+                            </ComboBox>
+                            <ComboBox Grid.Column="2" Name="CustomBody" Width="200">
+                                <ComboBoxItem Content="MultipartFormData"/>
+                                <ComboBoxItem Content="Binary"/>
+                            </ComboBox>
+                        </Grid>
                         <Grid ColumnDefinitions="150,*" Classes="form">
                             <TextBlock Classes="label" Text="Request URL"/>
                             <TextBox Grid.Column="1" Name="CustomUrl" Watermark="https://example.com/upload"/>
@@ -116,7 +132,12 @@
                         </Grid>
                         <Grid ColumnDefinitions="150,*" Classes="form">
                             <TextBlock Classes="label" Text="URL from response"/>
-                            <TextBox Grid.Column="1" Name="CustomJsonPath" Watermark="JSON path, e.g. data.url or files[0].url — empty uses the whole body"/>
+                            <TextBox Grid.Column="1" Name="CustomJsonPath" Watermark="data.url  ·  {json:files[0].url}  ·  {regex:https?://\S+}  ·  empty = whole body"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="150,*" Classes="form">
+                            <TextBlock Classes="label" Text="Form arguments" VerticalAlignment="Top" Margin="0,6,0,0"/>
+                            <TextBox Grid.Column="1" Name="CustomArguments" AcceptsReturn="True" Height="54" TextWrapping="Wrap"
+                                     Watermark="key: value  (one per line, multipart only)"/>
                         </Grid>
                     </StackPanel>
 
@@ -124,6 +145,111 @@
                         <Button Classes="ghost" Content="Test upload" Click="OnTestUpload"/>
                         <TextBlock Name="TestUploadResult" Classes="muted" VerticalAlignment="Center" MaxWidth="460"/>
                     </StackPanel>
+                    <CheckBox Name="ShortenUrls" Content="Shorten uploaded links with is.gd"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Image effects -->
+            <Border Classes="card">
+                <Grid ColumnDefinitions="*,220">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="h2" Text="Image effects"/>
+                        <TextBlock Classes="muted" Text="Applied to screenshots before they are saved, copied or uploaded. Transparent backgrounds turn black in JPEG."/>
+                        <CheckBox Name="EffectsEnabled" Content="Enable image effects"/>
+                        <Grid ColumnDefinitions="150,Auto,Auto,Auto" Classes="form">
+                            <TextBlock Classes="label" Text="Padding / background"/>
+                            <NumericUpDown Grid.Column="1" Name="EffPadding" Minimum="0" Maximum="200" FormatString="0" Width="120"/>
+                            <TextBox Grid.Column="2" Name="EffBackground" Width="120" Watermark="#00000000"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="150,Auto" Classes="form">
+                            <TextBlock Classes="label" Text="Rounded corners"/>
+                            <NumericUpDown Grid.Column="1" Name="EffRadius" Minimum="0" Maximum="100" FormatString="0" Width="120"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="150,Auto,Auto" Classes="form">
+                            <CheckBox Name="EffShadow" Content="Drop shadow"/>
+                            <NumericUpDown Grid.Column="1" Name="EffShadowSize" Minimum="2" Maximum="80" FormatString="0" Width="120"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="150,Auto,Auto" Classes="form">
+                            <TextBlock Classes="label" Text="Border width / color"/>
+                            <NumericUpDown Grid.Column="1" Name="EffBorder" Minimum="0" Maximum="40" FormatString="0" Width="120"/>
+                            <TextBox Grid.Column="2" Name="EffBorderColor" Width="120" Watermark="#4C8DFF"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="150,*" Classes="form">
+                            <TextBlock Classes="label" Text="Watermark text"/>
+                            <TextBox Grid.Column="1" Name="EffWatermark" Watermark="e.g. © My Company"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="150,Auto,Auto,Auto" Classes="form">
+                            <TextBlock Classes="label" Text="Position / size / opacity"/>
+                            <ComboBox Grid.Column="1" Name="EffWatermarkPos" Width="140">
+                                <ComboBoxItem Content="Top left"/>
+                                <ComboBoxItem Content="Top right"/>
+                                <ComboBoxItem Content="Bottom left"/>
+                                <ComboBoxItem Content="Bottom right"/>
+                                <ComboBoxItem Content="Center"/>
+                            </ComboBox>
+                            <NumericUpDown Grid.Column="2" Name="EffWatermarkSize" Minimum="8" Maximum="120" FormatString="0" Width="110"/>
+                            <NumericUpDown Grid.Column="3" Name="EffWatermarkOpacity" Minimum="5" Maximum="100" FormatString="0" Width="110"/>
+                        </Grid>
+                    </StackPanel>
+                    <Border Grid.Column="1" Margin="12,30,0,0" CornerRadius="10" Background="#E4E6EE" VerticalAlignment="Top" Height="200">
+                        <Image Name="EffectsPreview" Stretch="Uniform" Margin="8"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Recording -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="h2" Text="Screen recording"/>
+                    <TextBlock Classes="muted" Name="FfmpegStatus"/>
+                    <Grid ColumnDefinitions="150,*,Auto" Classes="form">
+                        <TextBlock Classes="label" Text="ffmpeg path"/>
+                        <TextBox Grid.Column="1" Name="FfmpegPath" Watermark="Automatic (PATH, Homebrew, winget…)"/>
+                        <Button Grid.Column="2" Classes="ghost" Content="Browse…" Tag="FfmpegPath" Click="OnBrowseTool"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="150,Auto,Auto,Auto,Auto" Classes="form">
+                        <TextBlock Classes="label" Text="Video / GIF FPS"/>
+                        <NumericUpDown Grid.Column="1" Name="VideoFps" Minimum="5" Maximum="60" FormatString="0" Width="110"/>
+                        <NumericUpDown Grid.Column="2" Name="GifFps" Minimum="5" Maximum="30" FormatString="0" Width="110"/>
+                        <TextBlock Grid.Column="3" Classes="label" Text="GIF max width"/>
+                        <NumericUpDown Grid.Column="4" Name="GifMaxWidth" Minimum="160" Maximum="3840" Increment="40" FormatString="0" Width="120"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="150,Auto" Classes="form">
+                        <TextBlock Classes="label" Text="Countdown (seconds)"/>
+                        <NumericUpDown Grid.Column="1" Name="RecordCountdown" Minimum="0" Maximum="10" FormatString="0" Width="110"/>
+                    </Grid>
+                    <CheckBox Name="RecordCursor" Content="Record the mouse cursor"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Tools -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="h2" Text="Tools"/>
+                    <TextBlock Classes="muted" Name="TesseractStatus"/>
+                    <Grid ColumnDefinitions="150,*,Auto" Classes="form">
+                        <TextBlock Classes="label" Text="Tesseract path"/>
+                        <TextBox Grid.Column="1" Name="TesseractPath" Watermark="Automatic"/>
+                        <Button Grid.Column="2" Classes="ghost" Content="Browse…" Tag="TesseractPath" Click="OnBrowseTool"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="150,*" Classes="form">
+                        <TextBlock Classes="label" Text="OCR languages"/>
+                        <TextBox Grid.Column="1" Name="OcrLanguages" Watermark="Automatic (eng+tur when installed), e.g. eng+deu"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="150,Auto,Auto,Auto" Classes="form">
+                        <TextBlock Classes="label" Text="Scrolling: max / delay ms"/>
+                        <NumericUpDown Grid.Column="1" Name="ScrollMax" Minimum="1" Maximum="200" FormatString="0" Width="110"/>
+                        <NumericUpDown Grid.Column="2" Name="ScrollDelay" Minimum="100" Maximum="3000" Increment="50" FormatString="0" Width="120"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="150,Auto,Auto" Classes="form">
+                        <TextBlock Classes="label" Text="Auto capture every (s)"/>
+                        <NumericUpDown Grid.Column="1" Name="AutoInterval" Minimum="2" Maximum="86400" FormatString="0" Width="120"/>
+                        <ComboBox Grid.Column="2" Name="AutoMode" Width="160">
+                            <ComboBoxItem Content="Full screen"/>
+                            <ComboBoxItem Content="Last region"/>
+                            <ComboBoxItem Content="Active monitor"/>
+                        </ComboBox>
+                    </Grid>
                 </StackPanel>
             </Border>
 

@@ -53,6 +53,12 @@
                             <TextBlock Text="History" VerticalAlignment="Center"/>
                         </StackPanel>
                     </ToggleButton>
+                    <ToggleButton Classes="nav" Name="NavTools" Tag="Tools" Click="OnNavClick">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconTools}" Width="18" Height="18"/>
+                            <TextBlock Text="Tools" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ToggleButton>
                     <ToggleButton Classes="nav" Name="NavSettings" Tag="Settings" Click="OnNavClick">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <PathIcon Data="{StaticResource IconSettings}" Width="18" Height="18"/>
@@ -142,6 +148,54 @@
                                 <TextBlock Grid.Row="2" Classes="muted" Text="Same area as last time, instantly."/>
                             </Grid>
                         </Button>
+                        <Button Classes="capture-card" Tag="WindowCapture" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconWindow}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyWindowCapture">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Window"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Click any window to capture just that window."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="RecordVideo" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconVideo}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyRecordVideo">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Screen recording"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Record an area to MP4. Click again to stop."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="RecordGif" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconGif}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyRecordGif">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="GIF recording"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Record an area as an animated GIF."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="ScrollingCapture" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconScroll}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyScrollingCapture">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Scrolling capture"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Capture a long page by scrolling it."/>
+                            </Grid>
+                        </Button>
                         <Button Classes="capture-card" Tag="ColorPicker" Click="OnCaptureCardClick">
                             <Grid RowDefinitions="Auto,Auto,Auto">
                                 <Grid ColumnDefinitions="Auto,*">
@@ -183,10 +237,12 @@
                     </Grid>
                     <WrapPanel Name="RecentPanel"/>
                     <TextBlock Name="RecentEmpty" Classes="muted" Text="Nothing yet — your screenshots will show up here."/>
+                    <TextBlock Classes="muted" Margin="0,18,0,0" Text="Tip: drop files on this window to upload them, or images to open them in the editor."/>
                 </StackPanel>
             </ScrollViewer>
 
             <views:HistoryView Name="HistoryPage" IsVisible="False"/>
+            <views:ToolsView Name="ToolsPage" IsVisible="False"/>
             <views:SettingsView Name="SettingsPage" IsVisible="False"/>
         </Panel>
     </Grid>

@@ -22,6 +22,12 @@ public enum OverlayAction { Confirm, Copy, Save, SaveAs, Upload, Pin }
 /// <param name="Image">Final annotated image at full resolution.</param>
 /// <param name="Region">Selected rectangle in screenshot pixels.</param>
 /// <param name="SaveAsPath">Destination picked by the user for <see cref="OverlayAction.SaveAs"/>.</param>
+/// <param name="SelectOnly">Finish as soon as a region is selected (recording, OCR, QR…).</param>
+/// <param name="Hint">Instruction shown before selecting.</param>
+/// <param name="Editor">Open as a normal window that edits the whole image.</param>
+/// <param name="Windows">Top-level window rectangles in screen pixels, topmost first.</param>
+public record OverlayOptions(bool SelectOnly = false, string? Hint = null, bool Editor = false, IReadOnlyList<PixelRect>? Windows = null);
+
 public record OverlayResult(Bitmap Image, OverlayAction Action, PixelRect Region, string? SaveAsPath = null);
 
 public partial class OverlayWindow : Window
@@ -70,9 +76,12 @@ public partial class OverlayWindow : Window
 
     public OverlayWindow() : this(null, OverlayMode.Region, new AppSettings()) { }
 
-    public OverlayWindow(ScreenCapture? capture, OverlayMode mode, AppSettings settings)
+    private readonly OverlayOptions _options;
+
+    public OverlayWindow(ScreenCapture? capture, OverlayMode mode, AppSettings settings, OverlayOptions? options = null)
     {
         InitializeComponent();
+        _options = options ?? new OverlayOptions();
 
         _canvas = this.FindControl<OverlayCanvas>("Canvas")!;
         _toolbar = this.FindControl<Border>("ToolbarBorder")!;
@@ -87,7 +96,12 @@ public partial class OverlayWindow : Window
         if (capture != null)
             _canvas.ScreenCapture = capture.Bitmap;
 
-        _canvas.SelectionCompleted += _ => ShowToolbar();
+        _canvas.HintText = _options.Hint;
+        _canvas.SelectionCompleted += _ =>
+        {
+            if (_options.SelectOnly) Finish(OverlayAction.Confirm);
+            else if (mode != OverlayMode.Ruler) ShowToolbar();
+        };
         _canvas.SelectionChanged += _ => PositionToolbar();
         _canvas.SelectionCleared += () => { _toolbar.IsVisible = false; FinalizeTextBox(); };
         _canvas.TextRequested += OnTextRequested;
@@ -97,7 +111,8 @@ public partial class OverlayWindow : Window
 
         AddHandler(KeyDownEvent, OnOverlayKeyDown, RoutingStrategies.Tunnel);
 
-        CoverAllScreens();
+        if (_options.Editor) SetupEditor(capture);
+        else CoverAllScreens();
         PopulateColorGrid();
         PopulateWidths();
         UpdateUndoButtons();
@@ -146,16 +161,62 @@ public partial class OverlayWindow : Window
         Width = _desktop.Width / scaling;
         Height = _desktop.Height / scaling;
 
-        _canvas.MonitorRects = _screenRects
-            .Select(b => new Rect((b.X - _desktop.X) / scaling, (b.Y - _desktop.Y) / scaling,
-                                  b.Width / scaling, b.Height / scaling))
-            .ToList();
+        UpdateRects(scaling);
+    }
+
+    private void UpdateRects(double scaling)
+    {
+        if (_desktop.Width <= 0) return;
+        Rect ToCanvas(PixelRect b) => new((b.X - _desktop.X) / scaling, (b.Y - _desktop.Y) / scaling,
+                                          b.Width / scaling, b.Height / scaling);
+        _canvas.MonitorRects = _screenRects.Select(ToCanvas).ToList();
+        _canvas.WindowRects = (_options.Windows ?? Array.Empty<PixelRect>()).Select(ToCanvas).ToList();
+    }
+
+    /// <summary>Editor mode: a regular window showing the image, fully selected.</summary>
+    private void SetupEditor(ScreenCapture? capture)
+    {
+        Title = "EagleShot Editor";
+        SystemDecorations = SystemDecorations.Full;
+        Topmost = false;
+        ShowInTaskbar = true;
+        WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        Icon = new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://EagleShot/Resources/icon.ico")));
+
+        var screen = Screens?.Primary ?? Screens?.All.FirstOrDefault();
+        double scaling = screen?.Scaling ?? 1;
+        var size = capture?.Bitmap.PixelSize ?? new PixelSize(800, 600);
+        double w = size.Width / scaling, h = size.Height / scaling;
+        if (screen != null)
+        {
+            double maxW = screen.WorkingArea.Width / scaling * 0.92, maxH = screen.WorkingArea.Height / scaling * 0.88;
+            double fit = Math.Min(1, Math.Min(maxW / w, maxH / h));
+            w *= fit;
+            h *= fit;
+        }
+        // Leave room for the toolbar below the image
+        Width = Math.Max(w, 900);
+        Height = h + 64;
+        _canvas.Width = w;
+        _canvas.Height = h;
+        _canvas.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+        _canvas.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+        _canvas.ShowMagnifier = false;
+        _canvas.ShowCrosshair = false;
     }
 
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
-        ApplyLayout(RenderScaling);
+        if (_options.Editor)
+        {
+            Dispatcher.UIThread.Post(() => _canvas.SetSelection(new Rect(_canvas.Bounds.Size)), DispatcherPriority.Loaded);
+        }
+        else
+        {
+            ApplyLayout(RenderScaling);
+            UpdateRects(RenderScaling);
+        }
         Activate();
         _canvas.Focus();
     }
@@ -171,7 +232,7 @@ public partial class OverlayWindow : Window
     private void PositionToolbar()
     {
         if (!_toolbar.IsVisible) return;
-        var sel = _canvas.Selection;
+        var sel = _canvas.Selection.Translate(CanvasOffset);
         _toolbar.Measure(Size.Infinity);
         double tbW = _toolbar.DesiredSize.Width, tbH = _toolbar.DesiredSize.Height;
         double w = Bounds.Width > 0 ? Bounds.Width : Width;
@@ -186,6 +247,9 @@ public partial class OverlayWindow : Window
 
         _toolbar.Margin = new Thickness(x, y, 0, 0);
     }
+
+    /// <summary>Canvas position inside the window (non-zero only in editor mode).</summary>
+    private Vector CanvasOffset => new(_canvas.Bounds.X, _canvas.Bounds.Y);
 
     private void PopulateColorGrid()
     {
@@ -309,6 +373,7 @@ public partial class OverlayWindow : Window
     private void OnRightClicked()
     {
         if (_activeTextBox != null) { CancelTextBox(); return; }
+        if (_options.Editor) return;
         if (_canvas.HasSelection) _canvas.ResetSelection();
         else Close();
     }
@@ -499,7 +564,7 @@ public partial class OverlayWindow : Window
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             // Offset by padding + border so the placed text lands where it was typed
-            Margin = new Thickness(location.X - 5.5, location.Y - 3.5, 0, 0),
+            Margin = new Thickness(location.X + CanvasOffset.X - 5.5, location.Y + CanvasOffset.Y - 3.5, 0, 0),
             Children =
             {
                 _activeTextBox,

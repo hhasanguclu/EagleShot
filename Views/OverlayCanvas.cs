@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace EagleShot.Views;
 
-public enum OverlayMode { Region, ColorPicker }
+public enum OverlayMode { Region, ColorPicker, Ruler }
 
 /// <summary>
 /// Custom control that handles all overlay rendering and pointer interaction:
@@ -70,6 +70,21 @@ public class OverlayCanvas : Control
     /// <summary>Monitor rectangles in canvas coordinates; clicking without dragging selects one.</summary>
     public IReadOnlyList<Rect> MonitorRects { get; set; } = Array.Empty<Rect>();
 
+    /// <summary>Top-level windows in canvas coordinates, topmost first; clicking one selects it.</summary>
+    public IReadOnlyList<Rect> WindowRects { get; set; } = Array.Empty<Rect>();
+
+    /// <summary>Overrides the instruction shown before a selection is made.</summary>
+    public string? HintText { get; set; }
+
+    private Rect? HoveredWindow(Point p)
+    {
+        if (Mode != OverlayMode.Region) return null;
+        foreach (var r in WindowRects)
+            if (r.Contains(p))
+                return r.Intersect(new Rect(Bounds.Size));
+        return null;
+    }
+
     public bool HasSelection => _phase == Phase.Selected;
     public Rect Selection => _selection;
     public bool CanUndo => _undo.Count > 0;
@@ -106,7 +121,7 @@ public class OverlayCanvas : Control
         if (_capture != null)
             context.DrawImage(_capture, new Rect(0, 0, _capture.PixelSize.Width, _capture.PixelSize.Height), bounds);
 
-        bool hasRect = _selection.Width > 0 && _selection.Height > 0 && Mode == OverlayMode.Region;
+        bool hasRect = _selection.Width > 0 && _selection.Height > 0 && Mode != OverlayMode.ColorPicker;
         if (hasRect)
         {
             context.FillRectangle(DimBrush, new Rect(0, 0, bounds.Width, _selection.Top));
@@ -114,7 +129,7 @@ public class OverlayCanvas : Control
             context.FillRectangle(DimBrush, new Rect(0, _selection.Top, _selection.Left, _selection.Height));
             context.FillRectangle(DimBrush, new Rect(_selection.Right, _selection.Top, bounds.Width - _selection.Right, _selection.Height));
         }
-        else if (Mode == OverlayMode.Region)
+        else if (Mode != OverlayMode.ColorPicker)
         {
             context.FillRectangle(DimBrush, bounds);
         }
@@ -144,6 +159,12 @@ public class OverlayCanvas : Control
                 DrawMagnifier(context, bounds);
         }
 
+        if (_phase == Phase.Idle && HoveredWindow(_mouse) is { } win && win.Width > 0)
+        {
+            context.FillRectangle(new SolidColorBrush(Color.FromArgb(40, Accent.R, Accent.G, Accent.B)), win);
+            context.DrawRectangle(null, new Pen(new SolidColorBrush(Accent), 2), win.Deflate(1));
+        }
+
         if (_phase == Phase.Idle)
             DrawHint(context, bounds);
     }
@@ -162,7 +183,15 @@ public class OverlayCanvas : Control
 
         // Size label (in real pixels)
         var px = SelectionPixelRect();
-        var ft = Text($"{px.Width} × {px.Height}", 12, Brushes.White);
+        string label = $"{px.Width} × {px.Height}";
+        if (Mode == OverlayMode.Ruler)
+        {
+            context.DrawLine(new Pen(new SolidColorBrush(Accent), 1, new DashStyle(new double[] { 4, 3 }, 0)), _selection.TopLeft, _selection.BottomRight);
+            double diagonal = Math.Sqrt((double)px.Width * px.Width + (double)px.Height * px.Height);
+            double angle = Math.Atan2(px.Height, px.Width) * 180 / Math.PI;
+            label = $"W {px.Width}  H {px.Height}  ·  ⟋ {diagonal:0.#} px  ·  {angle:0.#}°  ·  X {px.X}  Y {px.Y}";
+        }
+        var ft = Text(label, 12, Brushes.White);
         double tx = _selection.Left;
         double ty = _selection.Top - ft.Height - 10;
         if (ty < 2) ty = _selection.Top + 6;
@@ -227,9 +256,13 @@ public class OverlayCanvas : Control
 
     private void DrawHint(DrawingContext context, Rect bounds)
     {
-        string hint = Mode == OverlayMode.ColorPicker
-            ? "Click to copy a color  ·  Esc to cancel"
-            : "Drag to select a region  ·  Click to capture a monitor  ·  Esc to cancel";
+        string hint = HintText ?? Mode switch
+        {
+            OverlayMode.ColorPicker => "Click to copy a color  ·  Esc to cancel",
+            OverlayMode.Ruler => "Drag to measure  ·  Esc to close",
+            _ when WindowRects.Count > 0 => "Drag to select a region  ·  Click a window or monitor  ·  Esc to cancel",
+            _ => "Drag to select a region  ·  Click to capture a monitor  ·  Esc to cancel"
+        };
         var ft = Text(hint, 13, Brushes.White);
         double w = ft.Width + 28, h = ft.Height + 16;
         var monitor = MonitorRects.FirstOrDefault(r => r.Contains(_mouse));
@@ -425,9 +458,10 @@ public class OverlayCanvas : Control
                 }
                 else
                 {
-                    // A click: snap to the monitor under the cursor
+                    // A click: snap to the window, else the monitor under the cursor
                     var monitor = MonitorRects.FirstOrDefault(r => r.Contains(pos));
-                    _selection = monitor != default ? monitor : new Rect(Bounds.Size);
+                    _selection = HoveredWindow(pos) is { Width: > 0 } win ? win
+                        : monitor != default ? monitor : new Rect(Bounds.Size);
                     CompleteSelection();
                 }
                 break;
@@ -457,7 +491,7 @@ public class OverlayCanvas : Control
 
     private void UpdateHoverCursor(Point pos)
     {
-        if (_phase != Phase.Selected || Mode != OverlayMode.Region)
+        if (_phase != Phase.Selected || Mode == OverlayMode.ColorPicker)
         {
             Cursor = new Cursor(StandardCursorType.Cross);
             return;
@@ -734,7 +768,7 @@ public class OverlayCanvas : Control
 
     public void SelectAll()
     {
-        if (Mode != OverlayMode.Region) return;
+        if (Mode == OverlayMode.ColorPicker) return;
         _selection = new Rect(Bounds.Size);
         CompleteSelection();
         InvalidateVisual();

@@ -75,10 +75,14 @@ public partial class HistoryView : UserControl
         };
         actions.Classes.Add("card-actions");
 
-        if (item.FileExists)
+        if (item.FileExists && item.IsImage)
         {
+            actions.Children.Add(ActionButton("IconEdit", "Open in editor", () => _ = App.Capture?.OpenImageInEditorAsync(item.FilePath)));
             actions.Children.Add(ActionButton("IconCopy", "Copy image", () => CopyImage(item)));
             actions.Children.Add(ActionButton("IconPin", "Pin to screen", () => PinImage(item)));
+        }
+        if (item.FileExists)
+        {
             actions.Children.Add(ActionButton("IconFolder", "Show in folder", () => ShellHelper.ShowInFolder(item.FilePath!)));
         }
         if (item.Url != null)
@@ -140,8 +144,10 @@ public partial class HistoryView : UserControl
             else if (item.Url != null) ShellHelper.Open(item.Url);
         };
 
-        if (item.FileExists)
-            _ = LoadThumbnailAsync(item.FilePath!, image, placeholder);
+        var thumbSource = item.ThumbnailPath != null && File.Exists(item.ThumbnailPath) ? item.ThumbnailPath
+                        : item.FileExists && item.IsImage ? item.FilePath : null;
+        if (thumbSource != null)
+            _ = LoadThumbnailAsync(thumbSource, image, placeholder);
 
         return card;
     }
@@ -166,9 +172,10 @@ public partial class HistoryView : UserControl
         bool file = item.FileExists;
         Add("Open", () => ShellHelper.Open(item.FilePath!), file);
         Add("Show in folder", () => ShellHelper.ShowInFolder(item.FilePath!), file);
-        Add("Pin to screen", () => PinImage(item), file);
+        Add("Pin to screen", () => PinImage(item), file && item.IsImage);
+        Add("Open in editor", () => _ = App.Capture?.OpenImageInEditorAsync(item.FilePath), file && item.IsImage);
         menu.Items.Add(new Separator());
-        Add("Copy image", () => CopyImage(item), file);
+        Add("Copy image", () => CopyImage(item), file && item.IsImage);
         Add("Copy file path", () => CopyText(item.FilePath!), item.FilePath != null);
         Add("Copy link", () => CopyText(item.Url!), item.Url != null);
         Add("Open link in browser", () => ShellHelper.Open(item.Url!), item.Url != null);

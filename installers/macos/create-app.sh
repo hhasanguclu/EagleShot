@@ -1,9 +1,9 @@
 #!/bin/bash
-# EagleShot v3.0.1 - macOS .app Bundle & DMG Creator
+# EagleShot v3.1.0 - macOS .app Bundle & DMG Creator
 set -e
 
 APP_NAME="EagleShot"
-VERSION="${VERSION:-3.0.1}"
+VERSION="${VERSION:-3.1.0}"
 BUNDLE_ID="com.eagleshot.app"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"

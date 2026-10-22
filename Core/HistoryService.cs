@@ -16,6 +16,12 @@ public class HistoryItem
     public int Width { get; set; }
     public int Height { get; set; }
     public string Kind { get; set; } = "Region";
+    /// <summary>Preview image for non-image files (videos).</summary>
+    public string? ThumbnailPath { get; set; }
+
+    [JsonIgnore]
+    public bool IsImage => FilePath == null || ImageExtensions.Contains(Path.GetExtension(FilePath).ToLowerInvariant());
+    private static readonly string[] ImageExtensions = { ".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif" };
 
     [JsonIgnore]
     public string DisplayName => FilePath != null ? Path.GetFileName(FilePath) : Url ?? "Screenshot";

@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using EagleShot.Core;
@@ -14,6 +15,7 @@ public partial class MainWindow : Window
     private readonly ScrollViewer _capturePage;
     private readonly HistoryView _historyPage;
     private readonly SettingsView _settingsPage;
+    private readonly ToolsView _toolsPage;
 
     public MainWindow()
     {
@@ -22,6 +24,11 @@ public partial class MainWindow : Window
         _capturePage = this.FindControl<ScrollViewer>("CapturePage")!;
         _historyPage = this.FindControl<HistoryView>("HistoryPage")!;
         _settingsPage = this.FindControl<SettingsView>("SettingsPage")!;
+        _toolsPage = this.FindControl<ToolsView>("ToolsPage")!;
+
+        // Drop files: upload them, or open images in the editor when no uploader is set up
+        DragDrop.SetAllowDrop(this, true);
+        AddHandler(DragDrop.DropEvent, OnDrop);
 
         var v = Assembly.GetExecutingAssembly().GetName().Version;
         this.FindControl<TextBlock>("VersionText")!.Text = v == null ? "" : $"v{v.Major}.{v.Minor}.{v.Build}";
@@ -55,6 +62,8 @@ public partial class MainWindow : Window
         _capturePage.IsVisible = page == "Capture";
         _historyPage.IsVisible = page == "History";
         _settingsPage.IsVisible = page == "Settings";
+        _toolsPage.IsVisible = page == "Tools";
+        this.FindControl<ToggleButton>("NavTools")!.IsChecked = page == "Tools";
         this.FindControl<ToggleButton>("NavCapture")!.IsChecked = page == "Capture";
         this.FindControl<ToggleButton>("NavHistory")!.IsChecked = page == "History";
         this.FindControl<ToggleButton>("NavSettings")!.IsChecked = page == "Settings";
@@ -74,6 +83,21 @@ public partial class MainWindow : Window
     private void OnNavClick(object? sender, RoutedEventArgs e)
     {
         if (sender is ToggleButton { Tag: string page }) ShowPage(page);
+    }
+
+    private async void OnDrop(object? sender, DragEventArgs e)
+    {
+        var paths = e.Data.GetFiles()?.Select(f => f.TryGetLocalPath()).OfType<string>().ToList();
+        if (paths == null || paths.Count == 0 || App.Capture == null) return;
+
+        if (UploadService.IsConfigured(App.Settings))
+        {
+            await App.Capture.UploadFilesAsync(paths);
+            return;
+        }
+        var image = paths.FirstOrDefault(p => UploadService.MimeFor(p).StartsWith("image/"));
+        if (image != null) await App.Capture.OpenImageInEditorAsync(image);
+        else ToastWindow.Show("Uploader not configured", "Set one up in Settings → Upload to upload dropped files.", isError: true);
     }
 
     private void OnViewAllClick(object? sender, RoutedEventArgs e) => ShowPage("History");

@@ -53,18 +53,20 @@ public class App : Application
             Hotkeys.Start();
 
             Capture = new CaptureManager(History, Hotkeys);
+            Capture.AutoCapture.Changed += RefreshTrayMenu;
+            Capture.RecordingChanged += () => Dispatcher.UIThread.Post(RefreshTrayMenu);
             MainWindowInstance = new MainWindow();
             Capture.MainWindow = MainWindowInstance;
 
             SetupTrayIcon();
-            SingleInstance.StartServer(args => Dispatcher.UIThread.Post(() => RunCommand(CommandLine.Parse(args) ?? CommandLine.Show)));
+            SingleInstance.StartServer(args => Dispatcher.UIThread.Post(() => RunCommand(CommandLine.Parse(args) ?? CommandLine.Show, args)));
 
             foreach (var p in missingPermissions)
                 DispatcherTimer.RunOnce(() => ToastWindow.Show(p.Title, p.Message, onClick: () => ShellHelper.Open(p.SettingsUrl)),
                     TimeSpan.FromSeconds(2));
 
             if (command != null)
-                Dispatcher.UIThread.Post(() => RunCommand(command), DispatcherPriority.Background);
+                Dispatcher.UIThread.Post(() => RunCommand(command, desktop.Args ?? Array.Empty<string>()), DispatcherPriority.Background);
             else if (Settings.ShowMainWindowOnStartup)
                 DispatcherTimer.RunOnce(() => MainWindowInstance.BringToFront(),
                     TimeSpan.FromMilliseconds(Settings.ShowSplash ? 1500 : 0));
@@ -79,10 +81,20 @@ public class App : Application
         else Capture?.Run(action);
     }
 
-    private static void RunCommand(string command)
+    private static void RunCommand(string command, string[] args)
     {
+        var files = args.Where(a => !a.StartsWith('-') && File.Exists(a)).Select(Path.GetFullPath).ToList();
         switch (command)
         {
+            case CommandLine.Window: Capture?.Run(HotkeyAction.WindowCapture); break;
+            case CommandLine.Record: Capture?.Run(HotkeyAction.RecordVideo); break;
+            case CommandLine.Gif: Capture?.Run(HotkeyAction.RecordGif); break;
+            case CommandLine.Scroll: Capture?.Run(HotkeyAction.ScrollingCapture); break;
+            case CommandLine.Ocr: Capture?.Run(HotkeyAction.TextRecognition); break;
+            case CommandLine.Qr: Capture?.Run(HotkeyAction.ScanQrCode); break;
+            case CommandLine.Ruler: Capture?.Run(HotkeyAction.Ruler); break;
+            case CommandLine.Editor: _ = Capture?.OpenImageInEditorAsync(files.FirstOrDefault()); break;
+            case CommandLine.Upload when files.Count > 0: _ = Capture?.UploadFilesAsync(files); break;
             case CommandLine.Region: Capture?.Run(HotkeyAction.RegionCapture); break;
             case CommandLine.FullScreen: Capture?.Run(HotkeyAction.FullScreenCapture); break;
             case CommandLine.Monitor: Capture?.Run(HotkeyAction.ActiveMonitorCapture); break;
@@ -168,7 +180,32 @@ public class App : Application
         AddCapture("Capture active monitor", HotkeyAction.ActiveMonitorCapture);
         AddCapture($"Delayed region ({Settings.CaptureDelaySeconds}s)", HotkeyAction.DelayedRegionCapture);
         AddCapture("Repeat last region", HotkeyAction.RepeatLastRegion);
+        AddCapture("Capture window", HotkeyAction.WindowCapture);
+        AddCapture("Scrolling capture", HotkeyAction.ScrollingCapture);
         AddCapture("Color picker", HotkeyAction.ColorPicker);
+
+        menu.Add(new NativeMenuItemSeparator());
+
+        var recordTitle = Capture?.IsRecording == true ? "■ Stop recording" : "Screen recording (MP4)";
+        AddCapture(recordTitle, HotkeyAction.RecordVideo);
+        if (Capture?.IsRecording != true) AddCapture("GIF recording", HotkeyAction.RecordGif);
+
+        var tools = new NativeMenuItem("Tools") { Menu = new NativeMenu() };
+        void AddTool(string title, Action action)
+        {
+            var item = new NativeMenuItem(title);
+            item.Click += (_, _) => action();
+            tools.Menu.Add(item);
+        }
+        AddTool("Text recognition (OCR)", () => Capture?.Run(HotkeyAction.TextRecognition));
+        AddTool("Scan QR code", () => Capture?.Run(HotkeyAction.ScanQrCode));
+        AddTool("Create QR code", () => new QrGeneratorWindow().Show());
+        AddTool("Ruler", () => Capture?.Run(HotkeyAction.Ruler));
+        AddTool("Image editor…", () => _ = Capture?.OpenImageInEditorAsync());
+        AddTool("Image combiner", () => new ImageCombinerWindow().Show());
+        AddTool("Hash checker", () => new HashWindow().Show());
+        AddTool(Capture?.AutoCapture.IsRunning == true ? "Stop auto capture" : "Start auto capture", () => Capture?.AutoCapture.Toggle());
+        menu.Add(tools);
 
         menu.Add(new NativeMenuItemSeparator());
 
@@ -227,8 +264,17 @@ public static class CommandLine
     public const string Repeat = "repeat";
     public const string Color = "color";
     public const string Show = "show";
+    public const string Window = "window";
+    public const string Record = "record";
+    public const string Gif = "gif";
+    public const string Scroll = "scroll";
+    public const string Ocr = "ocr";
+    public const string Qr = "qr";
+    public const string Ruler = "ruler";
+    public const string Editor = "editor";
+    public const string Upload = "upload";
 
-    private static readonly string[] All = { Region, FullScreen, Monitor, Delay, Repeat, Color, Show };
+    private static readonly string[] All = { Region, FullScreen, Monitor, Delay, Repeat, Color, Show, Window, Record, Gif, Scroll, Ocr, Qr, Ruler, Editor, Upload };
 
     /// <returns>The first recognised command, or null when none was given.</returns>
     public static string? Parse(string[] args) =>

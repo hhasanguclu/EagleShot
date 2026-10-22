@@ -29,6 +29,15 @@ public partial class SettingsView : UserControl
         (HotkeyAction.DelayedRegionCapture, "Delayed region capture"),
         (HotkeyAction.RepeatLastRegion, "Repeat last region"),
         (HotkeyAction.ColorPicker, "Color picker"),
+        (HotkeyAction.WindowCapture, "Capture window"),
+        (HotkeyAction.RecordVideo, "Start / stop screen recording"),
+        (HotkeyAction.RecordGif, "Start / stop GIF recording"),
+        (HotkeyAction.ScrollingCapture, "Scrolling capture"),
+        (HotkeyAction.TextRecognition, "Text recognition (OCR)"),
+        (HotkeyAction.ScanQrCode, "Scan QR code"),
+        (HotkeyAction.Ruler, "Ruler"),
+        (HotkeyAction.ToggleAutoCapture, "Start / stop auto capture"),
+        (HotkeyAction.OpenEditor, "Open image in editor"),
         (HotkeyAction.OpenMainWindow, "Open EagleShot window"),
     };
 
@@ -83,6 +92,40 @@ public partial class SettingsView : UserControl
         C<TextBox>("CustomField").Text = s.CustomUploader.FileFormName;
         C<TextBox>("CustomHeaders").Text = s.CustomUploader.Headers;
         C<TextBox>("CustomJsonPath").Text = s.CustomUploader.UrlJsonPath;
+        C<TextBox>("CustomArguments").Text = s.CustomUploader.Arguments;
+        C<ComboBox>("CustomMethod").SelectedIndex = s.CustomUploader.Method.ToUpperInvariant() switch { "PUT" => 1, "PATCH" => 2, _ => 0 };
+        C<ComboBox>("CustomBody").SelectedIndex = s.CustomUploader.Body == "Binary" ? 1 : 0;
+        C<TextBlock>("CustomName").Text = string.IsNullOrEmpty(s.CustomUploader.Name) ? "" : $"Using “{s.CustomUploader.Name}”";
+        C<CheckBox>("ShortenUrls").IsChecked = s.ShortenUrls;
+
+        var e = s.Effects;
+        C<CheckBox>("EffectsEnabled").IsChecked = e.Enabled;
+        C<NumericUpDown>("EffPadding").Value = e.Padding;
+        C<TextBox>("EffBackground").Text = e.BackgroundColor;
+        C<NumericUpDown>("EffRadius").Value = e.CornerRadius;
+        C<CheckBox>("EffShadow").IsChecked = e.Shadow;
+        C<NumericUpDown>("EffShadowSize").Value = e.ShadowSize;
+        C<NumericUpDown>("EffBorder").Value = e.BorderWidth;
+        C<TextBox>("EffBorderColor").Text = e.BorderColor;
+        C<TextBox>("EffWatermark").Text = e.WatermarkText;
+        C<ComboBox>("EffWatermarkPos").SelectedIndex = (int)e.WatermarkPosition;
+        C<NumericUpDown>("EffWatermarkSize").Value = e.WatermarkSize;
+        C<NumericUpDown>("EffWatermarkOpacity").Value = e.WatermarkOpacity;
+
+        var r = s.Recording;
+        C<TextBox>("FfmpegPath").Text = r.FfmpegPath;
+        C<NumericUpDown>("VideoFps").Value = r.VideoFps;
+        C<NumericUpDown>("GifFps").Value = r.GifFps;
+        C<NumericUpDown>("GifMaxWidth").Value = r.GifMaxWidth;
+        C<NumericUpDown>("RecordCountdown").Value = r.CountdownSeconds;
+        C<CheckBox>("RecordCursor").IsChecked = r.ShowCursor;
+
+        C<TextBox>("TesseractPath").Text = s.TesseractPath;
+        C<TextBox>("OcrLanguages").Text = s.OcrLanguages;
+        C<NumericUpDown>("ScrollMax").Value = s.ScrollingMaxScrolls;
+        C<NumericUpDown>("ScrollDelay").Value = s.ScrollingDelayMs;
+        C<NumericUpDown>("AutoInterval").Value = s.AutoCaptureIntervalSeconds;
+        C<ComboBox>("AutoMode").SelectedIndex = (int)s.AutoCaptureMode;
 
         foreach (var (action, btn) in _hotkeyButtons)
             btn.Content = HotkeyText(s.Hotkeys.GetValueOrDefault(action));
@@ -127,6 +170,40 @@ public partial class SettingsView : UserControl
         s.CustomUploader.FileFormName = C<TextBox>("CustomField").Text?.Trim() ?? "";
         s.CustomUploader.Headers = C<TextBox>("CustomHeaders").Text ?? "";
         s.CustomUploader.UrlJsonPath = C<TextBox>("CustomJsonPath").Text?.Trim() ?? "";
+        s.CustomUploader.Arguments = C<TextBox>("CustomArguments").Text ?? "";
+        s.CustomUploader.Method = (C<ComboBox>("CustomMethod").SelectedIndex) switch { 1 => "PUT", 2 => "PATCH", _ => "POST" };
+        s.CustomUploader.Body = C<ComboBox>("CustomBody").SelectedIndex == 1 ? "Binary" : "MultipartFormData";
+        s.ShortenUrls = C<CheckBox>("ShortenUrls").IsChecked == true;
+
+        int Num(string name, int fallback) => (int)(C<NumericUpDown>(name).Value ?? fallback);
+        var e = s.Effects;
+        e.Enabled = C<CheckBox>("EffectsEnabled").IsChecked == true;
+        e.Padding = Num("EffPadding", 24);
+        e.BackgroundColor = C<TextBox>("EffBackground").Text?.Trim() ?? "";
+        e.CornerRadius = Num("EffRadius", 10);
+        e.Shadow = C<CheckBox>("EffShadow").IsChecked == true;
+        e.ShadowSize = Num("EffShadowSize", 18);
+        e.BorderWidth = Num("EffBorder", 0);
+        e.BorderColor = C<TextBox>("EffBorderColor").Text?.Trim() ?? "";
+        e.WatermarkText = C<TextBox>("EffWatermark").Text ?? "";
+        e.WatermarkPosition = (WatermarkPosition)Math.Max(0, C<ComboBox>("EffWatermarkPos").SelectedIndex);
+        e.WatermarkSize = Num("EffWatermarkSize", 16);
+        e.WatermarkOpacity = Num("EffWatermarkOpacity", 70);
+
+        var r = s.Recording;
+        r.FfmpegPath = C<TextBox>("FfmpegPath").Text?.Trim() ?? "";
+        r.VideoFps = Num("VideoFps", 30);
+        r.GifFps = Num("GifFps", 15);
+        r.GifMaxWidth = Num("GifMaxWidth", 960);
+        r.CountdownSeconds = Num("RecordCountdown", 0);
+        r.ShowCursor = C<CheckBox>("RecordCursor").IsChecked == true;
+
+        s.TesseractPath = C<TextBox>("TesseractPath").Text?.Trim() ?? "";
+        s.OcrLanguages = C<TextBox>("OcrLanguages").Text?.Trim() ?? "";
+        s.ScrollingMaxScrolls = Num("ScrollMax", 30);
+        s.ScrollingDelayMs = Num("ScrollDelay", 400);
+        s.AutoCaptureIntervalSeconds = Num("AutoInterval", 60);
+        s.AutoCaptureMode = (AutoCaptureMode)Math.Max(0, C<ComboBox>("AutoMode").SelectedIndex);
 
         s.Save();
         UpdateDependentControls();
@@ -157,7 +234,16 @@ public partial class SettingsView : UserControl
             if (e.Property == RangeBase.ValueProperty) Save();
         };
 
-        foreach (var name in new[] { "SaveFolder", "FileNamePattern", "ImgurClientId", "CustomUrl", "CustomField", "CustomHeaders", "CustomJsonPath" })
+        foreach (var name in new[] { "ShortenUrls", "EffectsEnabled", "EffShadow", "RecordCursor" })
+            C<CheckBox>(name).IsCheckedChanged += (_, _) => Save();
+        foreach (var name in new[] { "EffPadding", "EffRadius", "EffShadowSize", "EffBorder", "EffWatermarkSize", "EffWatermarkOpacity",
+                                     "VideoFps", "GifFps", "GifMaxWidth", "RecordCountdown", "ScrollMax", "ScrollDelay", "AutoInterval" })
+            C<NumericUpDown>(name).ValueChanged += (_, _) => Save();
+        foreach (var name in new[] { "CustomMethod", "CustomBody", "EffWatermarkPos", "AutoMode" })
+            C<ComboBox>(name).SelectionChanged += (_, _) => Save();
+
+        foreach (var name in new[] { "SaveFolder", "FileNamePattern", "ImgurClientId", "CustomUrl", "CustomField", "CustomHeaders", "CustomJsonPath",
+                                     "CustomArguments", "EffBackground", "EffBorderColor", "EffWatermark", "FfmpegPath", "TesseractPath", "OcrLanguages" })
             C<TextBox>(name).LostFocus += (_, _) => Save();
         C<TextBox>("FileNamePattern").TextChanged += (_, _) => UpdatePatternPreview();
     }
@@ -177,6 +263,92 @@ public partial class SettingsView : UserControl
         C<CheckBox>("AfterCopyUrl").IsEnabled = C<CheckBox>("AfterUpload").IsChecked == true;
 
         UpdatePatternPreview();
+        UpdateEffectsPreview();
+        UpdateToolStatus();
+    }
+
+    private static Avalonia.Media.Imaging.Bitmap? _sample;
+
+    private void UpdateEffectsPreview()
+    {
+        try
+        {
+            if (_sample == null)
+            {
+                var rtb = new Avalonia.Media.Imaging.RenderTargetBitmap(new PixelSize(320, 200));
+                using (var ctx = rtb.CreateDrawingContext())
+                {
+                    ctx.FillRectangle(new LinearGradientBrush
+                    {
+                        StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                        EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+                        GradientStops = { new GradientStop(Color.FromRgb(0x2B, 0x5C, 0xD9), 0), new GradientStop(Color.FromRgb(0x9B, 0x4D, 0xE0), 1) }
+                    }, new Rect(0, 0, 320, 200));
+                    ctx.FillRectangle(new SolidColorBrush(Color.FromArgb(200, 255, 255, 255)), new Rect(24, 24, 160, 14), 4);
+                    ctx.FillRectangle(new SolidColorBrush(Color.FromArgb(120, 255, 255, 255)), new Rect(24, 50, 230, 10), 4);
+                    ctx.FillRectangle(new SolidColorBrush(Color.FromArgb(120, 255, 255, 255)), new Rect(24, 68, 200, 10), 4);
+                }
+                _sample = rtb;
+            }
+            var effects = App.Settings.Effects;
+            var preview = new ImageEffectsSettings
+            {
+                Enabled = true, Padding = effects.Padding, BackgroundColor = effects.BackgroundColor, CornerRadius = effects.CornerRadius,
+                Shadow = effects.Shadow, ShadowSize = effects.ShadowSize, BorderWidth = effects.BorderWidth, BorderColor = effects.BorderColor,
+                WatermarkText = effects.WatermarkText, WatermarkPosition = effects.WatermarkPosition, WatermarkSize = effects.WatermarkSize,
+                WatermarkOpacity = effects.WatermarkOpacity
+            };
+            C<Image>("EffectsPreview").Source = ImageEffects.Apply(_sample, preview);
+            C<Image>("EffectsPreview").Opacity = effects.Enabled ? 1 : 0.4;
+        }
+        catch { }
+    }
+
+    private void UpdateToolStatus()
+    {
+        var ffmpeg = ScreenRecorder.FindFfmpeg();
+        C<TextBlock>("FfmpegStatus").Text = ffmpeg != null ? $"✓ ffmpeg found: {ffmpeg}" : "⚠ ffmpeg not found. " + ToolLocator.InstallHint("ffmpeg");
+        var tesseract = OcrService.FindTesseract();
+        C<TextBlock>("TesseractStatus").Text = tesseract != null ? $"✓ Tesseract found: {tesseract}" : "⚠ Tesseract not found (needed for text recognition). " + ToolLocator.InstallHint("tesseract");
+    }
+
+    private async void OnBrowseTool(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string box }) return;
+        var top = TopLevel.GetTopLevel(this);
+        if (top == null) return;
+        var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = "Choose the program", AllowMultiple = false });
+        var path = files.FirstOrDefault()?.TryGetLocalPath();
+        if (path == null) return;
+        C<TextBox>(box).Text = path;
+        Save();
+    }
+
+    private async void OnImportSxcu(object? sender, RoutedEventArgs e)
+    {
+        var top = TopLevel.GetTopLevel(this);
+        if (top == null) return;
+        var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Import ShareX custom uploader",
+            AllowMultiple = false,
+            FileTypeFilter = new[] { new FilePickerFileType("ShareX custom uploader") { Patterns = new[] { "*.sxcu", "*.json" } } }
+        });
+        var path = files.FirstOrDefault()?.TryGetLocalPath();
+        if (path == null) return;
+        try
+        {
+            App.Settings.CustomUploader = UploadService.ImportSxcu(await File.ReadAllTextAsync(path));
+            App.Settings.Uploader = UploaderKind.Custom;
+            App.Settings.Save();
+            Load();
+            SettingsChanged?.Invoke();
+            ToastWindow.Show("Uploader imported", App.Settings.CustomUploader.Name);
+        }
+        catch (Exception ex)
+        {
+            ToastWindow.Show("Import failed", ex.Message, isError: true);
+        }
     }
 
     private void UpdatePatternPreview()

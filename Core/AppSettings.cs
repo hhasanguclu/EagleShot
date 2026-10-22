@@ -19,7 +19,48 @@ public enum HotkeyAction
     DelayedRegionCapture,
     RepeatLastRegion,
     ColorPicker,
-    OpenMainWindow
+    OpenMainWindow,
+    WindowCapture,
+    RecordVideo,
+    RecordGif,
+    ScrollingCapture,
+    TextRecognition,
+    ScanQrCode,
+    Ruler,
+    ToggleAutoCapture,
+    OpenEditor
+}
+
+public enum AutoCaptureMode { FullScreen, LastRegion, ActiveMonitor }
+
+public enum WatermarkPosition { TopLeft, TopRight, BottomLeft, BottomRight, Center }
+
+/// <summary>Effects applied to images before they are saved, copied or uploaded.</summary>
+public class ImageEffectsSettings
+{
+    public bool Enabled { get; set; }
+    public int Padding { get; set; } = 24;
+    public string BackgroundColor { get; set; } = "#00000000";
+    public int CornerRadius { get; set; } = 10;
+    public bool Shadow { get; set; } = true;
+    public int ShadowSize { get; set; } = 18;
+    public int BorderWidth { get; set; }
+    public string BorderColor { get; set; } = "#4C8DFF";
+    public string WatermarkText { get; set; } = "";
+    public WatermarkPosition WatermarkPosition { get; set; } = WatermarkPosition.BottomRight;
+    public int WatermarkSize { get; set; } = 16;
+    public int WatermarkOpacity { get; set; } = 70;
+}
+
+public class RecordingSettings
+{
+    /// <summary>Path to ffmpeg; empty = search PATH and common install locations.</summary>
+    public string FfmpegPath { get; set; } = "";
+    public int VideoFps { get; set; } = 30;
+    public int GifFps { get; set; } = 15;
+    public int GifMaxWidth { get; set; } = 960;
+    public bool ShowCursor { get; set; } = true;
+    public int CountdownSeconds { get; set; } = 0;
 }
 
 /// <summary>
@@ -43,6 +84,14 @@ public class CustomUploaderSettings
     public string Headers { get; set; } = "";
     /// <summary>Dot path to the URL in a JSON response, e.g. "data.link". Empty = whole body.</summary>
     public string UrlJsonPath { get; set; } = "";
+    /// <summary>POST or PUT.</summary>
+    public string Method { get; set; } = "POST";
+    /// <summary>"MultipartFormData" or "Binary" (raw file as request body).</summary>
+    public string Body { get; set; } = "MultipartFormData";
+    /// <summary>Extra form fields, one "name: value" per line.</summary>
+    public string Arguments { get; set; } = "";
+    /// <summary>Name shown in the UI (from an imported .sxcu file).</summary>
+    public string Name { get; set; } = "";
 }
 
 public class RegionInfo
@@ -73,6 +122,17 @@ public class AppSettings
     public int FileCounter { get; set; } = 1;
 
     public AfterCaptureOptions AfterCapture { get; set; } = new();
+    public ImageEffectsSettings Effects { get; set; } = new();
+    public RecordingSettings Recording { get; set; } = new();
+
+    // Tools
+    public string TesseractPath { get; set; } = "";
+    public string OcrLanguages { get; set; } = "";
+    public int ScrollingMaxScrolls { get; set; } = 30;
+    public int ScrollingDelayMs { get; set; } = 400;
+    public int AutoCaptureIntervalSeconds { get; set; } = 60;
+    public AutoCaptureMode AutoCaptureMode { get; set; } = AutoCaptureMode.FullScreen;
+    public bool ShortenUrls { get; set; }
 
     // Upload
     public UploaderKind Uploader { get; set; } = UploaderKind.None;
@@ -97,6 +157,15 @@ public class AppSettings
             [HotkeyAction.DelayedRegionCapture] = $"Ctrl+Shift+{key}",
             [HotkeyAction.ColorPicker] = "",
             [HotkeyAction.OpenMainWindow] = "",
+            [HotkeyAction.WindowCapture] = "",
+            [HotkeyAction.RecordVideo] = "",
+            [HotkeyAction.RecordGif] = "",
+            [HotkeyAction.ScrollingCapture] = "",
+            [HotkeyAction.TextRecognition] = "",
+            [HotkeyAction.ScanQrCode] = "",
+            [HotkeyAction.Ruler] = "",
+            [HotkeyAction.ToggleAutoCapture] = "",
+            [HotkeyAction.OpenEditor] = "",
         };
     }
 
@@ -125,6 +194,8 @@ public class AppSettings
                         s.Hotkeys.TryAdd(action, combo);
                     s.AfterCapture ??= new();
                     s.CustomUploader ??= new();
+                    s.Effects ??= new();
+                    s.Recording ??= new();
                     if (string.IsNullOrWhiteSpace(s.SaveFolder))
                         s.SaveFolder = AppPaths.DefaultScreenshotFolder;
                     return s;
