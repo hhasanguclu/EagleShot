@@ -1,9 +1,13 @@
 #define MyAppName "EagleShot"
-#define MyAppVersion "3.0.0"
+#ifndef MyAppVersion
+  #define MyAppVersion "3.0.0"
+#endif
 #define MyAppPublisher "Hasan Guclu"
 #define MyAppURL "https://github.com/hhasanguclu/EagleShot"
 #define MyAppExeName "EagleShot.exe"
-#define ProjectDir "C:\Users\Hasan\Documents\GitHub\EagleShot"
+#ifndef ProjectDir
+  #define ProjectDir "C:\Users\Hasan\Documents\GitHub\EagleShot"
+#endif
 
 [Setup]
 AppId={{EAGLE-SHOT-GUID-12345}

@@ -3,7 +3,7 @@
 set -e
 
 APP_NAME="EagleShot"
-VERSION="3.0.0"
+VERSION="${VERSION:-3.0.0}"
 BUNDLE_ID="com.eagleshot.app"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
