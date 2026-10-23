@@ -1,0 +1,249 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:EagleShot.Views"
+        x:Class="EagleShot.Views.MainWindow"
+        Title="EagleShot"
+        Width="1080" Height="700"
+        MinWidth="820" MinHeight="540"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource WindowBrush}"
+        Icon="avares://EagleShot/Resources/icon.ico">
+    <Grid ColumnDefinitions="236,*">
+
+        <!-- ═══════════ Sidebar ═══════════ -->
+        <Border Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource BorderSubtleBrush}"
+                BorderThickness="0,0,1,0">
+            <DockPanel Margin="14,18">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="11" Margin="8,4,0,30">
+                    <Border Width="38" Height="38" CornerRadius="10" ClipToBounds="True">
+                        <Image Source="avares://EagleShot/Resources/logo.png" Stretch="UniformToFill"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="EagleShot" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Name="VersionText" Classes="muted" Text="v3.0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom" Spacing="10">
+                    <Border Background="#191A23" CornerRadius="10" Padding="12" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Runs in the tray" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Classes="muted" Text="Closing this window keeps EagleShot ready for hotkeys."/>
+                        </StackPanel>
+                    </Border>
+                    <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Click="OnQuitClick">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconClose}"/>
+                            <TextBlock Text="Quit EagleShot" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <ToggleButton Classes="nav" Name="NavCapture" Tag="Capture" Click="OnNavClick" IsChecked="True">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconCapture}" Width="18" Height="18"/>
+                            <TextBlock Text="Capture" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ToggleButton>
+                    <ToggleButton Classes="nav" Name="NavHistory" Tag="History" Click="OnNavClick">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconHistory}" Width="18" Height="18"/>
+                            <TextBlock Text="History" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ToggleButton>
+                    <ToggleButton Classes="nav" Name="NavTools" Tag="Tools" Click="OnNavClick">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconTools}" Width="18" Height="18"/>
+                            <TextBlock Text="Tools" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ToggleButton>
+                    <ToggleButton Classes="nav" Name="NavSettings" Tag="Settings" Click="OnNavClick">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconSettings}" Width="18" Height="18"/>
+                            <TextBlock Text="Settings" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ToggleButton>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- ═══════════ Pages ═══════════ -->
+        <Panel Grid.Column="1">
+
+            <!-- Capture (home) -->
+            <ScrollViewer Name="CapturePage" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="36,32,22,32">
+                    <TextBlock Classes="h1" Text="Capture"/>
+                    <TextBlock Classes="sub" Margin="0,4,0,22" Text="Pick a capture mode, or use the hotkeys from anywhere."/>
+
+                    <Border Name="HotkeyWarning" IsVisible="False" Background="#2A2216" BorderBrush="#5A4520" BorderThickness="1"
+                            CornerRadius="10" Padding="14,10" Margin="0,0,14,18">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="Global hotkeys are not available in this session" FontWeight="SemiBold" FontSize="13" Foreground="#FFC870"/>
+                            <TextBlock Classes="sub" Name="HotkeyWarningText"
+                                       Text="Bind a desktop shortcut to “eagleshot --region” (also --fullscreen, --monitor, --repeat, --color, --delay) instead."/>
+                        </StackPanel>
+                    </Border>
+
+                    <WrapPanel Name="CaptureCards">
+                        <Button Classes="capture-card" Tag="RegionCapture" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconRegion}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyRegionCapture">
+                                        <TextBlock Text="PrintScreen"/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Region"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Select an area, annotate, then copy, save or upload."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="FullScreenCapture" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconFullscreen}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyFullScreenCapture">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Full screen"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Every monitor in one shot, no editor."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="ActiveMonitorCapture" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconMonitor}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyActiveMonitorCapture">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Active monitor"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="The monitor under the mouse cursor."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="DelayedRegionCapture" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconTimer}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyDelayedRegionCapture">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Name="DelayTitle" Text="Delayed region"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Countdown first, to open menus or tooltips."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="RepeatLastRegion" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconRepeat}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyRepeatLastRegion">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Repeat last region"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Same area as last time, instantly."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="WindowCapture" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconWindow}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyWindowCapture">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Window"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Click any window to capture just that window."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="RecordVideo" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconVideo}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyRecordVideo">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Screen recording"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Record an area to MP4. Click again to stop."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="RecordGif" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconGif}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyRecordGif">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="GIF recording"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Record an area as an animated GIF."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="ScrollingCapture" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconScroll}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyScrollingCapture">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Scrolling capture"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Capture a long page by scrolling it."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="ColorPicker" Click="OnCaptureCardClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Classes="icon-badge"><PathIcon Data="{StaticResource IconColorPicker}"/></Border>
+                                    <Border Grid.Column="1" Classes="kbd" HorizontalAlignment="Right" VerticalAlignment="Top" Name="KeyColorPicker">
+                                        <TextBlock/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Color picker"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Copy the HEX color of any pixel."/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="capture-card" Tag="OpenImage" Click="OnOpenImageClick">
+                            <Grid RowDefinitions="Auto,Auto,Auto">
+                                <Border Classes="icon-badge" HorizontalAlignment="Left"><PathIcon Data="{StaticResource IconPin}"/></Border>
+                                <TextBlock Grid.Row="1" Classes="h2" Margin="0,14,0,3" Text="Pin an image"/>
+                                <TextBlock Grid.Row="2" Classes="muted" Text="Float an image file on top of all windows."/>
+                            </Grid>
+                        </Button>
+                    </WrapPanel>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,18,14,4">
+                        <StackPanel>
+                            <TextBlock Classes="h2" Text="After capture"/>
+                            <TextBlock Classes="muted" Text="Tasks that run when you press ✓ / Enter in the editor, and for full-screen, monitor and repeat captures."/>
+                        </StackPanel>
+                    </Grid>
+                    <WrapPanel Name="TaskChips" Margin="0,10,0,0">
+                        <ToggleButton Classes="chip" Name="ChipCopy" Content="Copy to clipboard" Click="OnChipClick"/>
+                        <ToggleButton Classes="chip" Name="ChipSave" Content="Save to folder" Click="OnChipClick"/>
+                        <ToggleButton Classes="chip" Name="ChipUpload" Content="Upload &amp; copy link" Click="OnChipClick"/>
+                        <ToggleButton Classes="chip" Name="ChipPin" Content="Pin to screen" Click="OnChipClick"/>
+                        <ToggleButton Classes="chip" Name="ChipNotify" Content="Show notification" Click="OnChipClick"/>
+                    </WrapPanel>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,22,14,12">
+                        <TextBlock Classes="h2" Text="Recent captures" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" Classes="ghost" Content="View all" FontSize="12" Click="OnViewAllClick"/>
+                    </Grid>
+                    <WrapPanel Name="RecentPanel"/>
+                    <TextBlock Name="RecentEmpty" Classes="muted" Text="Nothing yet — your screenshots will show up here."/>
+                    <TextBlock Classes="muted" Margin="0,18,0,0" Text="Tip: drop files on this window to upload them, or images to open them in the editor."/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <views:HistoryView Name="HistoryPage" IsVisible="False"/>
+            <views:ToolsView Name="ToolsPage" IsVisible="False"/>
+            <views:SettingsView Name="SettingsPage" IsVisible="False"/>
+        </Panel>
+    </Grid>
+</Window>

@@ -1,0 +1,175 @@
+name: Release
+
+# Releases are made by pushing a v* tag, by running the workflow manually,
+# or by pushing a commit whose message contains "[release]" (the tag is then
+# created from the <Version> in EagleShot.csproj).
+on:
+  push:
+    tags:
+      - "v*"
+    branches:
+      - "**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="v$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' EagleShot.csproj | head -1)"
+          fi
+          echo "Releasing $TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+  windows:
+    needs: prepare
+    runs-on: windows-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Publish
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/win-x64
+
+      - name: Bundle ffmpeg and Tesseract
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/fetch-windows-tools.ps1 -Destination publish/win-x64/tools
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $version = "$env:TAG".TrimStart("v")
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path publish/win-x64/* -DestinationPath "dist/EagleShot_v${version}_win-x64.zip"
+
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+          }
+          & $iscc "/DMyAppVersion=$version" "/DProjectDir=$env:GITHUB_WORKSPACE" installers/windows/setup.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/*
+
+  linux:
+    needs: prepare
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Publish
+        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/linux-x64
+
+      - name: Package
+        run: |
+          VERSION="${TAG#v}"
+          NAME="EagleShot_v${VERSION}_linux-x64"
+          mkdir -p "dist" "staging/$NAME/publish" "staging/$NAME/installers/linux" "staging/$NAME/Resources"
+          cp -r publish/linux-x64 "staging/$NAME/publish/"
+          cp installers/linux/*.sh "staging/$NAME/installers/linux/"
+          cp Resources/logo.png "staging/$NAME/Resources/"
+          cp README.md "staging/$NAME/"
+          chmod +x "staging/$NAME/installers/linux/"*.sh "staging/$NAME/publish/linux-x64/EagleShot"
+          tar -C staging -czf "dist/$NAME.tar.gz" "$NAME"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: dist/*
+
+  macos:
+    needs: prepare
+    runs-on: macos-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Publish
+        run: |
+          # Not single-file on macOS: native dylibs stay inside the .app so they are signed with it.
+          for RID in osx-arm64 osx-x64; do
+            dotnet publish -c Release -r $RID --self-contained true -o publish/$RID
+          done
+
+      - name: Create .app and .dmg
+        run: |
+          export VERSION="${TAG#v}"
+          chmod +x installers/macos/create-app.sh
+          ./installers/macos/create-app.sh
+          ls -l dist
+
+      - name: Smoke test (Apple Silicon)
+        run: |
+          # Mount the DMG like a user would and make sure the app starts and stays up.
+          VERSION="${TAG#v}"
+          hdiutil attach "dist/EagleShot_v${VERSION}_osx-arm64.dmg" -mountpoint /tmp/eagleshot -nobrowse
+          codesign --verify --deep --strict --verbose=2 /tmp/eagleshot/EagleShot.app
+          /tmp/eagleshot/EagleShot.app/Contents/MacOS/EagleShot > /tmp/eagleshot.log 2>&1 &
+          PID=$!
+          sleep 20
+          if ! kill -0 $PID 2>/dev/null; then
+            echo "EagleShot exited early:"; cat /tmp/eagleshot.log; exit 1
+          fi
+          kill $PID || true
+          hdiutil detach /tmp/eagleshot
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: dist/*.dmg
+
+  release:
+    needs: [prepare, windows, linux, macos]
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Checksums
+        run: |
+          cd artifacts
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: EagleShot ${{ env.TAG }} 🦅
+          body_path: .github/release-notes/${{ env.TAG }}.md
+          files: artifacts/*

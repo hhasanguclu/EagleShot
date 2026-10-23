@@ -1,22 +1,24 @@
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace EagleShot.Core;
 
 public static class ClipboardService
 {
-    public static bool CopyImage(RenderTargetBitmap bitmap)
+    public static bool CopyImage(Bitmap bitmap)
     {
         try
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return CopyImageWindows(bitmap);
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 return CopyImageLinux(bitmap);
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 return CopyImageMacOS(bitmap);
         }
         catch (Exception ex)
@@ -26,15 +28,31 @@ public static class ClipboardService
         return false;
     }
 
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    private static bool CopyImageWindows(RenderTargetBitmap bitmap)
+    /// <summary>Copies text using the Avalonia clipboard of any open window.</summary>
+    public static async Task<bool> CopyTextAsync(TopLevel? topLevel, string text)
     {
-        // Save to PNG in memory
-        using var ms = new MemoryStream();
-        bitmap.Save(ms);
-        var pngBytes = ms.ToArray();
+        try
+        {
+            var clipboard = topLevel?.Clipboard;
+            if (clipboard != null)
+            {
+                await clipboard.SetTextAsync(text);
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Text clipboard failed: {ex.Message}");
+        }
+        return false;
+    }
 
-        // Use Win32 clipboard API with CF_DIB for broad compatibility
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    private static bool CopyImageWindows(Bitmap bitmap)
+    {
+        var pngBytes = ImageHelper.Encode(bitmap, ImageFormatKind.Png);
+        var pixels = ImageHelper.ReadPixels(bitmap);
+
         if (!OpenClipboard(IntPtr.Zero))
             return false;
 
@@ -42,20 +60,13 @@ public static class ClipboardService
         {
             EmptyClipboard();
 
-            // Load PNG bytes into a System.Drawing.Bitmap to get DIB
-            // Instead, we'll put PNG format directly which modern apps support
-            uint CF_PNG = RegisterClipboardFormatW("PNG");
-            if (CF_PNG != 0)
-            {
-                var hGlobal = Marshal.AllocHGlobal(pngBytes.Length);
-                Marshal.Copy(pngBytes, 0, hGlobal, pngBytes.Length);
-                SetClipboardData(CF_PNG, hGlobal);
-                // Don't free hGlobal — clipboard owns it now
-            }
+            // PNG keeps transparency for apps that support it
+            uint cfPng = RegisterClipboardFormatW("PNG");
+            if (cfPng != 0)
+                SetClipboardData(cfPng, ToGlobal(pngBytes));
 
-            // Also set as CF_DIB for apps that don't support PNG
-            SetDibFromPng(pngBytes);
-
+            // CF_DIB for everything else
+            SetClipboardData(8, ToGlobal(BuildDib(pixels)));
             return true;
         }
         finally
@@ -64,118 +75,94 @@ public static class ClipboardService
         }
     }
 
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    private static void SetDibFromPng(byte[] pngBytes)
+    private static byte[] BuildDib(PixelBuffer pixels)
     {
-        // Decode PNG to raw pixels using Avalonia
-        using var pngStream = new MemoryStream(pngBytes);
-        var bmp = new Avalonia.Media.Imaging.Bitmap(pngStream);
-        int w = bmp.PixelSize.Width;
-        int h = bmp.PixelSize.Height;
+        int w = pixels.Width, h = pixels.Height, stride = pixels.Stride;
+        const int headerSize = 40; // BITMAPINFOHEADER
+        var dib = new byte[headerSize + stride * h];
 
-        // Create a WriteableBitmap to access pixels
-        var wb = new Avalonia.Media.Imaging.WriteableBitmap(
-            bmp.PixelSize, bmp.Dpi,
-            Avalonia.Platform.PixelFormat.Bgra8888,
-            Avalonia.Platform.AlphaFormat.Premul);
+        BitConverter.GetBytes(headerSize).CopyTo(dib, 0);  // biSize
+        BitConverter.GetBytes(w).CopyTo(dib, 4);           // biWidth
+        BitConverter.GetBytes(h).CopyTo(dib, 8);           // biHeight (positive = bottom-up)
+        BitConverter.GetBytes((short)1).CopyTo(dib, 12);   // biPlanes
+        BitConverter.GetBytes((short)32).CopyTo(dib, 14);  // biBitCount
 
-        using (var fb = wb.Lock())
-        {
-            bmp.CopyPixels(
-                new Avalonia.PixelRect(0, 0, w, h),
-                fb.Address, fb.RowBytes * h, fb.RowBytes);
-        }
-
-        // Build BITMAPINFOHEADER + pixel data (bottom-up DIB)
-        int stride = w * 4;
-        int headerSize = 40; // BITMAPINFOHEADER
-        int imageSize = stride * h;
-        int totalSize = headerSize + imageSize;
-
-        var dibBytes = new byte[totalSize];
-
-        // BITMAPINFOHEADER
-        BitConverter.GetBytes(headerSize).CopyTo(dibBytes, 0);   // biSize
-        BitConverter.GetBytes(w).CopyTo(dibBytes, 4);             // biWidth
-        BitConverter.GetBytes(h).CopyTo(dibBytes, 8);             // biHeight (positive = bottom-up)
-        BitConverter.GetBytes((short)1).CopyTo(dibBytes, 12);     // biPlanes
-        BitConverter.GetBytes((short)32).CopyTo(dibBytes, 14);    // biBitCount
-        // biCompression = 0 (BI_RGB), rest zeros
-
-        // Copy pixels (flip vertically for bottom-up DIB)
-        using (var fb = wb.Lock())
-        {
-            unsafe
-            {
-                byte* src = (byte*)fb.Address;
-                for (int y = 0; y < h; y++)
-                {
-                    int srcOffset = y * fb.RowBytes;
-                    int dstOffset = headerSize + (h - 1 - y) * stride;
-                    Marshal.Copy((IntPtr)(src + srcOffset), dibBytes, dstOffset, stride);
-                }
-            }
-        }
-
-        var hGlobal = Marshal.AllocHGlobal(totalSize);
-        Marshal.Copy(dibBytes, 0, hGlobal, totalSize);
-        SetClipboardData(8 /* CF_DIB */, hGlobal);
+        for (int y = 0; y < h; y++)
+            Buffer.BlockCopy(pixels.Data, y * stride, dib, headerSize + (h - 1 - y) * stride, stride);
+        return dib;
     }
 
-    private static bool CopyImageLinux(RenderTargetBitmap bitmap)
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    private static IntPtr ToGlobal(byte[] data)
     {
-        var tmpFile = Path.Combine(Path.GetTempPath(), $"eagleshot_{Guid.NewGuid()}.png");
+        // GMEM_MOVEABLE memory is required by SetClipboardData; the clipboard owns it afterwards.
+        IntPtr hGlobal = GlobalAlloc(0x0002, (UIntPtr)data.Length);
+        IntPtr ptr = GlobalLock(hGlobal);
+        Marshal.Copy(data, 0, ptr, data.Length);
+        GlobalUnlock(hGlobal);
+        return hGlobal;
+    }
+
+    private static bool CopyImageLinux(Bitmap bitmap)
+    {
+        var png = ImageHelper.Encode(bitmap, ImageFormatKind.Png);
+        bool wayland = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY"));
+
+        string[][] commands = wayland
+            ? new[] { new[] { "wl-copy", "--type", "image/png" }, new[] { "xclip", "-selection", "clipboard", "-t", "image/png", "-i" } }
+            : new[] { new[] { "xclip", "-selection", "clipboard", "-t", "image/png", "-i" }, new[] { "wl-copy", "--type", "image/png" } };
+
+        foreach (var cmd in commands)
+        {
+            if (PipeToProcess(cmd, png)) return true;
+        }
+        return false;
+    }
+
+    private static bool PipeToProcess(string[] command, byte[] input)
+    {
         try
         {
-            bitmap.Save(tmpFile);
-
-            // Try xclip first, then xsel, then wl-copy (Wayland)
-            string[] commands = {
-                $"xclip -selection clipboard -t image/png -i \"{tmpFile}\"",
-                $"xsel --clipboard --input < \"{tmpFile}\"",
-                $"wl-copy < \"{tmpFile}\""
-            };
-
-            foreach (var cmd in commands)
+            var psi = new ProcessStartInfo
             {
-                try
-                {
-                    var psi = new ProcessStartInfo
-                    {
-                        FileName = "/bin/bash",
-                        Arguments = $"-c \"{cmd}\"",
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    };
-                    var proc = Process.Start(psi);
-                    proc?.WaitForExit(3000);
-                    if (proc?.ExitCode == 0) return true;
-                }
-                catch { }
-            }
+                FileName = command[0],
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardInput = true
+            };
+            for (int i = 1; i < command.Length; i++)
+                psi.ArgumentList.Add(command[i]);
+
+            using var proc = Process.Start(psi);
+            if (proc == null) return false;
+            proc.StandardInput.BaseStream.Write(input, 0, input.Length);
+            proc.StandardInput.Close();
+            // xclip/wl-copy fork into the background to serve the selection; the parent exits quickly.
+            if (!proc.WaitForExit(3000)) return true;
+            return proc.ExitCode == 0;
+        }
+        catch
+        {
             return false;
         }
-        finally
-        {
-            try { if (File.Exists(tmpFile)) File.Delete(tmpFile); } catch { }
-        }
     }
 
-    private static bool CopyImageMacOS(RenderTargetBitmap bitmap)
+    private static bool CopyImageMacOS(Bitmap bitmap)
     {
-        var tmpFile = Path.Combine(Path.GetTempPath(), $"eagleshot_{Guid.NewGuid()}.png");
+        var tmpFile = Path.Combine(Path.GetTempPath(), $"eagleshot_{Guid.NewGuid():N}.png");
         try
         {
-            bitmap.Save(tmpFile);
+            File.WriteAllBytes(tmpFile, ImageHelper.Encode(bitmap, ImageFormatKind.Png));
 
             var psi = new ProcessStartInfo
             {
                 FileName = "osascript",
-                Arguments = $"-e \"set the clipboard to (read (POSIX file \\\"{tmpFile}\\\") as «class PNGf»)\"",
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
-            var proc = Process.Start(psi);
+            psi.ArgumentList.Add("-e");
+            psi.ArgumentList.Add($"set the clipboard to (read (POSIX file \"{tmpFile}\") as «class PNGf»)");
+            using var proc = Process.Start(psi);
             proc?.WaitForExit(3000);
             return proc?.ExitCode == 0;
         }
@@ -191,4 +178,7 @@ public static class ClipboardService
     [DllImport("user32.dll")] private static extern bool EmptyClipboard();
     [DllImport("user32.dll")] private static extern IntPtr SetClipboardData(uint uFormat, IntPtr hMem);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern uint RegisterClipboardFormatW(string lpszFormat);
+    [DllImport("kernel32.dll")] private static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
+    [DllImport("kernel32.dll")] private static extern IntPtr GlobalLock(IntPtr hMem);
+    [DllImport("kernel32.dll")] private static extern bool GlobalUnlock(IntPtr hMem);
 }

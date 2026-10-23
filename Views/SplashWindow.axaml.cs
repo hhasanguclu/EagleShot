@@ -15,7 +15,7 @@ public partial class SplashWindow : Window
     protected override async void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
-        await Task.Delay(2000);
+        await Task.Delay(1200);
 
         // Fade out
         for (double o = 1.0; o > 0; o -= 0.05)

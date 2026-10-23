@@ -2,13 +2,16 @@ namespace EagleShot.Core;
 
 public enum ToolType
 {
-    None,
+    None,       // Select / move
     Pen,
+    Marker,
     Line,
     Arrow,
     Rectangle,
+    Ellipse,
     Text,
     Highlight,
     Number,
-    Mosaic
+    Mosaic,
+    Blur
 }
