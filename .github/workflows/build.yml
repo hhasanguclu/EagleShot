@@ -42,3 +42,27 @@ jobs:
         with:
           name: EagleShot-${{ matrix.rid }}
           path: publish/${{ matrix.rid }}
+
+      # Windows only: make sure the bundled tools download and the installer compiles
+      - name: Bundle ffmpeg and Tesseract
+        if: matrix.rid == 'win-x64'
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/fetch-windows-tools.ps1 -Destination publish/${{ matrix.rid }}/tools
+
+      - name: Compile installer
+        if: matrix.rid == 'win-x64'
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
+          & $iscc "/DProjectDir=$env:GITHUB_WORKSPACE" installers/windows/setup.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-ChildItem dist | Format-Table Name, Length
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.rid == 'win-x64'
+        with:
+          name: EagleShot-installer
+          path: dist/*.exe

@@ -16,13 +16,20 @@ public static class OcrService
 {
     public static string? FindTesseract() => ToolLocator.Find("tesseract", App.Settings.TesseractPath);
 
+    /// <summary>"--tessdata-dir" for a portable Tesseract with its own tessdata folder.</summary>
+    private static string[] DataDirArgs(string exe)
+    {
+        var dir = Path.Combine(Path.GetDirectoryName(exe) ?? "", "tessdata");
+        return Directory.Exists(dir) ? new[] { "--tessdata-dir", dir } : Array.Empty<string>();
+    }
+
     public static async Task<string[]> AvailableLanguagesAsync()
     {
         var exe = FindTesseract();
         if (exe == null) return Array.Empty<string>();
         try
         {
-            var r = await ToolLocator.RunAsync(exe, new[] { "--list-langs" }, TimeSpan.FromSeconds(10));
+            var r = await ToolLocator.RunAsync(exe, DataDirArgs(exe).Append("--list-langs").ToArray(), TimeSpan.FromSeconds(10));
             return (r.StdOut + "\n" + r.StdErr).Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Where(l => !l.Contains(' ') && !l.Contains(':') && l != "osd").ToArray();
         }
@@ -58,7 +65,7 @@ public static class OcrService
             }
 
             // psm 6 treats the selection as one block of text, which keeps lines intact
-            var r = await ToolLocator.RunAsync(exe, new[] { tmp, "stdout", "-l", langs, "--psm", "6" }, TimeSpan.FromSeconds(60));
+            var r = await ToolLocator.RunAsync(exe, DataDirArgs(exe).Concat(new[] { tmp, "stdout", "-l", langs, "--psm", "6" }).ToArray(), TimeSpan.FromSeconds(60));
             if (r.ExitCode != 0)
                 throw new InvalidOperationException("Tesseract failed: " + r.StdErr.Trim());
             return r.StdOut.Trim();

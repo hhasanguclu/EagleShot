@@ -60,7 +60,9 @@ public class RecordingSettings
     public int GifFps { get; set; } = 15;
     public int GifMaxWidth { get; set; } = 960;
     public bool ShowCursor { get; set; } = true;
-    public int CountdownSeconds { get; set; } = 0;
+    public int CountdownSeconds { get; set; } = 3;
+    /// <summary>Show the bar with a Start button first instead of recording right away.</summary>
+    public bool ShowStartButton { get; set; } = true;
 }
 
 /// <summary>

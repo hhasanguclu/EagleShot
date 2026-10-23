@@ -252,16 +252,30 @@ public class CaptureManager
 
     private ScreenRecorder? _recorder;
     private RecordingBar? _recordingBar;
+    private PixelRect _pendingRegion;
+    private bool _pendingGif;
+    private bool _starting;
 
-    public bool IsRecording => _recorder != null;
+    /// <summary>True while the recording bar is shown (ready or recording).</summary>
+    public bool IsRecording => _recordingBar != null;
+    /// <summary>True while ffmpeg is actually recording.</summary>
+    public bool IsRecordingActive => _recorder != null;
     public event Action? RecordingChanged;
 
-    /// <summary>Starts a recording, or stops the running one.</summary>
+    /// <summary>
+    /// First call: pick an area and show the recording bar (with a Start button).
+    /// Next call (hotkey / command again): start, or stop the running recording.
+    /// </summary>
     public async Task ToggleRecordingAsync(bool gif)
     {
         if (_recorder != null)
         {
             await StopRecordingAsync();
+            return;
+        }
+        if (_recordingBar != null)
+        {
+            await StartPendingRecordingAsync();
             return;
         }
 
@@ -276,48 +290,81 @@ public class CaptureManager
             var sel = await SelectRegionAsync(gif ? "Select the area to record as GIF  ·  Esc to cancel" : "Select the area to record  ·  Esc to cancel");
             if (sel == null) return;
             var (capture, result) = sel.Value;
-            var region = new PixelRect(result.Region.Position + capture.Origin, result.Region.Size);
+            _pendingRegion = new PixelRect(result.Region.Position + capture.Origin, result.Region.Size);
+            _pendingGif = gif;
 
-            if (_settings.Recording.CountdownSeconds > 0 && !await new CountdownWindow().RunAsync(_settings.Recording.CountdownSeconds))
-                return;
+            _recordingBar = new RecordingBar(_pendingRegion, gif);
+            _recordingBar.StartRequested += () => _ = StartPendingRecordingAsync();
+            _recordingBar.StopRequested += () => _ = StopRecordingAsync();
+            _recordingBar.CancelRequested += CancelRecording;
+            _recordingBar.Show();
+            // Keep the main window out of the way while recording
+            _keepMainWindowHidden = true;
+            RecordingChanged?.Invoke();
+        });
 
+        if (_recordingBar != null && !_settings.Recording.ShowStartButton)
+            await StartPendingRecordingAsync();
+    }
+
+    private async Task StartPendingRecordingAsync()
+    {
+        var bar = _recordingBar;
+        if (bar == null || _recorder != null || _starting) return;
+        _starting = true;
+        try
+        {
+            for (int i = Math.Clamp(_settings.Recording.CountdownSeconds, 0, 10); i > 0; i--)
+            {
+                bar.ShowCountdown(i);
+                await Task.Delay(1000);
+                if (_recordingBar != bar) return; // cancelled during the countdown
+            }
+
+            var region = _pendingRegion;
             var folder = EnsureSaveFolder();
             var name = FileNameFormatter.Format(_settings.FileNamePattern, region.Width, region.Height, _settings.FileCounter);
-            var output = FileNameFormatter.UniquePath(folder, name, gif ? "gif" : "mp4");
+            var output = FileNameFormatter.UniquePath(folder, name, _pendingGif ? "gif" : "mp4");
 
-            _recorder = await ScreenRecorder.StartAsync(region, gif, output);
+            _recorder = await ScreenRecorder.StartAsync(region, _pendingGif, output);
             _recorder.Failed += error => Dispatcher.UIThread.Post(() =>
             {
                 _recorder = null;
                 CloseRecordingUi();
                 ToastWindow.Show("Recording stopped", error, isError: true);
             });
-
-            _recordingBar = new RecordingBar(_recorder.Region, gif);
-            _recordingBar.StopRequested += () => _ = StopRecordingAsync();
-            _recordingBar.CancelRequested += () =>
-            {
-                _recorder?.Cancel();
-                _recorder = null;
-                CloseRecordingUi();
-                ToastWindow.Show("Recording cancelled", "Nothing was saved.");
-            };
-            _recordingBar.Show();
-            // Keep the main window hidden while recording
-            _keepMainWindowHidden = true;
+            bar.SetRecording();
             RecordingChanged?.Invoke();
-        });
+        }
+        catch (Exception ex)
+        {
+            CloseRecordingUi();
+            ToastWindow.Show("Recording failed", ex.Message, isError: true);
+        }
+        finally
+        {
+            _starting = false;
+        }
+    }
+
+    private void CancelRecording()
+    {
+        bool wasRecording = _recorder != null;
+        _recorder?.Cancel();
+        _recorder = null;
+        CloseRecordingUi();
+        if (wasRecording) ToastWindow.Show("Recording cancelled", "Nothing was saved.");
     }
 
     private bool _keepMainWindowHidden;
 
     private void CloseRecordingUi()
     {
-        RecordingChanged?.Invoke();
         _recordingBar?.Close();
         _recordingBar = null;
         _keepMainWindowHidden = false;
         RestoreMainWindow();
+        RecordingChanged?.Invoke();
     }
 
     public async Task StopRecordingAsync()
@@ -325,16 +372,17 @@ public class CaptureManager
         var recorder = _recorder;
         if (recorder == null) return;
         _recorder = null;
-        CloseRecordingUi();
+        _recordingBar?.SetBusy(recorder.IsGif ? "creating GIF…" : "saving…");
 
-        ToastWindow.Show(recorder.IsGif ? "Creating GIF…" : "Finishing recording…", "This takes a moment.");
         try
         {
             var path = await recorder.StopAsync();
+            CloseRecordingUi();
             await FinishFileAsync(path, recorder.IsGif ? "GIF" : "Video");
         }
         catch (Exception ex)
         {
+            CloseRecordingUi();
             ToastWindow.Show("Recording failed", ex.Message, isError: true);
         }
     }

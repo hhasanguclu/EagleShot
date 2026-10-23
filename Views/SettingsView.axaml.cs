@@ -119,6 +119,7 @@ public partial class SettingsView : UserControl
         C<NumericUpDown>("GifMaxWidth").Value = r.GifMaxWidth;
         C<NumericUpDown>("RecordCountdown").Value = r.CountdownSeconds;
         C<CheckBox>("RecordCursor").IsChecked = r.ShowCursor;
+        C<CheckBox>("RecordStartButton").IsChecked = r.ShowStartButton;
 
         C<TextBox>("TesseractPath").Text = s.TesseractPath;
         C<TextBox>("OcrLanguages").Text = s.OcrLanguages;
@@ -197,6 +198,7 @@ public partial class SettingsView : UserControl
         r.GifMaxWidth = Num("GifMaxWidth", 960);
         r.CountdownSeconds = Num("RecordCountdown", 0);
         r.ShowCursor = C<CheckBox>("RecordCursor").IsChecked == true;
+        r.ShowStartButton = C<CheckBox>("RecordStartButton").IsChecked == true;
 
         s.TesseractPath = C<TextBox>("TesseractPath").Text?.Trim() ?? "";
         s.OcrLanguages = C<TextBox>("OcrLanguages").Text?.Trim() ?? "";
@@ -234,7 +236,7 @@ public partial class SettingsView : UserControl
             if (e.Property == RangeBase.ValueProperty) Save();
         };
 
-        foreach (var name in new[] { "ShortenUrls", "EffectsEnabled", "EffShadow", "RecordCursor" })
+        foreach (var name in new[] { "ShortenUrls", "EffectsEnabled", "EffShadow", "RecordCursor", "RecordStartButton" })
             C<CheckBox>(name).IsCheckedChanged += (_, _) => Save();
         foreach (var name in new[] { "EffPadding", "EffRadius", "EffShadowSize", "EffBorder", "EffWatermarkSize", "EffWatermarkOpacity",
                                      "VideoFps", "GifFps", "GifMaxWidth", "RecordCountdown", "ScrollMax", "ScrollDelay", "AutoInterval" })

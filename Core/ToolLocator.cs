@@ -20,8 +20,14 @@ public static class ToolLocator
 
         var exe = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? name + ".exe" : name;
 
-        var dirs = (Environment.GetEnvironmentVariable("PATH") ?? "")
-            .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+        // Tools bundled by the Windows installer / portable zip come first
+        var bundled = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "tools", name),
+            Path.Combine(AppPaths.ConfigFolder, "tools", name),
+        };
+        var dirs = bundled
+            .Concat((Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
             .Concat(ExtraFolders(name));
 
         foreach (var dir in dirs)

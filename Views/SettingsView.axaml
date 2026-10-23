@@ -219,6 +219,7 @@
                         <NumericUpDown Grid.Column="1" Name="RecordCountdown" Minimum="0" Maximum="10" FormatString="0" Width="110"/>
                     </Grid>
                     <CheckBox Name="RecordCursor" Content="Record the mouse cursor"/>
+                    <CheckBox Name="RecordStartButton" Content="Show a Start button after selecting the area (otherwise start right away)"/>
                 </StackPanel>
             </Border>
 

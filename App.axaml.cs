@@ -186,7 +186,9 @@ public class App : Application
 
         menu.Add(new NativeMenuItemSeparator());
 
-        var recordTitle = Capture?.IsRecording == true ? "■ Stop recording" : "Screen recording (MP4)";
+        var recordTitle = Capture?.IsRecordingActive == true ? "■ Stop recording"
+                        : Capture?.IsRecording == true ? "● Start recording"
+                        : "Screen recording (MP4)";
         AddCapture(recordTitle, HotkeyAction.RecordVideo);
         if (Capture?.IsRecording != true) AddCapture("GIF recording", HotkeyAction.RecordGif);
 

@@ -46,6 +46,12 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/win-x64
 
+      - name: Bundle ffmpeg and Tesseract
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/fetch-windows-tools.ps1 -Destination publish/win-x64/tools
+
       - name: Package
         shell: pwsh
         run: |
