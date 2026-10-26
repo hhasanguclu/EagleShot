@@ -13,7 +13,7 @@ namespace EagleShot.Views;
 
 /// <summary>
 /// Floating control bar for screen recording: Start, a live timer, Stop and Cancel.
-/// It sits outside the recorded area together with a thin <see cref="RecordingFrame"/>.
+/// It sits next to the recorded area; no frame is drawn so nothing extra ends up on screen.
 /// </summary>
 public class RecordingBar : Window
 {
@@ -21,7 +21,6 @@ public class RecordingBar : Window
 
     private readonly PixelRect _region;
     private readonly bool _gif;
-    private readonly RecordingFrame _frame;
     private readonly DispatcherTimer _timer;
     private readonly Ellipse _dot;
     private readonly TextBlock _status;
@@ -41,7 +40,6 @@ public class RecordingBar : Window
     {
         _region = region;
         _gif = gif;
-        _frame = new RecordingFrame(region);
 
         Title = "EagleShot Recording";
         SystemDecorations = SystemDecorations.None;
@@ -146,7 +144,6 @@ public class RecordingBar : Window
         _status.Text = _gif ? "● recording GIF" : "● recording";
         _status.Foreground = new SolidColorBrush(Color.FromRgb(255, 105, 97));
         _dot.Fill = new SolidColorBrush(Red);
-        _frame.SetActive(true);
         Tick();
         _timer.Start();
     }
@@ -170,7 +167,6 @@ public class RecordingBar : Window
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
-        _frame.Show();
         Dispatcher.UIThread.Post(PlaceOutsideRegion, DispatcherPriority.Loaded);
     }
 
@@ -178,7 +174,6 @@ public class RecordingBar : Window
     {
         base.OnClosed(e);
         _timer.Stop();
-        _frame.Close();
     }
 
     /// <summary>Puts the bar below the area (or above it) so it isn't recorded.</summary>
@@ -190,109 +185,12 @@ public class RecordingBar : Window
         double scale = RenderScaling > 0 ? RenderScaling : screen.Scaling;
         int w = (int)Math.Ceiling(Bounds.Width * scale), h = (int)Math.Ceiling(Bounds.Height * scale);
         var area = screen.WorkingArea;
-        const int margin = 14; // clear of the frame
+        const int margin = 12;
 
         int x = Math.Clamp(_region.X + (_region.Width - w) / 2, area.X + 4, Math.Max(area.X + 4, area.Right - w - 4));
         int y = _region.Bottom + margin;
         if (y + h > area.Bottom) y = _region.Y - h - margin;          // above the area
         if (y < area.Y) y = Math.Max(area.Y + 8, _region.Bottom - h - 24); // full-screen area: inside, near the bottom
         Position = new PixelPoint(x, y);
-    }
-}
-
-/// <summary>
-/// A thin line drawn just outside the recorded area. Each side is its own small window placed
-/// a few pixels away from the area; if the OS enforces a minimum window size, the window grows
-/// away from the area instead of into it, and only its inner edge is painted.
-/// </summary>
-public class RecordingFrame
-{
-    private const int Gap = 4;        // pixels between the recorded area and the line
-    private const int Thickness = 2;  // line thickness in pixels
-
-    private readonly PixelRect _region;
-    private readonly List<(Window Window, Border Line, PixelRect Target, Dock Side)> _sides = new();
-
-    public RecordingFrame(PixelRect region) => _region = region;
-
-    public void Show()
-    {
-        var r = _region;
-        int o = Gap + Thickness;
-        var sides = new[]
-        {
-            (new PixelRect(r.X - o, r.Y - o, r.Width + 2 * o, Thickness), Dock.Bottom),     // top: line hugs its bottom edge
-            (new PixelRect(r.X - o, r.Bottom + Gap, r.Width + 2 * o, Thickness), Dock.Top), // bottom
-            (new PixelRect(r.X - o, r.Y - Gap, Thickness, r.Height + 2 * Gap), Dock.Right), // left
-            (new PixelRect(r.Right + Gap, r.Y - Gap, Thickness, r.Height + 2 * Gap), Dock.Left), // right
-        };
-
-        // X11 without a compositor can't do transparency, but it also has no minimum window size.
-        bool transparent = !OperatingSystem.IsLinux();
-
-        foreach (var (target, side) in sides)
-        {
-            var line = new Border { Background = new SolidColorBrush(Color.FromRgb(76, 141, 255)) };
-            var window = new Window
-            {
-                SystemDecorations = SystemDecorations.None,
-                Topmost = true,
-                ShowInTaskbar = false,
-                ShowActivated = false,
-                CanResize = false,
-                IsHitTestVisible = false,
-                Background = transparent ? Brushes.Transparent : line.Background,
-                TransparencyLevelHint = transparent ? new[] { WindowTransparencyLevel.Transparent } : Array.Empty<WindowTransparencyLevel>(),
-                Content = transparent ? line : null
-            };
-            // Size for the monitor's scaling up front, correct it once the real scaling is known
-            double guess = (window.Screens.ScreenFromPoint(target.Center) ?? window.Screens.Primary)?.Scaling ?? 1;
-            Size(window, line, target, side, guess);
-            window.Opened += (_, _) => Size(window, line, target, side, window.RenderScaling);
-            // Anchor once the final size is known: if the OS enforces a minimum size,
-            // the window grows away from the recorded area instead of into it.
-            window.SizeChanged += (_, e) =>
-            {
-                double scale = window.RenderScaling > 0 ? window.RenderScaling : guess;
-                int w = (int)Math.Round(e.NewSize.Width * scale), h = (int)Math.Round(e.NewSize.Height * scale);
-                int x = side == Dock.Right ? target.Right - w : target.X;   // left side grows leftwards
-                int y = side == Dock.Bottom ? target.Bottom - h : target.Y; // top side grows upwards
-                window.Position = new PixelPoint(x, y);
-            };
-            _sides.Add((window, line, target, side));
-            window.Position = target.Position;
-            window.Show();
-            window.Position = target.Position;
-        }
-    }
-
-    private static void Size(Window window, Border line, PixelRect target, Dock side, double scale)
-    {
-        if (scale <= 0) scale = 1;
-        window.Width = Math.Max(1, target.Width / scale);
-        window.Height = Math.Max(1, target.Height / scale);
-
-        bool horizontal = side is Dock.Top or Dock.Bottom;
-        line.Width = horizontal ? double.NaN : Thickness / scale;
-        line.Height = horizontal ? Thickness / scale : double.NaN;
-        line.HorizontalAlignment = side == Dock.Right ? HorizontalAlignment.Right : side == Dock.Left ? HorizontalAlignment.Left : HorizontalAlignment.Stretch;
-        line.VerticalAlignment = side == Dock.Bottom ? VerticalAlignment.Bottom : side == Dock.Top ? VerticalAlignment.Top : VerticalAlignment.Stretch;
-    }
-
-    /// <summary>Dashed-looking idle state vs solid red while recording.</summary>
-    public void SetActive(bool active)
-    {
-        foreach (var (window, line, _, _) in _sides)
-        {
-            var brush = new SolidColorBrush(active ? Color.FromRgb(255, 69, 58) : Color.FromRgb(76, 141, 255));
-            line.Background = brush;
-            if (window.Content == null) window.Background = brush;
-        }
-    }
-
-    public void Close()
-    {
-        foreach (var (window, _, _, _) in _sides) window.Close();
-        _sides.Clear();
     }
 }

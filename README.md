@@ -23,7 +23,7 @@ A lightweight, modern, cross-platform screenshot tool for Windows, macOS and Lin
   - **Scrolling capture:** scrolls a page or document automatically and stitches it into one long image
   - **Auto capture:** a screenshot every N seconds (full screen, last region or active monitor)
   - **Color picker:** copies the HEX value of any pixel
-- **Screen recording:** record a region to **MP4** or an animated **GIF** (via ffmpeg). A floating bar shows the timer with Stop and Cancel, and a frame marks the recorded area.
+- **Screen recording:** record a region to **MP4** or an animated **GIF** (via ffmpeg). A floating bar next to the area has Start, a live timer, Stop and Cancel.
 - **Tools:**
   - **Text recognition (OCR):** select text anywhere on screen and copy it (via Tesseract)
   - **QR codes:** scan QR codes and barcodes from the screen, or create QR codes
@@ -187,7 +187,7 @@ Windows, macOS ve Linux'ta çalışan, hafif, modern ve kullanıcı dostu bir ek
   - **Kaydırmalı yakalama:** sayfayı otomatik kaydırıp tek uzun görüntüde birleştirir
   - **Otomatik yakalama:** her N saniyede bir görüntü (tam ekran, son bölge veya aktif monitör)
   - **Renk seçici:** herhangi bir pikselin HEX değerini kopyalar
-- **Ekran kaydı:** bir bölgeyi **MP4** ya da animasyonlu **GIF** olarak kaydeder (ffmpeg ile). Süre sayacı, Durdur ve İptal butonlu bir çubuk çıkar; kaydedilen alan çerçeveyle gösterilir.
+- **Ekran kaydı:** bir bölgeyi **MP4** ya da animasyonlu **GIF** olarak kaydeder (ffmpeg ile). Alanın yanında Başlat, canlı sayaç, Durdur ve İptal butonlu bir çubuk çıkar.
 - **Araçlar:**
   - **Metin tanıma (OCR):** ekrandaki metni seçip kopyalar (Tesseract ile)
   - **QR kod:** ekrandaki QR kod ve barkodları okur, yeni QR kod oluşturur

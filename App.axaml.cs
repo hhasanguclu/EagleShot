@@ -68,7 +68,7 @@ public class App : Application
             if (command != null)
                 Dispatcher.UIThread.Post(() => RunCommand(command, desktop.Args ?? Array.Empty<string>()), DispatcherPriority.Background);
             else if (Settings.ShowMainWindowOnStartup)
-                DispatcherTimer.RunOnce(() => MainWindowInstance.BringToFront(),
+                DispatcherTimer.RunOnce(() => { if (Capture?.IsRecording != true) MainWindowInstance.BringToFront(); },
                     TimeSpan.FromMilliseconds(Settings.ShowSplash ? 1500 : 0));
         }
 
