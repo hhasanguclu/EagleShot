@@ -1,9 +1,9 @@
 #!/usr/bin/env pwsh
-# EagleShot v3.1.1 - Cross-platform build script
+# EagleShot v3.1.2 - Cross-platform build script
 # Can be run from anywhere: ./scripts/build-all.ps1
 
 $ErrorActionPreference = "Stop"
-$Version = "3.1.1"
+$Version = "3.1.2"
 
 # Always resolve paths relative to project root (one level up from this script)
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
