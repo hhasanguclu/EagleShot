@@ -49,6 +49,7 @@ Name: "ocr"; Description: "Tesseract OCR (English + Turkish) - needed for text r
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "startup"; Description: "Start with Windows"; GroupDescription: "Other:"
+Name: "printscreen"; Description: "Use the PrintScreen key for EagleShot (instead of the Windows Snipping Tool)"; GroupDescription: "Other:"
 
 [Files]
 Source: "{#ProjectDir}\publish\win-x64\*"; Excludes: "\tools\*"; DestDir: "{app}"; Components: main; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -60,6 +61,9 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Registry]
+; Windows 11 opens the Snipping Tool on PrintScreen; turn that off so only EagleShot reacts.
+; Removing the value on uninstall restores the Windows default.
+Root: HKCU; Subkey: "Control Panel\Keyboard"; ValueType: dword; ValueName: "PrintScreenKeyForSnippingEnabled"; ValueData: 0; Flags: uninsdeletevalue; Tasks: printscreen
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: startup
 
 [Run]

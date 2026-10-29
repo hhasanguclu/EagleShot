@@ -51,6 +51,7 @@ public class App : Application
             Hotkeys.UpdateBindings(Settings.Hotkeys);
             Hotkeys.HotkeyPressed += action => Dispatcher.UIThread.Post(() => OnHotkey(action));
             Hotkeys.Start();
+            WindowsIntegration.ApplyPrintScreenPreference(Settings);
 
             Capture = new CaptureManager(History, Hotkeys);
             Capture.AutoCapture.Changed += RefreshTrayMenu;
@@ -116,6 +117,7 @@ public class App : Application
     public static void ApplySettings()
     {
         Hotkeys?.UpdateBindings(Settings.Hotkeys);
+        WindowsIntegration.ApplyPrintScreenPreference(Settings);
         RefreshTrayMenu();
     }
 

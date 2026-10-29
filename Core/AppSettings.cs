@@ -146,6 +146,9 @@ public class AppSettings
 
     public int MaxHistoryItems { get; set; } = 300;
 
+    /// <summary>Windows: stop PrintScreen from opening the Snipping Tool so only EagleShot reacts.</summary>
+    public bool TakeOverPrintScreen { get; set; } = true;
+
     public static Dictionary<HotkeyAction, string> DefaultHotkeys()
     {
         // macOS keyboards have no PrintScreen key, use F12 there.

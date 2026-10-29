@@ -120,6 +120,8 @@ public partial class SettingsView : UserControl
         C<NumericUpDown>("RecordCountdown").Value = r.CountdownSeconds;
         C<CheckBox>("RecordCursor").IsChecked = r.ShowCursor;
         C<CheckBox>("RecordStartButton").IsChecked = r.ShowStartButton;
+        C<CheckBox>("TakeOverPrintScreen").IsChecked = s.TakeOverPrintScreen;
+        C<CheckBox>("TakeOverPrintScreen").IsVisible = OperatingSystem.IsWindows();
 
         C<TextBox>("TesseractPath").Text = s.TesseractPath;
         C<TextBox>("OcrLanguages").Text = s.OcrLanguages;
@@ -200,6 +202,11 @@ public partial class SettingsView : UserControl
         r.ShowCursor = C<CheckBox>("RecordCursor").IsChecked == true;
         r.ShowStartButton = C<CheckBox>("RecordStartButton").IsChecked == true;
 
+        bool takeOver = C<CheckBox>("TakeOverPrintScreen").IsChecked == true;
+        if (s.TakeOverPrintScreen && !takeOver)
+            WindowsIntegration.SetSnippingToolOnPrintScreen(true); // give PrintScreen back to Windows
+        s.TakeOverPrintScreen = takeOver;
+
         s.TesseractPath = C<TextBox>("TesseractPath").Text?.Trim() ?? "";
         s.OcrLanguages = C<TextBox>("OcrLanguages").Text?.Trim() ?? "";
         s.ScrollingMaxScrolls = Num("ScrollMax", 30);
@@ -236,7 +243,7 @@ public partial class SettingsView : UserControl
             if (e.Property == RangeBase.ValueProperty) Save();
         };
 
-        foreach (var name in new[] { "ShortenUrls", "EffectsEnabled", "EffShadow", "RecordCursor", "RecordStartButton" })
+        foreach (var name in new[] { "ShortenUrls", "EffectsEnabled", "EffShadow", "RecordCursor", "RecordStartButton", "TakeOverPrintScreen" })
             C<CheckBox>(name).IsCheckedChanged += (_, _) => Save();
         foreach (var name in new[] { "EffPadding", "EffRadius", "EffShadowSize", "EffBorder", "EffWatermarkSize", "EffWatermarkOpacity",
                                      "VideoFps", "GifFps", "GifMaxWidth", "RecordCountdown", "ScrollMax", "ScrollDelay", "AutoInterval" })

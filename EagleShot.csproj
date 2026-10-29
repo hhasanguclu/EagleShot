@@ -25,6 +25,12 @@
     <PackageReference Include="ZXing.Net" Version="0.16.9" />
   </ItemGroup>
 
+  <!-- Test projects live under tests/ and are built separately -->
+  <ItemGroup>
+    <Compile Remove="tests/**" />
+    <None Remove="tests/**" />
+  </ItemGroup>
+
   <ItemGroup>
     <AvaloniaResource Include="Resources\logo.png" />
     <AvaloniaResource Include="Resources\splash_logo.jpg" />

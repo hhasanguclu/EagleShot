@@ -259,6 +259,7 @@
                 <StackPanel Spacing="6">
                     <TextBlock Classes="h2" Text="Hotkeys"/>
                     <TextBlock Classes="muted" Text="Click a box and press the new key combination. Esc cancels, the × button clears."/>
+                    <CheckBox Name="TakeOverPrintScreen" Content="Windows: use the PrintScreen key for EagleShot instead of the Snipping Tool"/>
                     <Grid Name="HotkeyGrid" ColumnDefinitions="200,Auto,Auto"/>
                     <TextBlock Classes="muted" Name="HotkeyStatus"/>
                     <TextBlock Classes="muted" TextWrapping="Wrap"
