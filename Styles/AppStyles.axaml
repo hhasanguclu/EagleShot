@@ -2,21 +2,21 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Styles.Resources>
-        <!-- Palette -->
-        <Color x:Key="AccentColor">#4C8DFF</Color>
-        <SolidColorBrush x:Key="AccentBrush" Color="#4C8DFF"/>
-        <SolidColorBrush x:Key="AccentHoverBrush" Color="#6AA0FF"/>
-        <SolidColorBrush x:Key="WindowBrush" Color="#0F1015"/>
-        <SolidColorBrush x:Key="SidebarBrush" Color="#14151C"/>
-        <SolidColorBrush x:Key="CardBrush" Color="#1A1B23"/>
-        <SolidColorBrush x:Key="CardHoverBrush" Color="#22232E"/>
-        <SolidColorBrush x:Key="BorderSubtleBrush" Color="#2A2B36"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#ECEDF2"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9A9CAE"/>
-        <SolidColorBrush x:Key="TextMutedBrush" Color="#6B6D80"/>
-        <SolidColorBrush x:Key="DangerBrush" Color="#FF5C5C"/>
-        <SolidColorBrush x:Key="SuccessBrush" Color="#3DD68C"/>
-        <SolidColorBrush x:Key="ToolbarBrush" Color="#F0141520"/>
+        <!-- Palette (classic Windows) -->
+        <Color x:Key="AccentColor">#000080</Color>
+        <SolidColorBrush x:Key="AccentBrush" Color="#000080"/>
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#1084D0"/>
+        <SolidColorBrush x:Key="WindowBrush" Color="#C0C0C0"/>
+        <SolidColorBrush x:Key="SidebarBrush" Color="#C0C0C0"/>
+        <SolidColorBrush x:Key="CardBrush" Color="#C0C0C0"/>
+        <SolidColorBrush x:Key="CardHoverBrush" Color="#C0C0C0"/>
+        <SolidColorBrush x:Key="BorderSubtleBrush" Color="#808080"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#000000"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#000000"/>
+        <SolidColorBrush x:Key="TextMutedBrush" Color="#404040"/>
+        <SolidColorBrush x:Key="DangerBrush" Color="#C00000"/>
+        <SolidColorBrush x:Key="SuccessBrush" Color="#007000"/>
+        <SolidColorBrush x:Key="ToolbarBrush" Color="#C0C0C0"/>
 
         <!-- Icons (Material Design, 24x24) -->
         <StreamGeometry x:Key="IconSelect">M7,2 L19,13.2 L13.2,13.7 L16.5,21 L14.3,22 L11.1,14.6 L7,18.5 Z</StreamGeometry>
@@ -72,309 +72,272 @@
         <StreamGeometry x:Key="IconEffects">M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z</StreamGeometry>
     </Styles.Resources>
 
-    <!-- ═══════════════ Overlay toolbar ═══════════════ -->
+    <!-- ═══════════════ Overlay editor toolbar ═══════════════ -->
 
     <Style Selector="Button.tool-btn, ToggleButton.tool-btn">
-        <Setter Property="Width" Value="36"/>
-        <Setter Property="Height" Value="36"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="#E4E5EC"/>
-        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Width" Value="28"/>
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="MinHeight" Value="0"/>
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Cursor" Value="Hand"/>
     </Style>
     <Style Selector="Button.tool-btn PathIcon, ToggleButton.tool-btn PathIcon">
-        <Setter Property="Width" Value="18"/>
-        <Setter Property="Height" Value="18"/>
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
     </Style>
-    <Style Selector="Button.tool-btn:pointerover /template/ ContentPresenter, ToggleButton.tool-btn:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#2C2D3A"/>
-        <Setter Property="Foreground" Value="White"/>
+    <!-- The active drawing tool looks pressed in -->
+    <Style Selector="Button.tool-btn.selected /template/ Border#BevelOuter">
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicLight}"/>
+        <Setter Property="Background" Value="#E3E3E3"/>
     </Style>
-    <Style Selector="Button.tool-btn:pressed /template/ ContentPresenter, ToggleButton.tool-btn:pressed /template/ ContentPresenter">
-        <Setter Property="Background" Value="#23242F"/>
+    <Style Selector="Button.tool-btn.selected /template/ Border#BevelOuterLight">
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicShadow}"/>
     </Style>
-    <Style Selector="Button.tool-btn.selected /template/ ContentPresenter, ToggleButton.tool-btn:checked /template/ ContentPresenter">
-        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="Foreground" Value="White"/>
+    <Style Selector="Button.tool-btn:disabled PathIcon">
+        <Setter Property="Opacity" Value="0.4"/>
     </Style>
-    <Style Selector="Button.tool-btn:disabled /template/ ContentPresenter">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Opacity" Value="0.35"/>
+    <Style Selector="Button.tool-btn.primary PathIcon">
+        <Setter Property="Foreground" Value="#007000"/>
     </Style>
-
-    <Style Selector="Button.tool-btn.primary /template/ ContentPresenter">
-        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style>
-    <Style Selector="Button.tool-btn.primary:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="{StaticResource AccentHoverBrush}"/>
-    </Style>
-    <Style Selector="Button.tool-btn.danger:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#3A2026"/>
-        <Setter Property="Foreground" Value="#FF6B6B"/>
+    <Style Selector="Button.tool-btn.danger PathIcon">
+        <Setter Property="Foreground" Value="#C00000"/>
     </Style>
 
+    <!-- Etched vertical divider between toolbar groups -->
     <Style Selector="Border.separator">
-        <Setter Property="Width" Value="1"/>
+        <Setter Property="Width" Value="2"/>
         <Setter Property="Height" Value="22"/>
-        <Setter Property="Background" Value="#33343F"/>
-        <Setter Property="Margin" Value="5,0"/>
+        <Setter Property="Background" Value="{DynamicResource ClassicShadow}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicLight}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+        <Setter Property="Margin" Value="4,0"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
     <Style Selector="Button.color-swatch">
-        <Setter Property="Width" Value="26"/>
-        <Setter Property="Height" Value="26"/>
-        <Setter Property="CornerRadius" Value="13"/>
+        <Setter Property="Width" Value="22"/>
+        <Setter Property="Height" Value="22"/>
+        <Setter Property="MinHeight" Value="0"/>
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="Margin" Value="3"/>
+        <Setter Property="Margin" Value="1"/>
+    </Style>
+    <Style Selector="Button.color-swatch.selected /template/ Border#DefaultRing">
         <Setter Property="BorderThickness" Value="2"/>
-        <Setter Property="BorderBrush" Value="#30FFFFFF"/>
-        <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.color-swatch:pointerover /template/ ContentPresenter">
-        <Setter Property="BorderBrush" Value="White"/>
-    </Style>
-    <Style Selector="Button.color-swatch.selected /template/ ContentPresenter">
-        <Setter Property="BorderBrush" Value="White"/>
-        <Setter Property="BorderThickness" Value="3"/>
     </Style>
 
     <Style Selector="Button.width-btn">
-        <Setter Property="Width" Value="40"/>
-        <Setter Property="Height" Value="34"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Width" Value="34"/>
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="MinHeight" Value="0"/>
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Cursor" Value="Hand"/>
     </Style>
-    <Style Selector="Button.width-btn:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#2C2D3A"/>
+    <Style Selector="Button.width-btn.selected /template/ Border#BevelOuter">
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicLight}"/>
+        <Setter Property="Background" Value="#E3E3E3"/>
     </Style>
-    <Style Selector="Button.width-btn.selected /template/ ContentPresenter">
-        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+    <Style Selector="Button.width-btn.selected /template/ Border#BevelOuterLight">
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicDark}"/>
     </Style>
 
     <Style Selector="Button.text-size-btn">
-        <Setter Property="Width" Value="28"/>
-        <Setter Property="Height" Value="26"/>
-        <Setter Property="CornerRadius" Value="6"/>
-        <Setter Property="Background" Value="#E0181922"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="BorderBrush" Value="#3A3B48"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="22"/>
+        <Setter Property="MinHeight" Value="0"/>
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.text-size-btn:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#2C2D3A"/>
-        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
     </Style>
 
     <!-- ═══════════════ Main window ═══════════════ -->
 
-    <Style Selector="ToggleButton.nav">
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        <Setter Property="Height" Value="40"/>
-        <Setter Property="Padding" Value="12,0"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Cursor" Value="Hand"/>
+    <!-- Raised panel (toolbar, tab page) -->
+    <Style Selector="Border.raised">
+        <Setter Property="Background" Value="{DynamicResource ClassicFace}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicShadow}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        <Setter Property="BoxShadow" Value="inset 1 1 0 0 #FFFFFF"/>
     </Style>
-    <Style Selector="ToggleButton.nav:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#1E1F29"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    <!-- Sunken panel (status bar fields, list areas) -->
+    <Style Selector="Border.sunken">
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicShadow}"/>
+        <Setter Property="BorderThickness" Value="1,1,0,0"/>
+        <Setter Property="BoxShadow" Value="inset -1 -1 0 0 #FFFFFF"/>
+        <Setter Property="Padding" Value="4,1"/>
     </Style>
-    <Style Selector="ToggleButton.nav:checked /template/ ContentPresenter">
-        <Setter Property="Background" Value="#1F2A44"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style>
-    <Style Selector="ToggleButton.nav:checked PathIcon">
-        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+    <Style Selector="Border.sunken-deep">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicShadow}"/>
+        <Setter Property="BorderThickness" Value="1,1,0,0"/>
+        <Setter Property="BoxShadow" Value="inset 1 1 0 0 #404040, inset -1 -1 0 0 #DFDFDF"/>
+        <Setter Property="Padding" Value="2"/>
     </Style>
 
-    <!-- Capture card on the home page -->
+    <!-- Tabs -->
+    <Style Selector="ToggleButton.nav">
+        <Setter Property="Padding" Value="10,2"/>
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="Height" Value="21"/>
+        <Setter Property="Margin" Value="0,2,0,0"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="TabOuter" Background="{DynamicResource ClassicFace}" BorderBrush="{DynamicResource ClassicDark}" BorderThickness="0,0,1,0">
+                    <Border BorderBrush="{DynamicResource ClassicLight}" BorderThickness="1,1,0,0">
+                        <Border BorderBrush="{DynamicResource ClassicShadow}" BorderThickness="0,0,1,0">
+                            <ContentPresenter Name="TabContent"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Padding="{TemplateBinding Padding}"
+                                              Foreground="Black"
+                                              VerticalContentAlignment="Center"/>
+                        </Border>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <!-- The selected tab is taller and joins the page below it -->
+    <Style Selector="ToggleButton.nav:checked">
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="Margin" Value="-2,0,-2,-1"/>
+        <Setter Property="Padding" Value="12,2,12,4"/>
+        <Setter Property="ZIndex" Value="1"/>
+    </Style>
+
+
+    <!-- Group box: etched frame with a caption on its top edge -->
+    <Style Selector="HeaderedContentControl.group">
+        <Setter Property="Margin" Value="0,0,0,10"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="7,*">
+                    <Border Grid.RowSpan="2" Grid.Row="1" Margin="0,0,1,1"
+                            BorderBrush="{DynamicResource ClassicShadow}" BorderThickness="1"/>
+                    <Border Grid.RowSpan="2" Grid.Row="1" Margin="1,1,0,0"
+                            BorderBrush="{DynamicResource ClassicLight}" BorderThickness="1"/>
+                    <Border Grid.RowSpan="2" Margin="8,0,0,0" Padding="2,0" Background="{DynamicResource ClassicFace}"
+                            HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <ContentPresenter Content="{TemplateBinding Header}"/>
+                    </Border>
+                    <ContentPresenter Grid.Row="1" Margin="10,12,10,10"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- Capture mode buttons on the home page -->
     <Style Selector="Button.capture-card">
         <Setter Property="Width" Value="224"/>
-        <Setter Property="Height" Value="132"/>
-        <Setter Property="Margin" Value="0,0,14,14"/>
-        <Setter Property="Padding" Value="16"/>
-        <Setter Property="CornerRadius" Value="12"/>
-        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="Margin" Value="0,0,6,6"/>
+        <Setter Property="Padding" Value="6,3"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-        <Setter Property="Cursor" Value="Hand"/>
     </Style>
-    <Style Selector="Button.capture-card:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="{StaticResource CardHoverBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-    </Style>
-    <Style Selector="Button.capture-card:pressed">
-        <Setter Property="RenderTransform" Value="scale(0.98)"/>
-    </Style>
-
     <Style Selector="Button.tool-card">
         <Setter Property="Width" Value="224"/>
-        <Setter Property="Height" Value="96"/>
-        <Setter Property="Margin" Value="0,0,12,12"/>
-        <Setter Property="Padding" Value="14"/>
-        <Setter Property="CornerRadius" Value="12"/>
-        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="Margin" Value="0,0,6,6"/>
+        <Setter Property="Padding" Value="6,3"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-        <Setter Property="Cursor" Value="Hand"/>
     </Style>
-    <Style Selector="Button.tool-card:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="{StaticResource CardHoverBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+    <Style Selector="Button.tool-card.active">
+        <Setter Property="FontWeight" Value="Bold"/>
     </Style>
-    <Style Selector="Button.tool-card.active /template/ ContentPresenter">
-        <Setter Property="BorderBrush" Value="#FF5C5C"/>
-        <Setter Property="Background" Value="#2A1A1E"/>
+    <Style Selector="Button.tool-card.active /template/ Border#BevelOuter">
+        <Setter Property="Background" Value="#E3E3E3"/>
     </Style>
 
+    <Style Selector="PathIcon.card-icon">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="Margin" Value="2,0,8,0"/>
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
     <Style Selector="Border.icon-badge">
-        <Setter Property="Width" Value="38"/>
-        <Setter Property="Height" Value="38"/>
-        <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="Background" Value="#1F2A44"/>
+        <Setter Property="Width" Value="28"/>
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="Margin" Value="0,0,0,0"/>
     </Style>
     <Style Selector="Border.icon-badge PathIcon">
-        <Setter Property="Width" Value="20"/>
-        <Setter Property="Height" Value="20"/>
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
         <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
     </Style>
 
-    <Style Selector="Border.kbd">
-        <Setter Property="Background" Value="#262733"/>
-        <Setter Property="BorderBrush" Value="#343544"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="5"/>
-        <Setter Property="Padding" Value="6,2"/>
-    </Style>
+    <!-- Hotkey text next to a capture mode -->
     <Style Selector="Border.kbd TextBlock">
-        <Setter Property="FontSize" Value="11"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Foreground" Value="#404040"/>
     </Style>
 
+    <!-- Settings sections: a group box drawn on a plain border -->
     <Style Selector="Border.card">
-        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicShadow}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="12"/>
-        <Setter Property="Padding" Value="20"/>
-        <Setter Property="Margin" Value="0,0,0,16"/>
+        <Setter Property="BoxShadow" Value="inset 1 1 0 0 #FFFFFF, 1 1 0 0 #FFFFFF"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="Margin" Value="0,0,1,10"/>
     </Style>
 
     <Style Selector="TextBlock.h1">
-        <Setter Property="FontSize" Value="26"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="Black"/>
     </Style>
     <Style Selector="TextBlock.h2">
-        <Setter Property="FontSize" Value="15"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="Black"/>
     </Style>
     <Style Selector="TextBlock.sub">
-        <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="Black"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
     <Style Selector="TextBlock.muted">
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="#404040"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
     <Style Selector="TextBlock.label">
-        <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="Black"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
-    <Style Selector="Button.ghost">
-        <Setter Property="Background" Value="#20212B"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Padding" Value="12,7"/>
-        <Setter Property="Cursor" Value="Hand"/>
+    <Style Selector="Button.ghost, Button.accent">
+        <Setter Property="MinWidth" Value="75"/>
     </Style>
-    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#2A2B38"/>
-        <Setter Property="BorderBrush" Value="#3A3B4A"/>
-    </Style>
-    <Style Selector="Button.ghost PathIcon">
+    <Style Selector="Button.ghost PathIcon, Button.accent PathIcon">
         <Setter Property="Width" Value="14"/>
         <Setter Property="Height" Value="14"/>
     </Style>
-    <Style Selector="Button.accent">
-        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Padding" Value="14,7"/>
-        <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="{StaticResource AccentHoverBrush}"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style>
 
     <Style Selector="Button.icon-btn">
-        <Setter Property="Width" Value="30"/>
-        <Setter Property="Height" Value="30"/>
+        <Setter Property="Width" Value="23"/>
+        <Setter Property="Height" Value="22"/>
+        <Setter Property="MinHeight" Value="0"/>
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="CornerRadius" Value="7"/>
-        <Setter Property="Background" Value="#CC15161E"/>
-        <Setter Property="Foreground" Value="#E4E5EC"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Cursor" Value="Hand"/>
     </Style>
     <Style Selector="Button.icon-btn PathIcon">
-        <Setter Property="Width" Value="15"/>
-        <Setter Property="Height" Value="15"/>
+        <Setter Property="Width" Value="14"/>
+        <Setter Property="Height" Value="14"/>
     </Style>
-    <Style Selector="Button.icon-btn:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style>
-    <Style Selector="Button.icon-btn.danger:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#D9434B"/>
+    <Style Selector="Button.icon-btn.danger PathIcon">
+        <Setter Property="Foreground" Value="#C00000"/>
     </Style>
 
-    <!-- History thumbnail card -->
+    <!-- History thumbnail card: a sunken picture frame with the name below -->
     <Style Selector="Border.history-card">
-        <Setter Property="Width" Value="220"/>
-        <Setter Property="Margin" Value="0,0,14,14"/>
-        <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Margin" Value="0,0,8,8"/>
+        <Setter Property="Padding" Value="3"/>
+        <Setter Property="Background" Value="{DynamicResource ClassicFace}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ClassicDark}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        <Setter Property="BoxShadow" Value="inset 1 1 0 0 #FFFFFF, inset -1 -1 0 0 #808080"/>
         <Setter Property="ClipToBounds" Value="True"/>
-        <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Border.history-card:pointerover">
-        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
     </Style>
     <Style Selector="Border.history-card StackPanel.card-actions">
         <Setter Property="Opacity" Value="0"/>
@@ -383,44 +346,29 @@
         <Setter Property="Opacity" Value="1"/>
     </Style>
 
-    <Style Selector="ToggleButton.chip">
-        <Setter Property="CornerRadius" Value="16"/>
-        <Setter Property="Padding" Value="12,6"/>
-        <Setter Property="Margin" Value="0,0,8,8"/>
-        <Setter Property="Background" Value="#1E1F29"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="ToggleButton.chip:checked /template/ ContentPresenter">
-        <Setter Property="Background" Value="#1F2A44"/>
-        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style>
-    <Style Selector="ToggleButton.chip:pointerover /template/ ContentPresenter">
-        <Setter Property="BorderBrush" Value="#4A4B5C"/>
-    </Style>
-
     <Style Selector="Grid.form > Control">
-        <Setter Property="Margin" Value="0,0,8,0"/>
+        <Setter Property="Margin" Value="0,0,6,0"/>
     </Style>
 
     <Style Selector="Button.hotkey-box">
-        <Setter Property="MinWidth" Value="180"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="Background" Value="#20212B"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Padding" Value="12,6"/>
-        <Setter Property="FontFamily" Value="Consolas, Menlo, monospace"/>
-        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="MinWidth" Value="170"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="FontFamily" Value="Courier New, Consolas, DejaVu Sans Mono, monospace"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="Frame" Classes="sunken-deep" Background="{TemplateBinding Background}">
+                    <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                                      Padding="{TemplateBinding Padding}" Foreground="{TemplateBinding Foreground}"
+                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalContentAlignment="Center"/>
+                </Border>
+            </ControlTemplate>
+        </Setter>
     </Style>
-    <Style Selector="Button.hotkey-box.recording /template/ ContentPresenter">
-        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="Background" Value="#1F2A44"/>
+    <Style Selector="Button.hotkey-box.recording">
+        <Setter Property="Background" Value="{DynamicResource ClassicHighlight}"/>
+        <Setter Property="Foreground" Value="White"/>
     </Style>
 
 </Styles>

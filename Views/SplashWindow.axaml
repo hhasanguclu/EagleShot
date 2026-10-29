@@ -2,34 +2,48 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="EagleShot.Views.SplashWindow"
         Title="EagleShot"
-        Width="400" Height="400"
+        Width="440" SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
         SystemDecorations="None"
-        Background="Black"
+        Background="{StaticResource WindowBrush}"
         CanResize="False"
         ShowInTaskbar="False"
         Topmost="True"
-        TransparencyLevelHint="Transparent"
         Name="SplashRoot">
-    <Panel>
-        <Image Source="avares://EagleShot/Resources/splash_logo.jpg"
-               Stretch="Uniform"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center" />
-        
-        <!-- Modern loading indicator -->
-        <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,30">
-            <TextBlock Text="EagleShot"
-                       Foreground="White"
-                       FontSize="18"
-                       FontWeight="Light"
-                       HorizontalAlignment="Center"
-                       Opacity="0.8" />
-            <ProgressBar IsIndeterminate="True"
-                         Width="120"
-                         Height="3"
-                         Margin="0,8,0,0"
-                         Foreground="#6495ED" />
-        </StackPanel>
-    </Panel>
+    <!-- Raised window frame -->
+    <Border BorderBrush="Black" BorderThickness="0,0,1,1">
+        <Border BorderBrush="#DFDFDF" BorderThickness="1,1,0,0">
+            <Border BorderBrush="#808080" BorderThickness="0,0,1,1">
+                <Border BorderBrush="White" BorderThickness="1,1,0,0" Padding="2">
+                    <StackPanel>
+                        <Border Background="{StaticResource ClassicTitleBrush}" Height="20" Padding="5,0">
+                            <TextBlock Text="EagleShot" Foreground="White" FontWeight="Bold" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <DockPanel Margin="14,14,14,10">
+                            <Border DockPanel.Dock="Left" Classes="sunken-deep" Width="104" Height="104" Margin="0,0,16,0" VerticalAlignment="Top">
+                                <Image Source="avares://EagleShot/Resources/splash_logo.jpg" Stretch="UniformToFill"/>
+                            </Border>
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="EagleShot" FontFamily="Times New Roman, Liberation Serif, DejaVu Serif, serif"
+                                           FontSize="34" FontWeight="Bold" FontStyle="Italic" Foreground="#000080"/>
+                                <TextBlock Name="VersionText" Text="Version 3" FontWeight="Bold"/>
+                                <TextBlock Text="Screen Capture &amp; Recording Utility" Margin="0,6,0,0"/>
+                                <TextBlock Text="Screenshots · Recording · OCR · QR · Upload" Foreground="#404040"/>
+                            </StackPanel>
+                        </DockPanel>
+
+                        <Border Height="2" Margin="10,0" Background="#808080" BorderBrush="White" BorderThickness="0,0,0,1"/>
+
+                        <DockPanel Margin="14,8,14,12">
+                            <TextBlock DockPanel.Dock="Top" Name="StatusText" Text="Loading..." Margin="0,0,0,4"/>
+                            <Border Classes="sunken-deep" Height="18" Padding="2">
+                                <StackPanel Name="ProgressBlocks" Orientation="Horizontal" Spacing="2"/>
+                            </Border>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Border>
+    </Border>
 </Window>

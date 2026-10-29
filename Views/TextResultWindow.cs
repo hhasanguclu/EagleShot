@@ -21,6 +21,7 @@ public class TextResultWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = (IBrush)Application.Current!.FindResource("WindowBrush")!;
         Topmost = true;
+        ClassicChrome.Apply(this);
         KeyDown += (_, e) => { if (e.Key == Avalonia.Input.Key.Escape) Close(); };
 
         var box = new TextBox

@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
@@ -17,10 +18,10 @@ public class ToolsView : UserControl
 
     public ToolsView()
     {
-        var root = new StackPanel { Margin = new Thickness(36, 32, 22, 32) };
+        var root = new StackPanel { Margin = new Thickness(10) };
         var title = new TextBlock { Text = "Tools" };
         title.Classes.Add("h1");
-        var sub = new TextBlock { Text = "Recording, text recognition, QR codes and more. Every tool can also get a hotkey in Settings.", Margin = new Thickness(0, 4, 0, 22) };
+        var sub = new TextBlock { Text = "Recording, text recognition, QR codes and more. Every tool can also get a hotkey in Settings.", Margin = new Thickness(0, 2, 0, 10) };
         sub.Classes.Add("sub");
         root.Children.Add(title);
         root.Children.Add(sub);
@@ -66,12 +67,11 @@ public class ToolsView : UserControl
 
     private static void Section(Panel root, string title, params Control[] cards)
     {
-        var h = new TextBlock { Text = title, Margin = new Thickness(0, 6, 0, 12) };
-        h.Classes.Add("h2");
-        var wrap = new WrapPanel { Margin = new Thickness(0, 0, 0, 14) };
+        var wrap = new WrapPanel();
         foreach (var c in cards) wrap.Children.Add(c);
-        root.Children.Add(h);
-        root.Children.Add(wrap);
+        var group = new HeaderedContentControl { Header = title, Content = wrap };
+        group.Classes.Add("group");
+        root.Children.Add(group);
     }
 
     private static Button Card(string icon, string title, string description, Action onClick) =>
@@ -79,20 +79,21 @@ public class ToolsView : UserControl
 
     private static Button CardWithText(string icon, string title, string description, Action onClick, out TextBlock descriptionBlock)
     {
-        var badge = new Border { Child = new PathIcon { Data = (Geometry)Application.Current!.FindResource(icon)! }, VerticalAlignment = VerticalAlignment.Top };
-        badge.Classes.Add("icon-badge");
+        var badge = new PathIcon { Data = (Geometry)Application.Current!.FindResource(icon)! };
+        badge.Classes.Add("card-icon");
         var t = new TextBlock { Text = title };
         t.Classes.Add("h2");
-        descriptionBlock = new TextBlock { Text = description, Margin = new Thickness(0, 3, 0, 0) };
+        descriptionBlock = new TextBlock { Text = description, TextWrapping = TextWrapping.NoWrap, TextTrimming = TextTrimming.CharacterEllipsis };
         descriptionBlock.Classes.Add("muted");
 
         var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*") };
-        var text = new StackPanel { Margin = new Thickness(12, 0, 0, 0), Children = { t, descriptionBlock } };
+        var text = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Children = { t, descriptionBlock } };
         Grid.SetColumn(text, 1);
         grid.Children.Add(badge);
         grid.Children.Add(text);
 
         var button = new Button { Content = grid };
+        ToolTip.SetTip(button, description);
         button.Classes.Add("tool-card");
         button.Click += (_, _) => onClick();
         return button;

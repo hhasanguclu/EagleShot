@@ -40,12 +40,13 @@ public class PinWindow : Window
         _view = new Image { Source = image, Stretch = Stretch.Fill };
         RenderOptions.SetBitmapInterpolationMode(_view, BitmapInterpolationMode.HighQuality);
 
-        _zoomText = new TextBlock { Foreground = Brushes.White, FontSize = 11 };
+        _zoomText = new TextBlock { Foreground = Brushes.Black, FontSize = 11 };
         _zoomBadge = new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(200, 15, 16, 22)),
-            CornerRadius = new CornerRadius(6),
-            Padding = new Thickness(7, 3),
+            Background = new SolidColorBrush(Color.FromRgb(255, 255, 225)),
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(4, 1),
             Margin = new Thickness(6),
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
@@ -55,8 +56,8 @@ public class PinWindow : Window
 
         _frame = new Border
         {
-            BorderBrush = new SolidColorBrush(Color.FromRgb(0x4C, 0x8D, 0xFF)),
-            BorderThickness = new Thickness(1.5),
+            BorderBrush = new SolidColorBrush(Color.FromRgb(0, 0, 128)),
+            BorderThickness = new Thickness(2),
             Child = new Panel { Children = { _view, _zoomBadge } }
         };
         Content = _frame;

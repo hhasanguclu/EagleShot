@@ -27,6 +27,7 @@ public abstract class ToolWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = (IBrush)Application.Current!.FindResource("WindowBrush")!;
         Icon = new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://EagleShot/Resources/icon.ico")));
+        ClassicChrome.Apply(this);
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
     }
 
@@ -61,6 +62,47 @@ public abstract class ToolWindow : Window
 }
 
 /// <summary>Live QR code generator.</summary>
+/// <summary>Help → About: logo, version and a link to the project.</summary>
+public class AboutWindow : ToolWindow
+{
+    public AboutWindow() : base("About", 380, 230)
+    {
+        Title = "About EagleShot";
+        MinHeight = 0;
+        CanResize = false;
+        ShowInTaskbar = false;
+        WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        SizeToContent = SizeToContent.Height;
+
+        var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        var logo = new Image { Width = 48, Height = 48, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 0, 14, 0) };
+        try { logo.Source = Bitmap.DecodeToWidth(Avalonia.Platform.AssetLoader.Open(new Uri("avares://EagleShot/Resources/logo.png")), 96); } catch { }
+
+        var link = new Button { Content = "github.com/hhasanguclu/EagleShot", Classes = { "flat" }, Foreground = Brushes.Blue, HorizontalAlignment = HorizontalAlignment.Left, Padding = new Thickness(0), MinHeight = 0 };
+        link.Click += (_, _) => ShellHelper.Open("https://github.com/hhasanguclu/EagleShot");
+        var ok = Btn("OK", accent: true);
+        ok.HorizontalAlignment = HorizontalAlignment.Right;
+        ok.Click += (_, _) => Close();
+
+        var text = new StackPanel
+        {
+            Spacing = 3,
+            Children =
+            {
+                new TextBlock { Text = "EagleShot", FontWeight = FontWeight.Bold, FontSize = 13 },
+                new TextBlock { Text = v == null ? "" : $"Version {v.Major}.{v.Minor}.{v.Build}" },
+                new TextBlock { Text = "Screenshots, screen recording and capture tools.", TextWrapping = TextWrapping.Wrap },
+                link
+            }
+        };
+        var top = new DockPanel { Children = { logo, text } };
+        DockPanel.SetDock(logo, Dock.Left);
+        var rule = new Border { Height = 2, Margin = new Thickness(0, 12, 0, 10), BorderBrush = Brushes.White, BorderThickness = new Thickness(0, 0, 0, 1), Background = new SolidColorBrush(Color.FromRgb(128, 128, 128)) };
+
+        Content = new StackPanel { Margin = new Thickness(14), Children = { top, rule, ok } };
+    }
+}
+
 public class QrGeneratorWindow : ToolWindow
 {
     public QrGeneratorWindow(string? initial = null) : base("QR code", 520, 600)
@@ -261,8 +303,7 @@ public class ImageCombinerWindow : ToolWindow
         var previewFrame = new Border
         {
             Margin = new Thickness(0, 10, 0, 0),
-            CornerRadius = new CornerRadius(8),
-            Background = (IBrush)Application.Current!.FindResource("CardBrush")!,
+            Classes = { "sunken-deep" },
             Child = _preview
         };
 

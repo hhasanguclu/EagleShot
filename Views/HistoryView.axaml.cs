@@ -62,7 +62,7 @@ public partial class HistoryView : UserControl
         {
             Data = (Geometry)Application.Current!.FindResource("IconImage")!,
             Width = 28, Height = 28,
-            Foreground = new SolidColorBrush(Color.FromRgb(70, 72, 90))
+            Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
         };
 
         var actions = new StackPanel
@@ -91,32 +91,34 @@ public partial class HistoryView : UserControl
 
         var kindBadge = new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(200, 15, 16, 22)),
-            CornerRadius = new CornerRadius(5),
-            Padding = new Thickness(6, 2),
-            Margin = new Thickness(8),
+            Background = new SolidColorBrush(Color.FromRgb(255, 255, 225)),
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(4, 1),
+            Margin = new Thickness(4),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Bottom,
-            Child = new TextBlock { Text = item.Url != null ? $"{item.Kind} · uploaded" : item.Kind, FontSize = 10, Foreground = Brushes.White }
+            Child = new TextBlock { Text = item.Url != null ? $"{item.Kind} · uploaded" : item.Kind, FontSize = 10, Foreground = Brushes.Black }
         };
 
-        double thumbHeight = compact ? 112 : 128;
-        var thumb = new Panel
+        double thumbHeight = compact ? 100 : 120;
+        var thumb = new Border
         {
             Height = thumbHeight,
-            Background = new SolidColorBrush(Color.FromRgb(18, 19, 26)),
-            Children = { placeholder, image, kindBadge, actions }
+            Classes = { "sunken-deep" },
+            Padding = new Thickness(2),
+            Child = new Panel { ClipToBounds = true, Children = { placeholder, image, kindBadge, actions } }
         };
 
         var info = new StackPanel
         {
-            Margin = new Thickness(12, 9, 12, 11),
+            Margin = new Thickness(2, 4, 2, 1),
             Spacing = 2,
             Children =
             {
                 new TextBlock
                 {
-                    Text = item.DisplayName, FontSize = 12, FontWeight = FontWeight.Medium,
+                    Text = item.DisplayName, FontSize = 11, FontWeight = FontWeight.Bold,
                     Foreground = (IBrush)Application.Current!.FindResource("TextPrimaryBrush")!,
                     TextTrimming = TextTrimming.CharacterEllipsis
                 },
@@ -134,7 +136,7 @@ public partial class HistoryView : UserControl
             ContextMenu = BuildContextMenu(item)
         };
         card.Classes.Add("history-card");
-        if (compact) card.Width = 214;
+        if (compact) card.Width = 172;
 
         card.PointerPressed += (_, e) =>
         {

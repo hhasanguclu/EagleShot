@@ -1,0 +1,655 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:EagleShot.Views">
+
+    <!--
+        Classic Windows (9x / 2000) look: grey 3D bevels, navy selection, Tahoma.
+        A bevel is four nested 1px borders: outer dark/light, inner shadow/face-light.
+    -->
+
+    <Styles.Resources>
+        <!-- Fluent accent → classic navy, square corners everywhere -->
+        <Color x:Key="SystemAccentColor">#000080</Color>
+        <Color x:Key="SystemAccentColorDark1">#000080</Color>
+        <Color x:Key="SystemAccentColorDark2">#000060</Color>
+        <Color x:Key="SystemAccentColorDark3">#000040</Color>
+        <Color x:Key="SystemAccentColorLight1">#000080</Color>
+        <Color x:Key="SystemAccentColorLight2">#1084D0</Color>
+        <Color x:Key="SystemAccentColorLight3">#1084D0</Color>
+        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+        <Thickness x:Key="TextControlBorderThemeThicknessFocused">1</Thickness>
+
+        <!-- Fluent paints button states on the content; the classic bevel shows them instead -->
+        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
+        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>
+        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
+        <SolidColorBrush x:Key="RepeatButtonBackgroundPointerOver" Color="Transparent"/>
+        <SolidColorBrush x:Key="RepeatButtonBackgroundPressed" Color="Transparent"/>
+        <SolidColorBrush x:Key="RepeatButtonBackgroundDisabled" Color="Transparent"/>
+        <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="Transparent"/>
+        <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="Transparent"/>
+        <SolidColorBrush x:Key="ToggleButtonBackgroundDisabled" Color="Transparent"/>
+        <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="Transparent"/>
+        <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="Transparent"/>
+        <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="Transparent"/>
+        <SolidColorBrush x:Key="AccentButtonBackground" Color="Transparent"/>
+        <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="Transparent"/>
+        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="Transparent"/>
+        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="Transparent"/>
+        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedDisabled" Color="Transparent"/>
+        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#000000"/>
+        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#000000"/>
+        <SolidColorBrush x:Key="RepeatButtonForegroundPointerOver" Color="#000000"/>
+        <SolidColorBrush x:Key="RepeatButtonForegroundPressed" Color="#000000"/>
+        <SolidColorBrush x:Key="ToggleButtonForegroundPointerOver" Color="#000000"/>
+        <SolidColorBrush x:Key="ToggleButtonForegroundPressed" Color="#000000"/>
+        <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#000000"/>
+        <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#000000"/>
+        <SolidColorBrush x:Key="AccentButtonForeground" Color="#000000"/>
+        <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="#000000"/>
+        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="#000000"/>
+        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="#000000"/>
+        <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#808080"/>
+        <SolidColorBrush x:Key="RepeatButtonForegroundDisabled" Color="#808080"/>
+        <SolidColorBrush x:Key="ToggleButtonForegroundDisabled" Color="#808080"/>
+        <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#808080"/>
+        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedDisabled" Color="#808080"/>
+
+        <!-- Drop-down menus of the menu bar -->
+        <SolidColorBrush x:Key="MenuFlyoutPresenterBackground" Color="#C0C0C0"/>
+        <SolidColorBrush x:Key="MenuFlyoutPresenterBorderBrush" Color="#000000"/>
+        <Thickness x:Key="MenuFlyoutPresenterBorderThemeThickness">0,0,1,1</Thickness>
+        <Thickness x:Key="MenuFlyoutPresenterThemePadding">2</Thickness>
+        <SolidColorBrush x:Key="MenuFlyoutItemBackgroundPointerOver" Color="#000080"/>
+        <SolidColorBrush x:Key="MenuFlyoutItemForegroundPointerOver" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="MenuFlyoutItemBackgroundPressed" Color="#000080"/>
+        <SolidColorBrush x:Key="MenuFlyoutItemForegroundPressed" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="MenuFlyoutSubItemBackgroundPointerOver" Color="#000080"/>
+        <SolidColorBrush x:Key="MenuFlyoutSubItemBackgroundOpen" Color="#000080"/>
+        <SolidColorBrush x:Key="MenuFlyoutSubItemForegroundPointerOver" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="MenuFlyoutSubItemForegroundOpen" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="MenuFlyoutSeparatorBackground" Color="#808080"/>
+
+        <SolidColorBrush x:Key="ClassicFace" Color="#C0C0C0"/>
+        <SolidColorBrush x:Key="ClassicLight" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="ClassicFaceLight" Color="#DFDFDF"/>
+        <SolidColorBrush x:Key="ClassicShadow" Color="#808080"/>
+        <SolidColorBrush x:Key="ClassicDark" Color="#000000"/>
+        <SolidColorBrush x:Key="ClassicHighlight" Color="#000080"/>
+        <LinearGradientBrush x:Key="ClassicTitleBrush" StartPoint="0%,0%" EndPoint="100%,0%">
+            <GradientStop Color="#000080" Offset="0"/>
+            <GradientStop Color="#1084D0" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="ClassicTitleInactiveBrush" StartPoint="0%,0%" EndPoint="100%,0%">
+            <GradientStop Color="#808080" Offset="0"/>
+            <GradientStop Color="#B5B5B5" Offset="1"/>
+        </LinearGradientBrush>
+        <StreamGeometry x:Key="ClassicArrowDown">M0,0 L7,0 L3.5,4 Z</StreamGeometry>
+        <StreamGeometry x:Key="ClassicArrowUp">M0,4 L7,4 L3.5,0 Z</StreamGeometry>
+        <StreamGeometry x:Key="ClassicArrowLeft">M4,0 L4,7 L0,3.5 Z</StreamGeometry>
+        <StreamGeometry x:Key="ClassicArrowRight">M0,0 L0,7 L4,3.5 Z</StreamGeometry>
+        <StreamGeometry x:Key="ClassicCheck">M0,3 L2,5 L7,0 L7,2 L2,7 L0,5 Z</StreamGeometry>
+    </Styles.Resources>
+
+    <!-- ═══════════════ Text ═══════════════ -->
+
+    <Style Selector=":is(TopLevel)">
+        <Setter Property="FontFamily" Value="Tahoma, Microsoft Sans Serif, Verdana, DejaVu Sans, Liberation Sans, sans-serif"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="Black"/>
+    </Style>
+
+    <!-- ═══════════════ Window with classic chrome (Windows only, see ClassicChrome) ═══════════════ -->
+
+    <Style Selector="Window.classic">
+        <Setter Property="Background" Value="{StaticResource ClassicFace}"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Name="PART_TransparencyFallback" IsHitTestVisible="False"/>
+                    <Border Background="{TemplateBinding Background}" IsHitTestVisible="False"/>
+                    <VisualLayerManager Margin="{TemplateBinding OffScreenMargin}">
+                        <Border Name="FrameOuter" BorderBrush="{StaticResource ClassicDark}">
+                            <Border Name="FrameOuterLight" BorderBrush="{StaticResource ClassicFaceLight}">
+                                <Border Name="FrameInner" BorderBrush="{StaticResource ClassicShadow}">
+                                    <Border Name="FrameInnerLight" BorderBrush="{StaticResource ClassicLight}" Padding="0">
+                                        <DockPanel>
+                                            <views:ClassicTitleBar Name="ClassicTitle" DockPanel.Dock="Top" IsVisible="False"/>
+                                            <ContentPresenter Name="PART_ContentPresenter"
+                                                              Content="{TemplateBinding Content}"
+                                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                              Margin="{TemplateBinding Padding}"
+                                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                        </DockPanel>
+                                    </Border>
+                                </Border>
+                            </Border>
+                        </Border>
+                    </VisualLayerManager>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Window.classic[ExtendClientAreaToDecorationsHint=True] /template/ views|ClassicTitleBar#ClassicTitle">
+        <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="Window.classic[ExtendClientAreaToDecorationsHint=True] /template/ Border#FrameOuter">
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+    </Style>
+    <Style Selector="Window.classic[ExtendClientAreaToDecorationsHint=True] /template/ Border#FrameOuterLight">
+        <Setter Property="BorderThickness" Value="1,1,0,0"/>
+    </Style>
+    <Style Selector="Window.classic[ExtendClientAreaToDecorationsHint=True] /template/ Border#FrameInner">
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+    </Style>
+    <Style Selector="Window.classic[ExtendClientAreaToDecorationsHint=True] /template/ Border#FrameInnerLight">
+        <Setter Property="BorderThickness" Value="1,1,0,0"/>
+        <Setter Property="Padding" Value="2"/>
+    </Style>
+    <Style Selector="Window.classic[ExtendClientAreaToDecorationsHint=True][WindowState=Maximized] /template/ Border">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style Selector="views|ClassicTitleBar">
+        <Setter Property="Background" Value="{StaticResource ClassicTitleBrush}"/>
+    </Style>
+    <Style Selector="views|ClassicTitleBar.inactive">
+        <Setter Property="Background" Value="{StaticResource ClassicTitleInactiveBrush}"/>
+    </Style>
+
+    <!-- ═══════════════ Buttons ═══════════════ -->
+
+    <Style Selector="Button, ToggleButton, RepeatButton">
+        <Setter Property="Background" Value="{StaticResource ClassicFace}"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Padding" Value="10,3"/>
+        <Setter Property="MinHeight" Value="23"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Cursor" Value="Arrow"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="DefaultRing" BorderBrush="{StaticResource ClassicDark}" BorderThickness="0">
+                    <Border Name="BevelOuter" BorderBrush="{StaticResource ClassicDark}" BorderThickness="0,0,1,1" Background="{TemplateBinding Background}">
+                        <Border Name="BevelOuterLight" BorderBrush="{StaticResource ClassicLight}" BorderThickness="1,1,0,0">
+                            <Border Name="BevelInner" BorderBrush="{StaticResource ClassicShadow}" BorderThickness="0,0,1,1">
+                                <Border Name="BevelInnerLight" BorderBrush="{StaticResource ClassicFaceLight}" BorderThickness="1,1,0,0">
+                                    <ContentPresenter Name="PART_ContentPresenter"
+                                                      Content="{TemplateBinding Content}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                      Padding="{TemplateBinding Padding}"
+                                                      Foreground="{TemplateBinding Foreground}"
+                                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                </Border>
+                            </Border>
+                        </Border>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- Keep Fluent's state colours off the content: the bevel borders show the state -->
+    <!-- Fluent's own state setters are triggers, so these list the same states to win over them -->
+    <Style Selector="Button /template/ ContentPresenter#PART_ContentPresenter, Button:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button:pressed /template/ ContentPresenter#PART_ContentPresenter, Button:checked /template/ ContentPresenter#PART_ContentPresenter, Button:disabled /template/ ContentPresenter#PART_ContentPresenter, Button:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter, ToggleButton /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:pointerover /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:pressed /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:checked /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:disabled /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter, RepeatButton /template/ ContentPresenter#PART_ContentPresenter, RepeatButton:pointerover /template/ ContentPresenter#PART_ContentPresenter, RepeatButton:pressed /template/ ContentPresenter#PART_ContentPresenter, RepeatButton:checked /template/ ContentPresenter#PART_ContentPresenter, RepeatButton:disabled /template/ ContentPresenter#PART_ContentPresenter, RepeatButton:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter, CheckBox /template/ ContentPresenter#PART_ContentPresenter, CheckBox:pointerover /template/ ContentPresenter#PART_ContentPresenter, CheckBox:pressed /template/ ContentPresenter#PART_ContentPresenter, CheckBox:checked /template/ ContentPresenter#PART_ContentPresenter, CheckBox:disabled /template/ ContentPresenter#PART_ContentPresenter, CheckBox:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{Binding $parent[TemplatedControl].Foreground}"/>
+    </Style>
+
+    <!-- Flat toolbar buttons: no border until hovered -->
+    <Style Selector=":is(Button).flat /template/ Border#BevelOuter, :is(Button).flat /template/ Border#BevelOuterLight, :is(Button).flat /template/ Border#BevelInner, :is(Button).flat /template/ Border#BevelInnerLight,
+                     :is(ToggleButton).flat /template/ Border#BevelOuter, :is(ToggleButton).flat /template/ Border#BevelOuterLight, :is(ToggleButton).flat /template/ Border#BevelInner, :is(ToggleButton).flat /template/ Border#BevelInnerLight">
+        <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+    <Style Selector="Button.flat:pointerover /template/ Border#BevelOuterLight, ToggleButton.flat:pointerover /template/ Border#BevelOuterLight">
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicLight}"/>
+    </Style>
+    <Style Selector="Button.flat:pointerover /template/ Border#BevelOuter, ToggleButton.flat:pointerover /template/ Border#BevelOuter">
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicShadow}"/>
+    </Style>
+
+    <!-- Pressed / checked: sunken -->
+    <Style Selector="Button:pressed /template/ Border#BevelOuter, ToggleButton:pressed /template/ Border#BevelOuter, RepeatButton:pressed /template/ Border#BevelOuter, ToggleButton:checked /template/ Border#BevelOuter">
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicLight}"/>
+    </Style>
+    <Style Selector="Button:pressed /template/ Border#BevelOuterLight, ToggleButton:pressed /template/ Border#BevelOuterLight, RepeatButton:pressed /template/ Border#BevelOuterLight, ToggleButton:checked /template/ Border#BevelOuterLight">
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicDark}"/>
+    </Style>
+    <Style Selector="Button:pressed /template/ Border#BevelInner, ToggleButton:pressed /template/ Border#BevelInner, RepeatButton:pressed /template/ Border#BevelInner, ToggleButton:checked /template/ Border#BevelInner">
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicFaceLight}"/>
+    </Style>
+    <Style Selector="Button:pressed /template/ Border#BevelInnerLight, ToggleButton:pressed /template/ Border#BevelInnerLight, RepeatButton:pressed /template/ Border#BevelInnerLight, ToggleButton:checked /template/ Border#BevelInnerLight">
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicShadow}"/>
+    </Style>
+    <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:pressed /template/ ContentPresenter#PART_ContentPresenter, RepeatButton:pressed /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:checked /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="RenderTransform" Value="translate(1px, 1px)"/>
+    </Style>
+    <Style Selector="ToggleButton:checked /template/ Border#BevelOuter">
+        <Setter Property="Background" Value="#E3E3E3"/>
+    </Style>
+
+    <!-- Flat buttons sink only one pixel -->
+    <Style Selector="Button.flat:pressed /template/ Border#BevelOuter, ToggleButton.flat:pressed /template/ Border#BevelOuter, ToggleButton.flat:checked /template/ Border#BevelOuter">
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicLight}"/>
+    </Style>
+    <Style Selector="Button.flat:pressed /template/ Border#BevelOuterLight, ToggleButton.flat:pressed /template/ Border#BevelOuterLight, ToggleButton.flat:checked /template/ Border#BevelOuterLight">
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicShadow}"/>
+    </Style>
+    <Style Selector="Button.flat:pressed /template/ Border#BevelInner, Button.flat:pressed /template/ Border#BevelInnerLight, ToggleButton.flat:checked /template/ Border#BevelInner, ToggleButton.flat:checked /template/ Border#BevelInnerLight, ToggleButton.flat:pressed /template/ Border#BevelInner, ToggleButton.flat:pressed /template/ Border#BevelInnerLight">
+        <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+
+    <!-- Default button: extra black outline -->
+    <Style Selector="Button.accent /template/ Border#DefaultRing">
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+    <Style Selector="Button.accent, Button.accent:pointerover, Button.accent:pressed">
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Background" Value="{StaticResource ClassicFace}"/>
+        <Setter Property="Foreground" Value="Black"/>
+    </Style>
+
+    <Style Selector="Button:disabled, ToggleButton:disabled, RepeatButton:disabled">
+        <Setter Property="Foreground" Value="#808080"/>
+    </Style>
+
+    <!-- ═══════════════ Check boxes ═══════════════ -->
+
+    <Style Selector="CheckBox">
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="5,0,0,0"/>
+        <Setter Property="MinHeight" Value="18"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="Auto,*" Background="{TemplateBinding Background}">
+                    <Border Width="13" Height="13" VerticalAlignment="Center"
+                            BorderBrush="{StaticResource ClassicLight}" BorderThickness="0,0,1,1">
+                        <Border BorderBrush="{StaticResource ClassicShadow}" BorderThickness="1,1,0,0">
+                            <Border BorderBrush="{StaticResource ClassicFaceLight}" BorderThickness="0,0,1,1">
+                                <Border Name="CheckFace" BorderBrush="{StaticResource ClassicDark}" BorderThickness="1,1,0,0" Background="White">
+                                    <Path Name="ClassicCheckGlyph" Data="{StaticResource ClassicCheck}" Fill="Black"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False"/>
+                                </Border>
+                            </Border>
+                        </Border>
+                    </Border>
+                    <ContentPresenter Grid.Column="1" Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Margin="{TemplateBinding Padding}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      TextWrapping="Wrap"/>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="CheckBox:checked /template/ Path#ClassicCheckGlyph">
+        <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="CheckBox:pressed /template/ Border#CheckFace, CheckBox:disabled /template/ Border#CheckFace">
+        <Setter Property="Background" Value="{StaticResource ClassicFace}"/>
+    </Style>
+    <Style Selector="CheckBox:disabled">
+        <Setter Property="Foreground" Value="#808080"/>
+    </Style>
+
+    <!-- ═══════════════ Text boxes ═══════════════ -->
+
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicShadow}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="MinHeight" Value="21"/>
+        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="SelectionBrush" Value="{StaticResource ClassicHighlight}"/>
+        <Setter Property="SelectionForegroundBrush" Value="White"/>
+        <Setter Property="CaretBrush" Value="Black"/>
+    </Style>
+    <!-- The frame always follows the TextBox's own brushes; Fluent's state setters are triggers, hence the state list -->
+    <Style Selector="TextBox /template/ Border#PART_BorderElement, TextBox:pointerover /template/ Border#PART_BorderElement, TextBox:focus /template/ Border#PART_BorderElement, TextBox:focus:pointerover /template/ Border#PART_BorderElement, TextBox:disabled /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{Binding $parent[TextBox].Background}"/>
+        <Setter Property="BorderBrush" Value="{Binding $parent[TextBox].BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="{Binding $parent[TextBox].BorderThickness}"/>
+        <Setter Property="BoxShadow" Value="inset 1 1 0 0 #404040"/>
+    </Style>
+    <!-- Text typed onto a screenshot, and the box inside NumericUpDown, have no sunken edge -->
+    <Style Selector="TextBox.canvas-text /template/ Border#PART_BorderElement, NumericUpDown /template/ TextBox /template/ Border#PART_BorderElement, TextBox.canvas-text:pointerover /template/ Border#PART_BorderElement, NumericUpDown /template/ TextBox:pointerover /template/ Border#PART_BorderElement, TextBox.canvas-text:focus /template/ Border#PART_BorderElement, NumericUpDown /template/ TextBox:focus /template/ Border#PART_BorderElement, TextBox.canvas-text:focus:pointerover /template/ Border#PART_BorderElement, NumericUpDown /template/ TextBox:focus:pointerover /template/ Border#PART_BorderElement, TextBox.canvas-text:disabled /template/ Border#PART_BorderElement, NumericUpDown /template/ TextBox:disabled /template/ Border#PART_BorderElement">
+        <Setter Property="BoxShadow" Value="none"/>
+    </Style>
+    <Style Selector="TextBox:pointerover, TextBox:focus">
+        <Setter Property="Foreground" Value="Black"/>
+    </Style>
+    <Style Selector="TextBox:disabled">
+        <Setter Property="Background" Value="{StaticResource ClassicFace}"/>
+    </Style>
+    <Style Selector="TextBox /template/ TextBlock#PART_Watermark, TextBox /template/ TextBlock#PART_FloatingWatermark">
+        <Setter Property="Foreground" Value="#808080"/>
+    </Style>
+
+    <!-- NumericUpDown: the inner TextBox draws the frame -->
+    <Style Selector="NumericUpDown">
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="MinHeight" Value="21"/>
+    </Style>
+    <Style Selector="ButtonSpinner">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="MinHeight" Value="21"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border BorderBrush="{StaticResource ClassicLight}" BorderThickness="0,0,1,1">
+                    <Border BorderBrush="{StaticResource ClassicShadow}" BorderThickness="1,1,0,0">
+                        <Border BorderBrush="{StaticResource ClassicFaceLight}" BorderThickness="0,0,1,1">
+                            <Border BorderBrush="{StaticResource ClassicDark}" BorderThickness="1,1,0,0" Background="{TemplateBinding Background}">
+                                <Grid ColumnDefinitions="*,16">
+                                    <ContentPresenter Name="PART_ContentPresenter"
+                                                      Content="{TemplateBinding Content}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                      HorizontalContentAlignment="Stretch"
+                                                      VerticalContentAlignment="Center"/>
+                                    <Grid Grid.Column="1" RowDefinitions="*,*" IsVisible="{TemplateBinding ShowButtonSpinner}">
+                                        <RepeatButton Name="PART_IncreaseButton" Classes="spin" IsTabStop="False">
+                                            <Path Data="{StaticResource ClassicArrowUp}" Fill="Black"/>
+                                        </RepeatButton>
+                                        <RepeatButton Name="PART_DecreaseButton" Classes="spin" Grid.Row="1" IsTabStop="False">
+                                            <Path Data="{StaticResource ClassicArrowDown}" Fill="Black"/>
+                                        </RepeatButton>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </Border>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="RepeatButton.spin">
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style Selector="NumericUpDown">
+        <Setter Property="Background" Value="White"/>
+    </Style>
+
+    <!-- ═══════════════ Combo boxes ═══════════════ -->
+
+    <Style Selector="ComboBox">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="MinHeight" Value="21"/>
+        <Setter Property="Padding" Value="3,1"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="MaxDropDownHeight" Value="300"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border BorderBrush="{StaticResource ClassicLight}" BorderThickness="0,0,1,1">
+                    <Border BorderBrush="{StaticResource ClassicShadow}" BorderThickness="1,1,0,0">
+                        <Border BorderBrush="{StaticResource ClassicFaceLight}" BorderThickness="0,0,1,1">
+                            <Border BorderBrush="{StaticResource ClassicDark}" BorderThickness="1,1,0,0" Background="{TemplateBinding Background}">
+                                <Grid ColumnDefinitions="*,16">
+                                    <Border Name="SelectionBox" Margin="2">
+                                        <ContentControl Content="{TemplateBinding SelectionBoxItem}"
+                                                        ContentTemplate="{TemplateBinding ItemTemplate}"
+                                                        Padding="{TemplateBinding Padding}"
+                                                        Foreground="{TemplateBinding Foreground}"
+                                                        HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                        VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                    </Border>
+                                    <Border Grid.Column="1" Name="DropButton" Background="{StaticResource ClassicFace}"
+                                            BorderBrush="{StaticResource ClassicDark}" BorderThickness="0,0,1,1">
+                                        <Border Name="DropButtonLight" BorderBrush="{StaticResource ClassicFaceLight}" BorderThickness="1,1,0,0">
+                                            <Border Name="DropButtonInner" BorderBrush="{StaticResource ClassicShadow}" BorderThickness="0,0,1,1">
+                                                <Border Name="DropButtonInnerLight" BorderBrush="{StaticResource ClassicLight}" BorderThickness="1,1,0,0">
+                                                    <Path Data="{StaticResource ClassicArrowDown}" Fill="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Border>
+                                        </Border>
+                                    </Border>
+                                    <Popup Name="PART_Popup"
+                                           WindowManagerAddShadowHint="False"
+                                           IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                                           MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                                           MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                           PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                           Placement="BottomEdgeAlignedLeft"
+                                           IsLightDismissEnabled="True"
+                                           InheritsTransform="True">
+                                        <Border Background="White" BorderBrush="{StaticResource ClassicDark}" BorderThickness="1">
+                                            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}"/>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Popup>
+                                </Grid>
+                            </Border>
+                        </Border>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ComboBox:focus-within /template/ Border#SelectionBox">
+        <Setter Property="Background" Value="{StaticResource ClassicHighlight}"/>
+        <Setter Property="TextElement.Foreground" Value="White"/>
+    </Style>
+    <Style Selector="ComboBox:disabled">
+        <Setter Property="Background" Value="{StaticResource ClassicFace}"/>
+        <Setter Property="Foreground" Value="#808080"/>
+    </Style>
+    <Style Selector="ComboBoxItem, ListBoxItem">
+        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter, ComboBoxItem:selected /template/ ContentPresenter,
+                     ListBoxItem:selected /template/ ContentPresenter, ListBoxItem:selected:pointerover /template/ ContentPresenter,
+                     ComboBoxItem:selected:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource ClassicHighlight}"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="Black"/>
+    </Style>
+    <Style Selector="ComboBox:not(:dropdownopen) ComboBoxItem:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+
+    <Style Selector="ListBox">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicShadow}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+
+    <!-- ═══════════════ Menus, tooltips, flyouts ═══════════════ -->
+
+    <Style Selector="Menu">
+        <Setter Property="Background" Value="{StaticResource ClassicFace}"/>
+        <Setter Property="Height" Value="20"/>
+    </Style>
+    <Style Selector="Menu > MenuItem">
+        <Setter Property="Padding" Value="7,2"/>
+        <Setter Property="Height" Value="20"/>
+    </Style>
+    <Style Selector="MenuItem">
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="MinHeight" Value="0"/>
+    </Style>
+    <Style Selector="MenuItem:selected /template/ Border#PART_LayoutRoot, MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuItem:open /template/ Border#PART_LayoutRoot">
+        <Setter Property="Background" Value="{StaticResource ClassicHighlight}"/>
+    </Style>
+    <Style Selector="MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter, MenuItem:open /template/ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="MenuItem:selected /template/ TextBlock#PART_InputGestureText, MenuItem:pointerover /template/ TextBlock#PART_InputGestureText">
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="MenuItem:selected /template/ Path#PART_ChevronPath, MenuItem:pointerover /template/ Path#PART_ChevronPath">
+        <Setter Property="Fill" Value="White"/>
+    </Style>
+    <Style Selector="MenuItem:disabled /template/ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="#808080"/>
+    </Style>
+    <Style Selector="MenuFlyoutPresenter, ContextMenu">
+        <Setter Property="Background" Value="{StaticResource ClassicFace}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicDark}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Padding" Value="2"/>
+        <Setter Property="MinWidth" Value="140"/>
+    </Style>
+    <Style Selector="MenuItem /template/ Popup#PART_Popup > Border">
+        <Setter Property="BoxShadow" Value="inset 1 1 0 0 #FFFFFF, inset -1 -1 0 0 #808080"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+    <Style Selector="MenuFlyoutPresenter /template/ Border, ContextMenu /template/ Border">
+        <Setter Property="BoxShadow" Value="inset 1 1 0 0 #FFFFFF, inset -1 -1 0 0 #808080"/>
+    </Style>
+    <Style Selector="MenuFlyoutPresenter Separator, ContextMenu Separator, MenuItem Separator">
+        <Setter Property="Background" Value="{StaticResource ClassicShadow}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicLight}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="Height" Value="2"/>
+        <Setter Property="Margin" Value="1,3"/>
+    </Style>
+
+    <Style Selector="ToolTip">
+        <Setter Property="Background" Value="#FFFFE1"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="BorderBrush" Value="Black"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="FontSize" Value="11"/>
+    </Style>
+
+    <Style Selector="FlyoutPresenter">
+        <Setter Property="Background" Value="{StaticResource ClassicFace}"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ClassicDark}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Padding" Value="6"/>
+    </Style>
+    <Style Selector="FlyoutPresenter /template/ Border">
+        <Setter Property="BoxShadow" Value="inset 1 1 0 0 #FFFFFF, inset -1 -1 0 0 #808080"/>
+    </Style>
+
+    <!-- ═══════════════ Scroll bars ═══════════════ -->
+
+    <Style Selector="ScrollViewer">
+        <Setter Property="AllowAutoHide" Value="False"/>
+    </Style>
+    <Style Selector="ScrollBar">
+        <Setter Property="AllowAutoHide" Value="False"/>
+        <Setter Property="Background" Value="#E0E0E0"/>
+    </Style>
+    <Style Selector="ScrollBar RepeatButton">
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Focusable" Value="False"/>
+    </Style>
+    <Style Selector="ScrollBar RepeatButton.page">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="Transparent"/>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ScrollBar Thumb">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{StaticResource ClassicFace}" BorderBrush="{StaticResource ClassicDark}" BorderThickness="0,0,1,1">
+                    <Border BorderBrush="{StaticResource ClassicFaceLight}" BorderThickness="1,1,0,0">
+                        <Border BorderBrush="{StaticResource ClassicShadow}" BorderThickness="0,0,1,1">
+                            <Border BorderBrush="{StaticResource ClassicLight}" BorderThickness="1,1,0,0"/>
+                        </Border>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ScrollBar:vertical">
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="16,*,16" Background="{TemplateBinding Background}">
+                    <RepeatButton Name="PART_LineUpButton" Grid.Row="0" Width="16" Height="16">
+                        <Path Data="{StaticResource ClassicArrowUp}" Fill="Black"/>
+                    </RepeatButton>
+                    <Track Grid.Row="1" Orientation="Vertical" IsDirectionReversed="True"
+                           Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                           Value="{TemplateBinding Value, Mode=TwoWay}" ViewportSize="{TemplateBinding ViewportSize}"
+                           DeferThumbDrag="{TemplateBinding ScrollViewer.IsDeferredScrollingEnabled}">
+                        <Track.DecreaseButton>
+                            <RepeatButton Name="PART_PageUpButton" Classes="page"/>
+                        </Track.DecreaseButton>
+                        <Track.IncreaseButton>
+                            <RepeatButton Name="PART_PageDownButton" Classes="page"/>
+                        </Track.IncreaseButton>
+                        <Thumb MinHeight="16"/>
+                    </Track>
+                    <RepeatButton Name="PART_LineDownButton" Grid.Row="2" Width="16" Height="16">
+                        <Path Data="{StaticResource ClassicArrowDown}" Fill="Black"/>
+                    </RepeatButton>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ScrollBar:horizontal">
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="16,*,16" Background="{TemplateBinding Background}">
+                    <RepeatButton Name="PART_LineUpButton" Grid.Column="0" Width="16" Height="16">
+                        <Path Data="{StaticResource ClassicArrowLeft}" Fill="Black"/>
+                    </RepeatButton>
+                    <Track Grid.Column="1" Orientation="Horizontal"
+                           Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                           Value="{TemplateBinding Value, Mode=TwoWay}" ViewportSize="{TemplateBinding ViewportSize}"
+                           DeferThumbDrag="{TemplateBinding ScrollViewer.IsDeferredScrollingEnabled}">
+                        <Track.DecreaseButton>
+                            <RepeatButton Name="PART_PageUpButton" Classes="page"/>
+                        </Track.DecreaseButton>
+                        <Track.IncreaseButton>
+                            <RepeatButton Name="PART_PageDownButton" Classes="page"/>
+                        </Track.IncreaseButton>
+                        <Thumb MinWidth="16"/>
+                    </Track>
+                    <RepeatButton Name="PART_LineDownButton" Grid.Column="2" Width="16" Height="16">
+                        <Path Data="{StaticResource ClassicArrowRight}" Fill="Black"/>
+                    </RepeatButton>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════ Misc ═══════════════ -->
+
+    <Style Selector="ProgressBar">
+        <Setter Property="Foreground" Value="{StaticResource ClassicHighlight}"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+    <Style Selector="Slider">
+        <Setter Property="Foreground" Value="{StaticResource ClassicHighlight}"/>
+    </Style>
+</Styles>

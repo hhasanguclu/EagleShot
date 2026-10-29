@@ -29,8 +29,7 @@ public class ToastWindow : Window
         ShowActivated = false;
         CanResize = false;
         SizeToContent = SizeToContent.WidthAndHeight;
-        Background = Brushes.Transparent;
-        TransparencyLevelHint = new[] { WindowTransparencyLevel.Transparent };
+        Background = new SolidColorBrush(Color.FromRgb(192, 192, 192));
         Cursor = onClick != null ? new Cursor(StandardCursorType.Hand) : Cursor.Default;
 
         var content = new DockPanel { LastChildFill = true };
@@ -39,9 +38,9 @@ public class ToastWindow : Window
         {
             var thumb = new Border
             {
-                CornerRadius = new CornerRadius(6),
+                Classes = { "sunken-deep" },
                 ClipToBounds = true,
-                Margin = new Thickness(0, 0, 12, 0),
+                Margin = new Thickness(0, 0, 10, 0),
                 Child = new Image { Source = thumbnail, Width = 84, Height = 56, Stretch = Stretch.UniformToFill }
             };
             DockPanel.SetDock(thumb, Dock.Left);
@@ -52,11 +51,10 @@ public class ToastWindow : Window
             var sw = new Border
             {
                 Width = 40, Height = 40,
-                CornerRadius = new CornerRadius(8),
                 Background = new SolidColorBrush(swatch.Value),
-                BorderBrush = new SolidColorBrush(Color.FromArgb(80, 255, 255, 255)),
+                BorderBrush = Brushes.Black,
                 BorderThickness = new Thickness(1),
-                Margin = new Thickness(0, 0, 12, 0)
+                Margin = new Thickness(0, 0, 10, 0)
             };
             DockPanel.SetDock(sw, Dock.Left);
             content.Children.Add(sw);
@@ -70,30 +68,35 @@ public class ToastWindow : Window
             {
                 new TextBlock
                 {
-                    Text = title, FontSize = 13, FontWeight = FontWeight.SemiBold,
-                    Foreground = isError ? new SolidColorBrush(Color.FromRgb(255, 107, 107)) : Brushes.White
-                },
-                new TextBlock
-                {
-                    Text = message, FontSize = 12, MaxWidth = 260, TextWrapping = TextWrapping.Wrap,
+                    Text = message, FontSize = 11, MaxWidth = 260, TextWrapping = TextWrapping.Wrap,
                     TextTrimming = TextTrimming.CharacterEllipsis, MaxLines = 3,
-                    Foreground = new SolidColorBrush(Color.FromRgb(160, 162, 178))
+                    Foreground = Brushes.Black
                 }
             }
         });
 
-        Content = new Border
+        if (isError)
         {
-            Margin = new Thickness(12),
-            Padding = new Thickness(12),
-            MinWidth = 260,
-            CornerRadius = new CornerRadius(12),
-            Background = new SolidColorBrush(Color.FromArgb(245, 22, 23, 31)),
-            BorderBrush = new SolidColorBrush(isError ? Color.FromRgb(120, 40, 48) : Color.FromRgb(46, 47, 60)),
-            BorderThickness = new Thickness(1),
-            BoxShadow = BoxShadows.Parse("0 6 24 0 #80000000"),
-            Child = content
+            var icon = new TextBlock { Text = "⚠", FontSize = 22, Margin = new Thickness(0, 0, 10, 0), VerticalAlignment = VerticalAlignment.Center };
+            DockPanel.SetDock(icon, Dock.Left);
+            content.Children.Insert(0, icon);
+        }
+
+        // Small classic window: caption strip with the title, grey body with the message
+        var caption = new Border
+        {
+            Height = 18,
+            Padding = new Thickness(4, 0),
+            Background = isError
+                ? new LinearGradientBrush { StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative), EndPoint = new RelativePoint(1, 0, RelativeUnit.Relative), GradientStops = { new GradientStop(Color.FromRgb(128, 0, 0), 0), new GradientStop(Color.FromRgb(208, 64, 64), 1) } }
+                : (IBrush)Application.Current!.FindResource("ClassicTitleBrush")!,
+            Child = new TextBlock { Text = title, Foreground = Brushes.White, FontWeight = FontWeight.Bold, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis }
         };
+        Content = Bevel(new StackPanel
+        {
+            MinWidth = 260,
+            Children = { caption, new Border { Padding = new Thickness(8), Child = content } }
+        });
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(isError ? 7 : 4) };
         _timer.Tick += (_, _) => Close();
@@ -101,6 +104,21 @@ public class ToastWindow : Window
         PointerEntered += (_, _) => _timer.Stop();
         PointerExited += (_, _) => _timer.Start();
     }
+
+    /// <summary>Wraps content in the raised two-pixel frame of a classic window.</summary>
+    public static Control Bevel(Control child) => new Border
+    {
+        BorderBrush = Brushes.Black, BorderThickness = new Thickness(0, 0, 1, 1),
+        Child = new Border
+        {
+            BorderBrush = new SolidColorBrush(Color.FromRgb(223, 223, 223)), BorderThickness = new Thickness(1, 1, 0, 0),
+            Child = new Border
+            {
+                BorderBrush = new SolidColorBrush(Color.FromRgb(128, 128, 128)), BorderThickness = new Thickness(0, 0, 1, 1),
+                Child = new Border { BorderBrush = Brushes.White, BorderThickness = new Thickness(1, 1, 0, 0), Padding = new Thickness(1), Child = child }
+            }
+        }
+    };
 
     public static void Show(string title, string message, Bitmap? thumbnail = null, Color? swatch = null, Action? onClick = null, bool isError = false)
     {

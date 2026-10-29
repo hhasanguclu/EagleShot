@@ -8,7 +8,7 @@
 
 ## English
 
-A lightweight, modern, cross-platform screenshot tool for Windows, macOS and Linux. It pairs the speed of Lightshot with a ShareX-style workflow: capture modes, an annotation editor, after-capture tasks, uploads, history and pinned screenshots, all in one dark Fluent interface.
+A lightweight, modern, cross-platform screenshot tool for Windows, macOS and Linux. It pairs the speed of Lightshot with a ShareX-style workflow: capture modes, an annotation editor, after-capture tasks, uploads, history and pinned screenshots, all in a classic Windows 9x/2000-style interface: menu bar, toolbar, tabs, 3D buttons and a status bar.
 
 ### 🌟 Features
 
@@ -172,7 +172,7 @@ chmod +x scripts/build-all.sh
 
 ## Türkçe
 
-Windows, macOS ve Linux'ta çalışan, hafif, modern ve kullanıcı dostu bir ekran görüntüsü alma aracı. Lightshot'ın hızını ShareX tarzı bir iş akışıyla birleştirir: yakalama modları, düzenleme editörü, yakalama sonrası görevler, yükleme, geçmiş ve ekrana sabitleme. Hepsi tek bir koyu Fluent arayüzde.
+Windows, macOS ve Linux'ta çalışan, hafif, modern ve kullanıcı dostu bir ekran görüntüsü alma aracı. Lightshot'ın hızını ShareX tarzı bir iş akışıyla birleştirir: yakalama modları, düzenleme editörü, yakalama sonrası görevler, yükleme, geçmiş ve ekrana sabitleme. Hepsi menü çubuğu, araç çubuğu, sekmeler, 3D butonlar ve durum çubuğuyla klasik Windows 9x/2000 tarzı bir arayüzde.
 
 ### 🌟 Özellikler
 

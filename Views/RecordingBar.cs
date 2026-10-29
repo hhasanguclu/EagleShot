@@ -47,62 +47,82 @@ public class RecordingBar : Window
         ShowInTaskbar = false;
         CanResize = false;
         SizeToContent = SizeToContent.WidthAndHeight;
-        Background = new SolidColorBrush(Color.FromRgb(20, 21, 30));
+        Background = new SolidColorBrush(Color.FromRgb(192, 192, 192));
 
-        _dot = new Ellipse { Width = 12, Height = 12, Fill = new SolidColorBrush(Color.FromRgb(120, 122, 140)), VerticalAlignment = VerticalAlignment.Center };
+        _dot = new Ellipse { Width = 12, Height = 12, Fill = new SolidColorBrush(Color.FromRgb(128, 128, 128)), Stroke = Brushes.Black, StrokeThickness = 1, VerticalAlignment = VerticalAlignment.Center };
         _status = new TextBlock
         {
-            Text = gif ? "GIF  ·  ready" : "Video  ·  ready",
-            Foreground = new SolidColorBrush(Color.FromRgb(160, 162, 178)),
-            FontSize = 12,
+            Text = gif ? "GIF - ready" : "Video - ready",
+            Foreground = Brushes.Black,
+            FontSize = 11,
             VerticalAlignment = VerticalAlignment.Center
         };
         _time = new TextBlock
         {
             Text = "00:00",
-            Foreground = Brushes.White,
-            FontSize = 22,
+            Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0)),
+            FontFamily = new FontFamily("Courier New, Consolas, DejaVu Sans Mono, monospace"),
+            FontSize = 20,
             FontWeight = FontWeight.Bold,
-            MinWidth = 70,
+            MinWidth = 76,
+            TextAlignment = TextAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
 
-        _main = MakeButton("●  Start", Red);
+        _main = MakeButton("Start", Red);
         _main.Click += (_, _) =>
         {
             if (_state == State.Ready) StartRequested?.Invoke();
             else if (_state == State.Recording) StopRequested?.Invoke();
         };
-        _cancel = MakeButton("Cancel", Color.FromRgb(50, 52, 66));
+        _cancel = MakeButton("Cancel", null);
         _cancel.Click += (_, _) => CancelRequested?.Invoke();
 
         var size = new TextBlock
         {
-            Text = $"{region.Width} × {region.Height}",
-            Foreground = new SolidColorBrush(Color.FromRgb(120, 122, 140)),
+            Text = $"{region.Width} x {region.Height}",
+            Foreground = new SolidColorBrush(Color.FromRgb(64, 64, 64)),
             FontSize = 11,
             VerticalAlignment = VerticalAlignment.Center
         };
 
-        Content = new Border
+        // Black "LCD" timer in a sunken frame, like an old media player
+        var display = new Border
         {
-            Padding = new Thickness(14, 10),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(55, 57, 72)),
-            BorderThickness = new Thickness(1),
-            Child = new StackPanel
+            Classes = { "sunken-deep" },
+            Background = Brushes.Black,
+            Padding = new Thickness(6, 1),
+            VerticalAlignment = VerticalAlignment.Center,
+            Child = _time
+        };
+
+        Content = ToastWindow.Bevel(new StackPanel
+        {
+            Children =
             {
-                Orientation = Orientation.Horizontal,
-                Spacing = 12,
-                Children =
+                new Border
                 {
-                    _dot,
-                    new StackPanel { VerticalAlignment = VerticalAlignment.Center, Children = { _time, _status } },
-                    size,
-                    _main,
-                    _cancel
+                    Height = 18,
+                    Padding = new Thickness(4, 0),
+                    Background = (IBrush)Application.Current!.FindResource("ClassicTitleBrush")!,
+                    Child = new TextBlock { Text = gif ? "EagleShot - GIF Recorder" : "EagleShot - Screen Recorder", Foreground = Brushes.White, FontWeight = FontWeight.Bold, VerticalAlignment = VerticalAlignment.Center }
+                },
+                new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Spacing = 8,
+                    Margin = new Thickness(8, 6),
+                    Children =
+                    {
+                        _dot,
+                        display,
+                        new StackPanel { VerticalAlignment = VerticalAlignment.Center, Children = { _status, size } },
+                        _main,
+                        _cancel
+                    }
                 }
             }
-        };
+        });
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
         _timer.Tick += (_, _) => Tick();
@@ -114,17 +134,24 @@ public class RecordingBar : Window
         SizeChanged += (_, _) => PlaceOutsideRegion();
     }
 
-    private static Button MakeButton(string text, Color background) => new()
+    private static Button MakeButton(string text, Color? glyph)
     {
-        Content = text,
-        Foreground = Brushes.White,
-        Background = new SolidColorBrush(background),
-        CornerRadius = new CornerRadius(7),
-        Padding = new Thickness(14, 7),
-        FontSize = 13,
-        FontWeight = FontWeight.SemiBold,
-        VerticalAlignment = VerticalAlignment.Center
-    };
+        var label = new TextBlock { Text = text, VerticalAlignment = VerticalAlignment.Center };
+        var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5, Children = { label } };
+        if (glyph != null)
+            content.Children.Insert(0, new Ellipse { Width = 9, Height = 9, Fill = new SolidColorBrush(glyph.Value), VerticalAlignment = VerticalAlignment.Center });
+        return new Button { Content = content, MinWidth = 70, VerticalAlignment = VerticalAlignment.Center };
+    }
+
+    private void SetMainButton(string text, bool stopGlyph)
+    {
+        var content = (StackPanel)_main.Content!;
+        ((TextBlock)content.Children[^1]).Text = text;
+        if (content.Children[0] is Shape old) content.Children.Remove(old);
+        content.Children.Insert(0, stopGlyph
+            ? new Rectangle { Width = 8, Height = 8, Fill = Brushes.Black, VerticalAlignment = VerticalAlignment.Center }
+            : new Ellipse { Width = 9, Height = 9, Fill = new SolidColorBrush(Red), VerticalAlignment = VerticalAlignment.Center });
+    }
 
     /// <summary>Shows "3, 2, 1" in the bar before recording starts.</summary>
     public void ShowCountdown(int secondsLeft)
@@ -140,9 +167,9 @@ public class RecordingBar : Window
         _state = State.Recording;
         _start = DateTime.Now;
         _main.IsEnabled = true;
-        _main.Content = "■  Stop";
-        _status.Text = _gif ? "● recording GIF" : "● recording";
-        _status.Foreground = new SolidColorBrush(Color.FromRgb(255, 105, 97));
+        SetMainButton("Stop", stopGlyph: true);
+        _status.Text = _gif ? "Recording GIF..." : "Recording...";
+        _status.Foreground = new SolidColorBrush(Color.FromRgb(192, 0, 0));
         _dot.Fill = new SolidColorBrush(Red);
         Tick();
         _timer.Start();

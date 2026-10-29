@@ -21,42 +21,40 @@ public class CountdownWindow : Window
         Topmost = true;
         ShowInTaskbar = false;
         CanResize = false;
-        Width = 150;
-        Height = 150;
+        Width = 170;
+        SizeToContent = SizeToContent.Height;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        Background = Brushes.Transparent;
-        TransparencyLevelHint = new[] { WindowTransparencyLevel.Transparent };
+        Background = new SolidColorBrush(Color.FromRgb(192, 192, 192));
 
         _number = new TextBlock
         {
-            FontSize = 56,
+            FontSize = 44,
             FontWeight = FontWeight.Bold,
-            Foreground = Brushes.White,
+            Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 128)),
             HorizontalAlignment = HorizontalAlignment.Center
         };
 
-        Content = new Border
+        Content = ToastWindow.Bevel(new StackPanel
         {
-            CornerRadius = new CornerRadius(75),
-            Background = new SolidColorBrush(Color.FromArgb(230, 18, 19, 26)),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(0x4C, 0x8D, 0xFF)),
-            BorderThickness = new Thickness(3),
-            Child = new StackPanel
+            Children =
             {
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
+                new Border
                 {
-                    _number,
-                    new TextBlock
-                    {
-                        Text = "click to cancel",
-                        FontSize = 11,
-                        Foreground = new SolidColorBrush(Color.FromRgb(150, 152, 168)),
-                        HorizontalAlignment = HorizontalAlignment.Center
-                    }
+                    Height = 18,
+                    Padding = new Thickness(4, 0),
+                    Background = (IBrush)Avalonia.Application.Current!.FindResource("ClassicTitleBrush")!,
+                    Child = new TextBlock { Text = "Capturing in...", Foreground = Brushes.White, FontWeight = FontWeight.Bold, VerticalAlignment = VerticalAlignment.Center }
+                },
+                _number,
+                new TextBlock
+                {
+                    Text = "Click to cancel",
+                    FontSize = 11,
+                    Margin = new Thickness(0, 0, 0, 8),
+                    HorizontalAlignment = HorizontalAlignment.Center
                 }
             }
-        };
+        });
 
         PointerPressed += (_, _) => { _cancelled = true; Close(); };
     }
