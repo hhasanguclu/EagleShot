@@ -1,5 +1,5 @@
 #!/bin/bash
-# EagleShot v3.1.3 - Linux Installer
+# EagleShot v3.2.0 - Linux Installer
 set -e
 
 APP_NAME="EagleShot"

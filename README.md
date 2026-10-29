@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](#english) | [🇹🇷 Türkçe](#türkçe)
 
-![EagleShot Logo](Resources/logo.png)
+![EagleShot](docs/screenshots/main.png)
 
 ---
 
@@ -10,9 +10,24 @@
 
 A lightweight, modern, cross-platform screenshot tool for Windows, macOS and Linux. It pairs the speed of Lightshot with a ShareX-style workflow: capture modes, an annotation editor, after-capture tasks, uploads, history and pinned screenshots, all in a classic Windows 9x/2000-style interface: menu bar, toolbar, tabs, 3D buttons and a status bar.
 
+### 📸 Screenshots
+
+| | |
+|---|---|
+| ![Main window](docs/screenshots/main.png) | ![Capture menu](docs/screenshots/menu.png) |
+| **Main window:** menu bar, toolbar, capture modes, after-capture tasks, recent captures | **Menus** with the hotkey of every capture mode |
+| ![Editor](docs/screenshots/editor.png) | ![Tools](docs/screenshots/tools.png) |
+| **Editor:** select a region, annotate (rectangle, arrow, step numbers, text…), then copy, save, pin or upload | **Tools:** recording, scrolling capture, OCR, QR codes, ruler, image combiner, hash checker… |
+| ![History](docs/screenshots/history.png) | ![Options](docs/screenshots/settings.png) |
+| **History** of everything you saved or uploaded | **Options:** hotkeys, file names, uploaders, image effects, recording |
+
+| Splash screen | About | Screen recorder | Notification |
+|---|---|---|---|
+| ![Splash](docs/screenshots/splash.png) | ![About](docs/screenshots/about.png) | ![Recorder](docs/screenshots/recorder.png) | ![Notification](docs/screenshots/toast.png) |
+
 ### 🌟 Features
 
-- **Main window:** a dashboard with capture modes, recent captures, a searchable **History** gallery (with video and GIF previews), a **Tools** page and a **Settings** page. Closing it keeps EagleShot running in the tray. Drop files on it to upload them, or images to edit them.
+- **Main window:** a classic window with a menu bar (File, Capture, Tools, View, Help), a toolbar, tabs and a status bar; capture modes, recent captures, a searchable **History** gallery (with video and GIF previews), a **Tools** page and a **Settings** page. Closing it keeps EagleShot running in the tray. Drop files on it to upload them, or images to edit them.
 - **Capture modes:**
   - **Region:** drag to select, or click to grab a whole monitor
   - **Full screen:** all monitors at once
@@ -89,7 +104,7 @@ eagleshot --upload <files…>     # upload files
 #### Windows
 
 **Using the installer:**
-1. Download `EagleShot_Setup_v3.1.3_win-x64.exe` from [Releases](https://github.com/hhasanguclu/EagleShot/releases).
+1. Download `EagleShot_Setup_v3.2.0_win-x64.exe` from [Releases](https://github.com/hhasanguclu/EagleShot/releases).
 2. Run the installer and follow the steps. If FFmpeg (recording) or Tesseract OCR (text recognition) aren't installed yet, the installer offers to install them too.
 
 **Manual:**
@@ -174,9 +189,24 @@ chmod +x scripts/build-all.sh
 
 Windows, macOS ve Linux'ta çalışan, hafif, modern ve kullanıcı dostu bir ekran görüntüsü alma aracı. Lightshot'ın hızını ShareX tarzı bir iş akışıyla birleştirir: yakalama modları, düzenleme editörü, yakalama sonrası görevler, yükleme, geçmiş ve ekrana sabitleme. Hepsi menü çubuğu, araç çubuğu, sekmeler, 3D butonlar ve durum çubuğuyla klasik Windows 9x/2000 tarzı bir arayüzde.
 
+### 📸 Ekran görüntüleri
+
+| | |
+|---|---|
+| ![Ana pencere](docs/screenshots/main.png) | ![Yakalama menüsü](docs/screenshots/menu.png) |
+| **Ana pencere:** menü çubuğu, araç çubuğu, yakalama modları, yakalama sonrası görevler, son yakalamalar | **Menüler:** her yakalama modunun kısayolu yanında |
+| ![Editör](docs/screenshots/editor.png) | ![Araçlar](docs/screenshots/tools.png) |
+| **Editör:** alan seç, işaretle (dikdörtgen, ok, adım numarası, metin…), sonra kopyala, kaydet, sabitle veya yükle | **Araçlar:** kayıt, kaydırmalı yakalama, OCR, QR kod, cetvel, resim birleştirici, hash kontrolü… |
+| ![Geçmiş](docs/screenshots/history.png) | ![Seçenekler](docs/screenshots/settings.png) |
+| **Geçmiş:** kaydedilen ve yüklenen her şey | **Seçenekler:** kısayollar, dosya adları, yükleyiciler, resim efektleri, kayıt |
+
+| Açılış ekranı | Hakkında | Ekran kaydedici | Bildirim |
+|---|---|---|---|
+| ![Açılış](docs/screenshots/splash.png) | ![Hakkında](docs/screenshots/about.png) | ![Kaydedici](docs/screenshots/recorder.png) | ![Bildirim](docs/screenshots/toast.png) |
+
 ### 🌟 Özellikler
 
-- **Ana pencere:** yakalama modları, son yakalamalar, aranabilir **Geçmiş** galerisi (video ve GIF önizlemeli), **Araçlar** ve **Ayarlar** sayfalarından oluşan bir panel. Pencereyi kapatınca EagleShot tepside çalışmaya devam eder. Pencereye bırakılan dosyalar yüklenir, resimler editörde açılır.
+- **Ana pencere:** menü çubuğu (Dosya, Yakalama, Araçlar, Görünüm, Yardım), araç çubuğu, sekmeler ve durum çubuğu olan klasik bir pencere; yakalama modları, son yakalamalar, aranabilir **Geçmiş** galerisi (video ve GIF önizlemeli), **Araçlar** ve **Ayarlar** sayfalarından oluşan bir panel. Pencereyi kapatınca EagleShot tepside çalışmaya devam eder. Pencereye bırakılan dosyalar yüklenir, resimler editörde açılır.
 - **Yakalama modları:**
   - **Bölge:** sürükleyerek seçin ya da bir monitörü tıklayıp tamamını alın
   - **Tam ekran:** tüm monitörler tek seferde
@@ -253,7 +283,7 @@ eagleshot --upload <dosyalar…>  # dosya yükle
 #### Windows
 
 **Installer ile:**
-1. [Releases](https://github.com/hhasanguclu/EagleShot/releases) sayfasından `EagleShot_Setup_v3.1.3_win-x64.exe` indirin.
+1. [Releases](https://github.com/hhasanguclu/EagleShot/releases) sayfasından `EagleShot_Setup_v3.2.0_win-x64.exe` indirin.
 2. Installer'ı çalıştırın ve adımları takip edin. FFmpeg (kayıt) veya Tesseract OCR (metin tanıma) kurulu değilse installer onları da kurmayı önerir.
 
 **Manuel:**
@@ -363,7 +393,8 @@ EagleShot/
 │   ├── PortalScreenshot.cs        # Wayland capture via xdg-desktop-portal
 │   └── ToolLocator.cs             # Finds ffmpeg / tesseract
 ├── Views/
-│   ├── MainWindow.axaml(.cs)      # Dashboard: capture, history, tools, settings
+│   ├── MainWindow.axaml(.cs)      # Menu bar, toolbar, tabs: capture, history, tools, options
+│   ├── ClassicTitleBar.cs         # Classic caption bar (Windows) and window chrome
 │   ├── HistoryView.axaml(.cs)     # History gallery
 │   ├── SettingsView.axaml(.cs)    # Settings page
 │   ├── ToolsView.cs               # Tools page
@@ -377,7 +408,8 @@ EagleShot/
 │   ├── CountdownWindow.cs         # Delayed capture countdown
 │   └── SplashWindow.axaml(.cs)    # Splash screen
 ├── Styles/
-│   └── AppStyles.axaml            # Theme, icons, control styles
+│   ├── Classic.axaml              # Classic Windows look: bevels, menus, scroll bars, check boxes
+│   └── AppStyles.axaml            # Palette, icons, app-specific styles
 ├── Resources/
 ├── installers/
 ├── scripts/
