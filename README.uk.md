@@ -10,6 +10,9 @@
 
 ![EagleShot](docs/screenshots/languages/uk.png)
 
+<a href="https://hhasanguclu.github.io/EagleShot/#video"><img src="docs/assets/eagleshot-video-thumb.jpg" width="640" alt="▶ Дивитися відео"></a><br>
+<b>▶ <a href="https://hhasanguclu.github.io/EagleShot/#video">Дивитися відео</a></b>
+
 </div>
 
 ---

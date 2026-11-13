@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>EagleShot video slides</title>
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  /* 1280x720 title cards for the promo video (rendered with a headless browser) */
+  html, body { margin: 0; width: 1280px; height: 720px; overflow: hidden; padding: 0; }
+  body { display: grid; place-items: center; }
+  .card { width: 840px; }
+  .card .body { padding: 22px 26px; }
+  .row { display: grid; grid-template-columns: 150px 1fr; gap: 24px; align-items: center; }
+  .row .logo { width: 150px; height: 150px; }
+  .row .logo img { width: 100%; height: 100%; object-fit: cover; }
+  .wordmark { font-size: 72px; }
+  .big { font-size: 20px; font-weight: bold; margin: 8px 0 4px; }
+  .sub { font-size: 16px; color: #202020; margin: 4px 0; }
+  .progress { margin-top: 18px; height: 24px; }
+  .progress i { width: 16px; }
+  .url { font: bold 22px "Courier New", monospace; background: #fff; padding: 8px 12px; margin: 10px 0 0; }
+  .langwin { width: 820px; }
+  .langwin > .sunken img { width: 100%; display: block; }
+  .langwin .titlebar { height: 30px; font-size: 18px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chips span { padding: 4px 10px; background: #fff; box-shadow: inset -1px -1px #fff, inset 1px 1px #808080; font-size: 15px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<section class="window raised card" id="intro" hidden>
+  <div class="titlebar"><img src="assets/logo-64.png" alt=""><span class="t">EagleShot</span>
+    <span class="caps"><span class="cap close"><svg viewBox="0 0 8 7"><path d="M0 0h2l2 2 2-2h2L5 3.5 8 7H6L4 5 2 7H0l3-3.5z"/></svg></span></span></div>
+  <div class="body">
+    <div class="row">
+      <div class="logo sunken"><img src="assets/logo-256.png" alt=""></div>
+      <div>
+        <div class="wordmark">EagleShot</div>
+        <div class="big">Screenshots · Screen recording · OCR · QR codes</div>
+        <div class="sub">Free and open source · Windows · macOS · Linux</div>
+      </div>
+    </div>
+    <div class="progress sunken" id="bar"></div>
+  </div>
+</section>
+
+<section class="window raised card" id="langs" hidden>
+  <div class="titlebar"><img src="assets/logo-64.png" alt=""><span class="t">EagleShot – 11 languages</span></div>
+  <div class="body">
+    <div class="big" style="font-size:26px">Speaks your language</div>
+    <div class="sub">EagleShot starts in your system language. Change it any time in Options.</div>
+    <div class="chips">
+      <span>English</span><span>Türkçe</span><span>简体中文</span><span>繁體中文</span><span>日本語</span><span>한국어</span>
+      <span>Deutsch</span><span>Français</span><span>Polski</span><span>Українська</span><span>Русский</span>
+    </div>
+  </div>
+</section>
+
+<section class="window raised langwin" id="lang" hidden>
+  <div class="titlebar"><img src="assets/logo-64.png" alt=""><span class="t" id="lang-name"></span></div>
+  <div class="sunken" style="padding:0"><img id="lang-img" alt=""></div>
+</section>
+
+<section class="window raised card" id="outro" hidden>
+  <div class="titlebar"><img src="assets/logo-64.png" alt=""><span class="t">Download EagleShot</span></div>
+  <div class="body">
+    <div class="row">
+      <div class="logo sunken"><img src="assets/logo-256.png" alt=""></div>
+      <div>
+        <div class="wordmark" style="font-size:60px">EagleShot</div>
+        <div class="big">Free download for Windows, macOS and Linux</div>
+        <div class="url">hhasanguclu.github.io/EagleShot</div>
+        <div class="sub" style="margin-top:8px">github.com/hhasanguclu/EagleShot · MIT license</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  var q = new URLSearchParams(location.search);
+  var slide = q.get("slide") || "intro";
+  document.getElementById(slide).hidden = false;
+  var bar = document.getElementById("bar");
+  var blocks = parseInt(q.get("blocks") || "34", 10);
+  for (var i = 0; i < blocks; i++) bar.appendChild(document.createElement("i"));
+  if (slide === "lang") {
+    document.getElementById("lang-name").textContent = q.get("name");
+    document.getElementById("lang-img").src = "screenshots/languages/" + q.get("code") + ".png";
+  }
+</script>
+</body>
+</html>

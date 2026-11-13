@@ -22,6 +22,10 @@
 <meta property="og:image" content="https://hhasanguclu.github.io/EagleShot/screenshots/languages/en.png">
 <meta property="og:image:width" content="790">
 <meta property="og:image:height" content="600">
+<meta property="og:video" content="https://hhasanguclu.github.io/EagleShot/assets/eagleshot-promo.mp4">
+<meta property="og:video:type" content="video/mp4">
+<meta property="og:video:width" content="1280">
+<meta property="og:video:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="EagleShot – Screenshot &amp; Screen Recording Tool">
 <meta name="twitter:description" content="Free, open-source screenshot and screen recording for Windows, macOS and Linux.">
@@ -107,6 +111,7 @@
     <a href="#download" data-i18n="nav.download">Download</a>
     <a href="#features" data-i18n="nav.features">Features</a>
     <a href="#screenshots" data-i18n="nav.screenshots">Screenshots</a>
+    <a href="#video" data-i18n="nav.video">Video</a>
     <a href="#languages" data-i18n="nav.languages">Languages</a>
     <a href="#hotkeys" data-i18n="nav.hotkeys">Hotkeys</a>
     <a href="#about" data-i18n="nav.about">About</a>
@@ -159,6 +164,25 @@
     <span class="field grow" id="status-text" data-i18n="status.ready">Ready.</span>
     <span class="field" data-i18n="status.hotkeys">Hotkeys: on</span>
     <span class="field version-text">v3.3.0</span>
+  </div>
+</section>
+
+<!-- ═════════ Promo video ═════════ -->
+<section class="window raised" id="video" aria-labelledby="video-title">
+  <div class="titlebar">
+    <svg width="16" height="16" fill="#fff" aria-hidden="true"><use href="#i-video"/></svg>
+    <h2 class="t" id="video-title" style="margin:0;font-size:12px" data-i18n="video.title">EagleShot – Promo video</h2>
+    <span class="caps" aria-hidden="true"><span class="cap close"><svg><use href="#i-x"/></svg></span></span>
+  </div>
+  <div class="body">
+    <div class="sunken" style="padding:0;background:#000">
+      <video id="promo" controls muted playsinline preload="metadata" width="1280" height="720"
+             poster="assets/eagleshot-promo.jpg" style="display:block;width:100%;height:auto">
+        <source src="assets/eagleshot-promo.webm" type="video/webm">
+        <source src="assets/eagleshot-promo.mp4" type="video/mp4">
+      </video>
+    </div>
+    <p class="meta-line" data-i18n="video.text">78 seconds of EagleShot: region capture and annotation, menus, text recognition, screen recording and 11 languages.</p>
   </div>
 </section>
 
@@ -416,6 +440,7 @@
     <li><a role="menuitem" href="#download"><svg><use href="#i-download"/></svg><span data-i18n="nav.download">Download</span></a></li>
     <li><a role="menuitem" href="#features"><svg><use href="#i-capture"/></svg><span data-i18n="nav.features">Features</span></a></li>
     <li><a role="menuitem" href="#screenshots"><svg><use href="#i-image"/></svg><span data-i18n="nav.screenshots">Screenshots</span></a></li>
+    <li><a role="menuitem" href="#video"><svg><use href="#i-video"/></svg><span data-i18n="nav.video">Video</span></a></li>
     <li><a role="menuitem" href="#languages"><svg><use href="#i-help"/></svg><span data-i18n="nav.languages">Languages</span></a></li>
     <li><a role="menuitem" href="#hotkeys"><svg><use href="#i-keyboard"/></svg><span data-i18n="nav.hotkeys">Hotkeys</span></a></li>
     <li class="div" role="separator"></li>

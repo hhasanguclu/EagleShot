@@ -10,6 +10,9 @@
 
 ![EagleShot](docs/screenshots/languages/ja.png)
 
+<a href="https://hhasanguclu.github.io/EagleShot/#video"><img src="docs/assets/eagleshot-video-thumb.jpg" width="640" alt="▶ 動画を見る"></a><br>
+<b>▶ <a href="https://hhasanguclu.github.io/EagleShot/#video">動画を見る</a></b>
+
 </div>
 
 ---

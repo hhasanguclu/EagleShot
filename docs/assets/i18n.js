@@ -115,7 +115,10 @@ window.SITE_I18N = {
   "dl.for.win": "Windows için (kurulum)",
   "dl.for.mac": "macOS için (Apple Silicon)",
   "dl.for.linux": "Linux için (.tar.gz)",
-  "status.latest": "Hazır. Son sürüm: v{0}"
+  "status.latest": "Hazır. Son sürüm: v{0}",
+  "nav.video": "Video",
+  "video.title": "EagleShot – Tanıtım videosu",
+  "video.text": "78 saniyede EagleShot: alan yakalama ve işaretleme, menüler, metin tanıma, ekran kaydı ve 11 dil."
  },
  "zh-CN": {
   "desk.setup": "EagleShot 安装",
@@ -232,7 +235,10 @@ window.SITE_I18N = {
   "dl.for.win": "Windows 版（安装程序）",
   "dl.for.mac": "macOS 版（Apple Silicon）",
   "dl.for.linux": "Linux 版（.tar.gz）",
-  "status.latest": "就绪。最新版本：v{0}"
+  "status.latest": "就绪。最新版本：v{0}",
+  "nav.video": "视频",
+  "video.title": "EagleShot – 宣传视频",
+  "video.text": "78 秒了解 EagleShot：区域截图与标注、菜单、文字识别、屏幕录制和 11 种语言。"
  },
  "zh-TW": {
   "desk.setup": "EagleShot 安裝",
@@ -349,7 +355,10 @@ window.SITE_I18N = {
   "dl.for.win": "Windows 版（安裝程式）",
   "dl.for.mac": "macOS 版（Apple Silicon）",
   "dl.for.linux": "Linux 版（.tar.gz）",
-  "status.latest": "就緒。最新版本：v{0}"
+  "status.latest": "就緒。最新版本：v{0}",
+  "nav.video": "影片",
+  "video.title": "EagleShot – 宣傳影片",
+  "video.text": "78 秒認識 EagleShot：區域截圖與標註、選單、文字辨識、螢幕錄影和 11 種語言。"
  },
  "ja": {
   "desk.setup": "EagleShot セットアップ",
@@ -466,7 +475,10 @@ window.SITE_I18N = {
   "dl.for.win": "Windows 用 (インストーラー)",
   "dl.for.mac": "macOS 用 (Apple Silicon)",
   "dl.for.linux": "Linux 用 (.tar.gz)",
-  "status.latest": "準備完了。最新リリース: v{0}"
+  "status.latest": "準備完了。最新リリース: v{0}",
+  "nav.video": "動画",
+  "video.title": "EagleShot – 紹介動画",
+  "video.text": "78 秒でわかる EagleShot: 範囲キャプチャと注釈、メニュー、文字認識、画面録画、11 か国語。"
  },
  "ko": {
   "desk.setup": "EagleShot 설치",
@@ -583,7 +595,10 @@ window.SITE_I18N = {
   "dl.for.win": "Windows용 (설치 프로그램)",
   "dl.for.mac": "macOS용 (Apple Silicon)",
   "dl.for.linux": "Linux용 (.tar.gz)",
-  "status.latest": "준비됨. 최신 릴리스: v{0}"
+  "status.latest": "준비됨. 최신 릴리스: v{0}",
+  "nav.video": "동영상",
+  "video.title": "EagleShot – 소개 영상",
+  "video.text": "78초로 보는 EagleShot: 영역 캡처와 주석, 메뉴, 텍스트 인식, 화면 녹화, 11개 언어."
  },
  "de": {
   "desk.setup": "EagleShot Setup",
@@ -700,7 +715,10 @@ window.SITE_I18N = {
   "dl.for.win": "für Windows (Installer)",
   "dl.for.mac": "für macOS (Apple Silicon)",
   "dl.for.linux": "für Linux (.tar.gz)",
-  "status.latest": "Bereit. Neueste Version: v{0}"
+  "status.latest": "Bereit. Neueste Version: v{0}",
+  "nav.video": "Video",
+  "video.title": "EagleShot – Vorstellungsvideo",
+  "video.text": "EagleShot in 78 Sekunden: Bereichsaufnahme und Beschriftung, Menüs, Texterkennung, Bildschirmaufnahme und 11 Sprachen."
  },
  "fr": {
   "desk.setup": "Installation d'EagleShot",
@@ -817,7 +835,10 @@ window.SITE_I18N = {
   "dl.for.win": "pour Windows (installateur)",
   "dl.for.mac": "pour macOS (Apple Silicon)",
   "dl.for.linux": "pour Linux (.tar.gz)",
-  "status.latest": "Prêt. Dernière version : v{0}"
+  "status.latest": "Prêt. Dernière version : v{0}",
+  "nav.video": "Vidéo",
+  "video.title": "EagleShot – Vidéo de présentation",
+  "video.text": "EagleShot en 78 secondes : capture de zone et annotation, menus, reconnaissance de texte, enregistrement d'écran et 11 langues."
  },
  "pl": {
   "desk.setup": "Instalator EagleShot",
@@ -934,7 +955,10 @@ window.SITE_I18N = {
   "dl.for.win": "dla Windows (instalator)",
   "dl.for.mac": "dla macOS (Apple Silicon)",
   "dl.for.linux": "dla Linux (.tar.gz)",
-  "status.latest": "Gotowe. Najnowsza wersja: v{0}"
+  "status.latest": "Gotowe. Najnowsza wersja: v{0}",
+  "nav.video": "Wideo",
+  "video.title": "EagleShot – Film prezentacyjny",
+  "video.text": "EagleShot w 78 sekund: przechwytywanie obszaru i adnotacje, menu, rozpoznawanie tekstu, nagrywanie ekranu i 11 języków."
  },
  "uk": {
   "desk.setup": "Встановлення EagleShot",
@@ -1051,7 +1075,10 @@ window.SITE_I18N = {
   "dl.for.win": "для Windows (інсталятор)",
   "dl.for.mac": "для macOS (Apple Silicon)",
   "dl.for.linux": "для Linux (.tar.gz)",
-  "status.latest": "Готово. Останній реліз: v{0}"
+  "status.latest": "Готово. Останній реліз: v{0}",
+  "nav.video": "Відео",
+  "video.title": "EagleShot – Відеоогляд",
+  "video.text": "EagleShot за 78 секунд: захоплення області й позначки, меню, розпізнавання тексту, запис екрана та 11 мов."
  },
  "ru": {
   "desk.setup": "Установка EagleShot",
@@ -1168,6 +1195,9 @@ window.SITE_I18N = {
   "dl.for.win": "для Windows (установщик)",
   "dl.for.mac": "для macOS (Apple Silicon)",
   "dl.for.linux": "для Linux (.tar.gz)",
-  "status.latest": "Готово. Последний релиз: v{0}"
+  "status.latest": "Готово. Последний релиз: v{0}",
+  "nav.video": "Видео",
+  "video.title": "EagleShot – Видеообзор",
+  "video.text": "EagleShot за 78 секунд: захват области и пометки, меню, распознавание текста, запись экрана и 11 языков."
  }
 };
