@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using EagleShot.Core;
+
 namespace EagleShot.Views;
 
 /// <summary>
@@ -132,6 +134,7 @@ public class RecordingBar : Window
             if (e.Source is Visual v && v.FindAncestorOfType<Button>(true) == null) BeginMoveDrag(e);
         };
         SizeChanged += (_, _) => PlaceOutsideRegion();
+        L.Apply(this);
     }
 
     private static Button MakeButton(string text, Color? glyph)
@@ -146,8 +149,8 @@ public class RecordingBar : Window
     private void SetMainButton(string text, bool stopGlyph)
     {
         var content = (StackPanel)_main.Content!;
-        ((TextBlock)content.Children[^1]).Text = text;
-        if (content.Children[0] is Shape old) content.Children.Remove(old);
+        ((TextBlock)content.Children[^1]).Text = L.T(text);
+        if (content.Children[0] is Avalonia.Controls.Shapes.Shape old) content.Children.Remove(old);
         content.Children.Insert(0, stopGlyph
             ? new Rectangle { Width = 8, Height = 8, Fill = Brushes.Black, VerticalAlignment = VerticalAlignment.Center }
             : new Ellipse { Width = 9, Height = 9, Fill = new SolidColorBrush(Red), VerticalAlignment = VerticalAlignment.Center });
@@ -159,7 +162,7 @@ public class RecordingBar : Window
         _state = State.Countdown;
         _main.IsEnabled = false;
         _time.Text = secondsLeft.ToString();
-        _status.Text = "starting…";
+        _status.Text = L.T("starting…");
     }
 
     public void SetRecording()
@@ -168,7 +171,7 @@ public class RecordingBar : Window
         _start = DateTime.Now;
         _main.IsEnabled = true;
         SetMainButton("Stop", stopGlyph: true);
-        _status.Text = _gif ? "Recording GIF..." : "Recording...";
+        _status.Text = L.T(_gif ? "Recording GIF..." : "Recording...");
         _status.Foreground = new SolidColorBrush(Color.FromRgb(192, 0, 0));
         _dot.Fill = new SolidColorBrush(Red);
         Tick();
@@ -181,7 +184,7 @@ public class RecordingBar : Window
         _timer.Stop();
         _main.IsEnabled = false;
         _cancel.IsEnabled = false;
-        _status.Text = text;
+        _status.Text = L.T(text);
     }
 
     private void Tick()

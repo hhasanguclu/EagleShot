@@ -442,7 +442,9 @@
     </Style>
     <Style Selector="ComboBox:focus-within /template/ Border#SelectionBox">
         <Setter Property="Background" Value="{StaticResource ClassicHighlight}"/>
-        <Setter Property="TextElement.Foreground" Value="White"/>
+    </Style>
+    <Style Selector="ComboBox:focus-within /template/ Border#SelectionBox > ContentControl">
+        <Setter Property="Foreground" Value="White"/>
     </Style>
     <Style Selector="ComboBox:disabled">
         <Setter Property="Background" Value="{StaticResource ClassicFace}"/>

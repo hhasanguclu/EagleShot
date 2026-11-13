@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EagleShot – Free Screenshot &amp; Screen Recording Tool for Windows, macOS and Linux</title>
+<meta name="description" content="EagleShot is a free, open-source screenshot and screen recording tool for Windows, macOS and Linux. Region capture, annotation editor, MP4/GIF recording, scrolling capture, OCR, QR codes, uploads and pin to screen – in a classic Windows 98 style interface.">
+<meta name="keywords" content="screenshot tool, screen capture, screen recorder, snipping tool alternative, ShareX alternative, Lightshot alternative, Greenshot alternative, screenshot annotation, scrolling screenshot, GIF recorder, MP4 screen recording, OCR, text recognition, QR code scanner, image upload, Imgur uploader, pin screenshot, color picker, screen ruler, PrintScreen, Windows, macOS, Linux, Wayland, open source, free, retro, Windows 98, ekran görüntüsü, ekran görüntüsü alma programı, ekran kaydı, ekran kaydedici, ekran alıntısı aracı alternatifi">
+<meta name="author" content="hhasanguclu">
+<meta name="theme-color" content="#000080">
+<link rel="canonical" href="https://hhasanguclu.github.io/EagleShot/">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="assets/logo-64.png">
+<link rel="apple-touch-icon" href="assets/logo-256.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="EagleShot">
+<meta property="og:title" content="EagleShot – Screenshot &amp; Screen Recording Tool">
+<meta property="og:description" content="Free, open-source screenshot and screen recording for Windows, macOS and Linux, with a classic Windows 98 look.">
+<meta property="og:url" content="https://hhasanguclu.github.io/EagleShot/">
+<meta property="og:image" content="https://hhasanguclu.github.io/EagleShot/screenshots/main.png">
+<meta property="og:image:width" content="790">
+<meta property="og:image:height" content="600">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="EagleShot – Screenshot &amp; Screen Recording Tool">
+<meta name="twitter:description" content="Free, open-source screenshot and screen recording for Windows, macOS and Linux.">
+<meta name="twitter:image" content="https://hhasanguclu.github.io/EagleShot/screenshots/main.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "EagleShot",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "description": "Free, open-source screenshot and screen recording tool with an annotation editor, MP4/GIF recording, scrolling capture, OCR, QR codes, uploads and pin to screen.",
+  "url": "https://hhasanguclu.github.io/EagleShot/",
+  "downloadUrl": "https://github.com/hhasanguclu/EagleShot/releases/latest",
+  "screenshot": "https://hhasanguclu.github.io/EagleShot/screenshots/main.png",
+  "license": "https://opensource.org/licenses/MIT",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "hhasanguclu", "url": "https://github.com/hhasanguclu" }
+}
+</script>
+
+<style>
+/* ───────── Classic Windows palette ───────── */
+:root {
+  --face: #c0c0c0;
+  --light: #ffffff;
+  --face-light: #dfdfdf;
+  --shadow: #808080;
+  --dark: #000000;
+  --navy: #000080;
+  --title: linear-gradient(90deg, #000080, #1084d0);
+  --title-off: linear-gradient(90deg, #808080, #b5b5b5);
+  --desktop: #008080;
+  --tip: #ffffe1;
+  --font: Tahoma, "MS Sans Serif", "Microsoft Sans Serif", Verdana, "DejaVu Sans", Geneva, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+html[lang="en"] [data-l="tr"], html[lang="tr"] [data-l="en"] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--desktop);
+  color: #000;
+  font: 13px/1.45 var(--font);
+  padding-bottom: 40px; /* taskbar */
+}
+a { color: #0000ee; }
+a:visited { color: #551a8b; }
+img { max-width: 100%; display: block; }
+code, kbd {
+  font-family: "Courier New", Consolas, monospace;
+  background: #fff;
+  border: 1px solid var(--shadow);
+  padding: 0 3px;
+}
+:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
+
+/* ───────── Bevels ───────── */
+.raised {
+  background: var(--face);
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--face-light),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--light);
+}
+.sunken {
+  background: #fff;
+  box-shadow: inset -1px -1px var(--light), inset 1px 1px var(--shadow),
+              inset -2px -2px var(--face-light), inset 2px 2px var(--dark);
+  padding: 2px;
+}
+.field { /* status-bar style field */
+  box-shadow: inset -1px -1px var(--light), inset 1px 1px var(--shadow);
+  padding: 2px 6px;
+}
+.etched { border: 1px solid var(--shadow); box-shadow: 1px 1px 0 var(--light), inset 1px 1px 0 var(--light); }
+
+/* ───────── Buttons ───────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 75px; min-height: 23px; padding: 4px 12px;
+  font: inherit; color: #000; text-decoration: none; cursor: default;
+  background: var(--face); border: 0;
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--light),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--face-light);
+}
+a.btn:visited { color: #000; }
+.btn:active, .btn.pressed {
+  box-shadow: inset -1px -1px var(--light), inset 1px 1px var(--dark),
+              inset -2px -2px var(--face-light), inset 2px 2px var(--shadow);
+  padding: 5px 11px 3px 13px;
+}
+.btn.default { outline: 1px solid #000; outline-offset: -1px; font-weight: bold; }
+.btn.big { min-height: 40px; padding: 6px 16px; font-size: 13px; }
+.btn.big:active { padding: 7px 15px 5px 17px; }
+.btn svg { width: 20px; height: 20px; fill: var(--navy); flex: none; }
+.btn small { display: block; font-size: 11px; color: #404040; font-weight: normal; }
+
+/* ───────── Windows ───────── */
+.window { padding: 3px; margin: 0 auto 22px; max-width: 980px; }
+.titlebar {
+  display: flex; align-items: center; gap: 4px;
+  height: 20px; padding: 0 2px 0 4px;
+  background: var(--title); color: #fff; font-weight: bold; font-size: 12px;
+  user-select: none;
+}
+.titlebar.inactive { background: var(--title-off); }
+.titlebar img { width: 16px; height: 16px; }
+.titlebar .t { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.caps { display: flex; gap: 2px; }
+.cap {
+  width: 16px; height: 14px; padding: 0; display: grid; place-items: center;
+  background: var(--face); border: 0; color: #000; text-decoration: none; font: bold 9px/1 var(--font);
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--light),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--face-light);
+}
+.cap:active { box-shadow: inset -1px -1px var(--light), inset 1px 1px var(--dark), inset -2px -2px var(--face-light), inset 2px 2px var(--shadow); }
+.cap svg { width: 8px; height: 7px; fill: #000; }
+.cap.close { margin-left: 2px; }
+.menubar { display: flex; flex-wrap: wrap; padding: 2px 0; }
+.menubar a, .menubar button {
+  font: inherit; color: #000; background: none; border: 0; padding: 2px 8px; text-decoration: none; cursor: default;
+}
+.menubar a:hover, .menubar button:hover, .menubar a:focus-visible { background: var(--navy); color: #fff; }
+.menubar .u { text-decoration: underline; }
+.menubar .spacer { flex: 1; }
+.body { padding: 14px; }
+.statusbar { display: flex; gap: 2px; padding: 2px; }
+.statusbar .field { flex: none; }
+.statusbar .field.grow { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* Group box */
+fieldset.group { border: 0; margin: 0 0 14px; padding: 14px 12px 12px; position: relative; }
+fieldset.group::before {
+  content: ""; position: absolute; inset: 7px 0 0 0;
+  border: 1px solid var(--shadow); box-shadow: 1px 1px 0 var(--light), inset 1px 1px 0 var(--light);
+  pointer-events: none;
+}
+fieldset.group > legend { padding: 0 3px; margin-left: 6px; position: relative; z-index: 1; background: var(--face); }
+
+/* ───────── Desktop icons ───────── */
+.desktop-icons {
+  position: absolute; top: 14px; left: 10px; display: grid; gap: 18px; width: 84px; z-index: 2;
+}
+.dicon { display: grid; justify-items: center; gap: 4px; color: #fff; text-decoration: none; text-align: center; font-size: 12px; }
+.dicon:visited { color: #fff; }
+.dicon .ico { width: 36px; height: 36px; display: grid; place-items: center; }
+.dicon .ico svg { width: 32px; height: 32px; fill: #fff; filter: drop-shadow(1px 1px 0 #000); }
+.dicon .ico img { width: 34px; height: 34px; }
+.dicon span { padding: 0 2px; }
+.dicon:hover span, .dicon:focus-visible span { background: var(--navy); outline: 1px dotted #fff; }
+@media (max-width: 1240px) { .desktop-icons { display: none; } }
+
+main { position: relative; padding: 24px 16px 8px; }
+
+/* ───────── Hero (splash-like) ───────── */
+.hero { display: grid; grid-template-columns: 132px 1fr; gap: 20px; align-items: start; }
+.hero .logo { width: 132px; height: 132px; }
+.hero .logo img { width: 100%; height: 100%; object-fit: cover; }
+.wordmark {
+  margin: 0; font: italic bold 52px/1 "Times New Roman", Times, "Liberation Serif", serif; color: var(--navy);
+}
+.tagline { font-weight: bold; margin: 6px 0 2px; font-size: 14px; }
+.hero p { margin: 6px 0; max-width: 62ch; }
+.dl-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
+.dl-row .btn { text-align: left; justify-content: flex-start; }
+.meta-line { color: #404040; font-size: 12px; }
+.shot { margin-top: 16px; }
+.shot img { width: 100%; height: auto; image-rendering: auto; }
+
+/* Progress bar (decorative) */
+.progress { height: 18px; padding: 3px; display: flex; gap: 2px; overflow: hidden; }
+.progress i { width: 11px; flex: none; background: var(--navy); }
+
+/* ───────── Features ───────── */
+.features { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px 14px; }
+.feat { display: grid; grid-template-columns: 30px 1fr; gap: 8px; align-items: start; }
+.feat svg { width: 28px; height: 28px; fill: var(--navy); }
+.feat b { display: block; }
+.feat span { color: #202020; }
+
+/* ───────── Tabs ───────── */
+.tabs { display: flex; flex-wrap: wrap; gap: 0; padding-left: 4px; position: relative; z-index: 1; }
+.tab {
+  font: inherit; color: #000; background: var(--face); border: 0; padding: 3px 12px; margin-top: 3px; cursor: default;
+  box-shadow: inset 1px 1px var(--light), inset -1px 0 var(--dark), inset -2px 0 var(--shadow);
+}
+.tab[aria-selected="true"] { margin: 0 -2px -1px; padding: 4px 14px 5px; position: relative; z-index: 2; }
+.tabpage { padding: 12px; box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--light), inset -2px -2px var(--shadow); }
+.tabpage figure { margin: 0; }
+.tabpage figcaption { margin-top: 8px; }
+.tabpage[hidden] { display: none; }
+
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
+.thumbs figure { margin: 0; }
+.thumbs figcaption { font-size: 12px; margin-top: 4px; }
+
+/* ───────── Download (setup wizard) ───────── */
+.wizard { display: grid; grid-template-columns: 164px 1fr; min-height: 300px; }
+.wizard .side {
+  background: linear-gradient(180deg, #000080 0%, #1084d0 100%);
+  color: #fff; padding: 16px 12px; display: grid; align-content: start; gap: 10px;
+}
+.wizard .side img { width: 96px; height: 96px; }
+.wizard .side .wm { font: italic bold 26px/1 "Times New Roman", Times, serif; }
+.wizard .main { padding: 16px; }
+.wizard h3 { margin: 0 0 6px; font-size: 14px; }
+.platforms { display: grid; gap: 8px; margin: 12px 0; }
+.platform { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 8px; background: #fff; }
+.platform svg { width: 30px; height: 30px; }
+.platform .name b { display: block; }
+.platform .name span { font-size: 12px; color: #404040; }
+.platform .acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.platform.detected { outline: 1px dotted var(--navy); outline-offset: -3px; }
+.howto { display: grid; gap: 10px; }
+.howto details { padding: 6px 10px; }
+.howto summary { cursor: default; font-weight: bold; }
+.howto ol { margin: 6px 0 2px; padding-left: 20px; }
+.wizard .nav { display: flex; justify-content: flex-end; gap: 6px; border-top: 1px solid var(--shadow); box-shadow: 0 -1px 0 var(--light) inset; padding-top: 10px; margin-top: 14px; }
+
+/* ───────── Hotkeys table ───────── */
+table.list { width: 100%; border-collapse: collapse; background: #fff; }
+table.list th { text-align: left; font-weight: normal; padding: 3px 8px; background: var(--face);
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--light), inset -2px -2px var(--shadow); }
+table.list td { padding: 3px 8px; border-bottom: 1px dotted #c0c0c0; }
+table.list tr:hover td { background: var(--navy); color: #fff; }
+table.list tr:hover td code { color: #000; }
+
+/* ───────── About dialog ───────── */
+.about { display: grid; grid-template-columns: 64px 1fr; gap: 14px; }
+.about img { width: 64px; height: 64px; }
+.about p { margin: 4px 0; }
+.rule { height: 2px; border-top: 1px solid var(--shadow); border-bottom: 1px solid var(--light); margin: 12px 0; }
+
+/* ───────── Taskbar ───────── */
+.taskbar {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 32px; z-index: 50;
+  display: flex; align-items: center; gap: 4px; padding: 3px 3px;
+  background: var(--face); box-shadow: inset 0 1px var(--face-light), inset 0 2px var(--light);
+}
+.start { font-weight: bold; min-width: 0; padding: 2px 6px; height: 24px; }
+.start img { width: 18px; height: 18px; }
+.taskbar .sep { width: 2px; height: 22px; border-left: 1px solid var(--shadow); border-right: 1px solid var(--light); margin: 0 2px; }
+.task { min-width: 0; max-width: 160px; height: 24px; justify-content: flex-start; padding: 2px 8px; overflow: hidden; white-space: nowrap; }
+.task img { width: 16px; height: 16px; }
+.tray { margin-left: auto; height: 24px; display: flex; align-items: center; gap: 8px; padding: 0 10px; }
+.tray img { width: 16px; height: 16px; }
+.startmenu {
+  position: fixed; left: 2px; bottom: 30px; z-index: 60; width: 230px; display: none; padding: 3px;
+}
+.startmenu.open { display: grid; grid-template-columns: 22px 1fr; }
+.startmenu .stripe {
+  background: linear-gradient(0deg, #000080, #1084d0); color: #c0c0c0;
+  writing-mode: vertical-rl; transform: rotate(180deg); font: bold 15px/22px var(--font); padding: 6px 0; text-align: left;
+}
+.startmenu .stripe b { color: #fff; }
+.startmenu ul { list-style: none; margin: 0; padding: 0; }
+.startmenu li a { display: flex; align-items: center; gap: 10px; padding: 6px 10px; color: #000; text-decoration: none; }
+.startmenu li a:hover, .startmenu li a:focus-visible { background: var(--navy); color: #fff; }
+.startmenu li a:hover svg, .startmenu li a:focus-visible svg { fill: #fff; }
+.startmenu svg { width: 22px; height: 22px; fill: var(--navy); }
+.startmenu .div { height: 2px; margin: 3px 2px; border-top: 1px solid var(--shadow); border-bottom: 1px solid var(--light); }
+
+/* ───────── Small screens ───────── */
+@media (max-width: 720px) {
+  main { padding: 12px 8px 4px; }
+  .hero { grid-template-columns: 1fr; }
+  .hero .logo { width: 96px; height: 96px; }
+  .wordmark { font-size: 42px; }
+  .wizard { grid-template-columns: 1fr; }
+  .wizard .side { grid-template-columns: 64px 1fr; align-items: center; }
+  .wizard .side img { width: 64px; height: 64px; }
+  .wizard .side .hide-sm { display: none; }
+  .platform { grid-template-columns: 30px 1fr; }
+  .platform .acts { grid-column: 1 / -1; justify-content: flex-start; }
+  .about { grid-template-columns: 1fr; }
+  .task { display: none; }
+  .statusbar .field:not(.grow) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<!-- Icon sprite (Material Design paths, the same icons the app uses) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-region" viewBox="0 0 24 24"><path d="M17 15h2V7c0-1.1-.9-2-2-2H9v2h8v8zM7 17V1H5v4H1v2h4v10c0 1.1.9 2 2 2h10v4h2v-4h4v-2H7z"/></symbol>
+  <symbol id="i-full" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></symbol>
+  <symbol id="i-window" viewBox="0 0 24 24"><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.89-2-2-2zm0 14H5V8h14v10z"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></symbol>
+  <symbol id="i-gif" viewBox="0 0 24 24"><path d="M11.5 9H13v6h-1.5zM9 9H6c-.6 0-1 .5-1 1v4c0 .5.4 1 1 1h3c.6 0 1-.5 1-1v-2H8.5v1.5h-2v-3H10V10c0-.5-.4-1-1-1zm10 1.5V9h-4.5v6H16v-2h2v-1.5h-2v-1z"/></symbol>
+  <symbol id="i-scroll" viewBox="0 0 24 24"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></symbol>
+  <symbol id="i-ocr" viewBox="0 0 24 24"><path d="M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 19h2v2h-2zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM15 19h2v2h-2zM17 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></symbol>
+  <symbol id="i-color" viewBox="0 0 24 24"><path d="M20.71 5.63l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-3.12 3.12-1.93-1.91-1.41 1.41 1.42 1.42L3 16.25V21h4.75l8.92-8.92 1.42 1.42 1.41-1.41-1.92-1.92 3.12-3.12c.4-.4.4-1.03.01-1.42zM6.92 19L5 17.08l8.06-8.06 1.92 1.92L6.92 19z"/></symbol>
+  <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z"/></symbol>
+  <symbol id="i-effects" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24"><path d="M20 10V8h-4V4h-2v4h-4V4H8v4H4v2h4v4H4v2h4v4h2v-4h4v4h2v-4h4v-2h-4v-4h4zm-6 4h-4v-4h4v4z"/></symbol>
+  <symbol id="i-combine" viewBox="0 0 24 24"><path d="M20 13H3c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h17c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zm0-10H3c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h17c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z"/></symbol>
+  <symbol id="i-auto" viewBox="0 0 24 24"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 24 24"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></symbol>
+  <symbol id="i-capture" viewBox="0 0 24 24"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></symbol>
+  <symbol id="i-min" viewBox="0 0 8 7"><path d="M0 5h6v2H0z"/></symbol>
+  <symbol id="i-max" viewBox="0 0 9 9"><path d="M0 0h9v9H0zM1 2v6h7V2z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 8 7"><path d="M0 0h2l2 2 2-2h2L5 3.5 8 7H6L4 5 2 7H0l3-3.5z"/></symbol>
+  <symbol id="i-win" viewBox="0 0 24 24"><path fill="#f25022" d="M1 1h10.5v10.5H1z"/><path fill="#7fba00" d="M12.5 1H23v10.5H12.5z"/><path fill="#00a4ef" d="M1 12.5h10.5V23H1z"/><path fill="#ffb900" d="M12.5 12.5H23V23H12.5z"/></symbol>
+  <symbol id="i-apple" viewBox="0 0 24 24"><path fill="#333" d="M16.37 1.43c0 1.14-.42 2.2-1.25 3.07-.99 1.04-2.2 1.64-3.5 1.53-.02-.13-.03-.27-.03-.41 0-1.09.48-2.26 1.32-3.18.42-.47.96-.86 1.6-1.17.64-.3 1.25-.47 1.82-.5.02.22.04.44.04.66zM20.92 17.2c-.4.94-.87 1.8-1.42 2.6-.75 1.08-1.37 1.83-1.84 2.24-.74.68-1.53 1.03-2.38 1.05-.61 0-1.35-.17-2.21-.53-.86-.35-1.66-.52-2.38-.52-.76 0-1.57.17-2.44.52-.87.36-1.57.54-2.11.56-.82.04-1.63-.32-2.44-1.08-.52-.45-1.17-1.23-1.95-2.33-.83-1.18-1.52-2.55-2.06-4.11C.13 13.9-.12 12.25-.12 10.66c0-1.83.4-3.4 1.19-4.72a7 7 0 0 1 2.48-2.51 6.68 6.68 0 0 1 3.36-.95c.65 0 1.51.2 2.57.6 1.06.4 1.74.6 2.04.6.22 0 .98-.24 2.27-.71 1.22-.44 2.25-.62 3.1-.55 2.28.18 4 1.08 5.13 2.71-2.04 1.24-3.05 2.97-3.03 5.19.02 1.73.65 3.17 1.88 4.31.56.53 1.18.94 1.87 1.23-.15.44-.31.86-.48 1.27z"/></symbol>
+  <symbol id="i-linux" viewBox="0 0 24 24"><ellipse cx="12" cy="14" rx="7" ry="9" fill="#222"/><ellipse cx="12" cy="16" rx="4.6" ry="6" fill="#fff"/><circle cx="10" cy="8" r="1.4" fill="#fff"/><circle cx="14" cy="8" r="1.4" fill="#fff"/><circle cx="10.2" cy="8.2" r=".6" fill="#000"/><circle cx="13.8" cy="8.2" r=".6" fill="#000"/><path fill="#f5a623" d="M10 10.2h4l-2 1.8zM5 21.5c1.5-1.7 3.5-1.7 4.5 0zM14.5 21.5c1-1.7 3-1.7 4.5 0z"/></symbol>
+</svg>
+
+<!-- ═════════ Desktop icons (wide screens) ═════════ -->
+<nav class="desktop-icons" aria-label="Shortcuts">
+  <a class="dicon" href="#download"><span class="ico"><img src="assets/logo-64.png" alt=""></span><span>EagleShot Setup</span></a>
+  <a class="dicon" href="#screenshots"><span class="ico"><svg><use href="#i-image"/></svg></span><span data-l="en">Screenshots</span><span data-l="tr">Ekran Görüntüleri</span></a>
+  <a class="dicon" href="#features"><span class="ico"><svg><use href="#i-capture"/></svg></span><span data-l="en">Features</span><span data-l="tr">Özellikler</span></a>
+  <a class="dicon" href="https://github.com/hhasanguclu/EagleShot"><span class="ico"><svg><use href="#i-github"/></svg></span><span>GitHub</span></a>
+</nav>
+
+<main>
+
+<!-- ═════════ Main window: hero ═════════ -->
+<section class="window raised" id="top" aria-labelledby="app-title">
+  <div class="titlebar">
+    <img src="assets/logo-64.png" alt="">
+    <span class="t">EagleShot – <span data-l="en">Screen Capture &amp; Recording Utility</span><span data-l="tr">Ekran Görüntüsü ve Kayıt Aracı</span></span>
+    <span class="caps" aria-hidden="true">
+      <span class="cap"><svg><use href="#i-min"/></svg></span>
+      <span class="cap"><svg viewBox="0 0 9 9" style="width:9px;height:9px"><use href="#i-max"/></svg></span>
+      <span class="cap close"><svg><use href="#i-x"/></svg></span>
+    </span>
+  </div>
+  <nav class="menubar" aria-label="Menu">
+    <a href="#download"><span data-l="en"><span class="u">D</span>ownload</span><span data-l="tr"><span class="u">İ</span>ndir</span></a>
+    <a href="#features"><span data-l="en"><span class="u">F</span>eatures</span><span data-l="tr"><span class="u">Ö</span>zellikler</span></a>
+    <a href="#screenshots"><span data-l="en"><span class="u">S</span>creenshots</span><span data-l="tr"><span class="u">E</span>kran Görüntüleri</span></a>
+    <a href="#hotkeys"><span data-l="en"><span class="u">H</span>otkeys</span><span data-l="tr"><span class="u">K</span>ısayollar</span></a>
+    <a href="#about"><span data-l="en"><span class="u">A</span>bout</span><span data-l="tr"><span class="u">H</span>akkında</span></a>
+    <span class="spacer"></span>
+    <button type="button" id="lang-toggle" aria-label="Language / Dil"><span data-l="en">Türkçe</span><span data-l="tr">English</span></button>
+  </nav>
+
+  <div class="body">
+    <div class="hero">
+      <div class="logo sunken"><img src="assets/logo-256.png" alt="EagleShot logo" width="128" height="128"></div>
+      <div>
+        <h1 class="wordmark" id="app-title">EagleShot</h1>
+        <p class="tagline">
+          <span data-l="en">Screenshots, screen recording and capture tools. Free and open source.</span>
+          <span data-l="tr">Ekran görüntüsü, ekran kaydı ve yakalama araçları. Ücretsiz ve açık kaynak.</span>
+        </p>
+        <p data-l="en">Press <kbd>PrintScreen</kbd>, select an area, annotate it and copy, save, pin or upload it. Record the screen to MP4 or GIF, grab long scrolling pages, read text with OCR and scan QR codes. It is like ShareX and Lightshot, in a familiar retro interface, on Windows, macOS and Linux.</p>
+        <p data-l="tr"><kbd>PrintScreen</kbd>'e bas, alanı seç, üzerine işaretle; kopyala, kaydet, ekrana sabitle ya da yükle. Ekranı MP4 veya GIF olarak kaydet, uzun sayfaları kaydırarak yakala, OCR ile metin oku, QR kod tara. ShareX ve Lightshot gibi; Windows, macOS ve Linux'ta, tanıdık retro bir arayüzle.</p>
+
+        <div class="dl-row" id="hero-downloads">
+          <a class="btn big default" id="hero-primary" href="https://github.com/hhasanguclu/EagleShot/releases/latest">
+            <svg><use href="#i-download"/></svg>
+            <span><span data-l="en">Download EagleShot</span><span data-l="tr">EagleShot'ı İndir</span>
+              <small id="hero-primary-sub"><span data-l="en">Windows · macOS · Linux</span><span data-l="tr">Windows · macOS · Linux</span></small></span>
+          </a>
+          <a class="btn big" href="#download">
+            <span><span data-l="en">All downloads...</span><span data-l="tr">Tüm indirmeler...</span></span>
+          </a>
+          <a class="btn big" href="https://github.com/hhasanguclu/EagleShot">
+            <svg><use href="#i-github"/></svg><span>GitHub</span>
+          </a>
+        </div>
+        <div class="meta-line">
+          <span class="version-text">v3.2.0</span> ·
+          <span data-l="en">MIT license · No account, no ads, no telemetry</span>
+          <span data-l="tr">MIT lisansı · Hesap yok, reklam yok, izleme yok</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="shot sunken">
+      <img src="screenshots/main.png" width="790" height="600" alt="EagleShot main window with menu bar, toolbar, capture modes and recent captures">
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span class="field grow" id="status-text"><span data-l="en">Ready.</span><span data-l="tr">Hazır.</span></span>
+    <span class="field"><span data-l="en">Hotkeys: on</span><span data-l="tr">Kısayollar: açık</span></span>
+    <span class="field version-text">v3.2.0</span>
+  </div>
+</section>
+
+<!-- ═════════ Features ═════════ -->
+<section class="window raised" id="features" aria-labelledby="features-title">
+  <div class="titlebar">
+    <svg width="16" height="16" fill="#fff" aria-hidden="true"><use href="#i-capture"/></svg>
+    <h2 class="t" id="features-title" style="margin:0;font-size:12px"><span data-l="en">Features</span><span data-l="tr">Özellikler</span></h2>
+    <span class="caps" aria-hidden="true"><span class="cap close"><svg><use href="#i-x"/></svg></span></span>
+  </div>
+  <div class="body">
+    <fieldset class="group">
+      <legend><span data-l="en">Capture</span><span data-l="tr">Yakalama</span></legend>
+      <div class="features">
+        <div class="feat"><svg><use href="#i-region"/></svg><div><b data-l="en">Region, full screen, monitor</b><b data-l="tr">Alan, tam ekran, monitör</b>
+          <span data-l="en">Drag to select with a magnifier and pixel colors, or grab a whole monitor in one click.</span>
+          <span data-l="tr">Büyüteç ve piksel rengiyle sürükleyerek seç ya da tek tıkla bütün monitörü al.</span></div></div>
+        <div class="feat"><svg><use href="#i-window"/></svg><div><b data-l="en">Window capture</b><b data-l="tr">Pencere yakalama</b>
+          <span data-l="en">Hover a window to highlight it, click to capture just that window.</span>
+          <span data-l="tr">Pencerenin üzerine gel, vurgulansın; tıkla, sadece o pencere yakalansın.</span></div></div>
+        <div class="feat"><svg><use href="#i-scroll"/></svg><div><b data-l="en">Scrolling capture</b><b data-l="tr">Kaydırmalı yakalama</b>
+          <span data-l="en">Scrolls a page or document and stitches it into one long image.</span>
+          <span data-l="tr">Sayfayı ya da belgeyi kaydırır, tek uzun bir görüntüde birleştirir.</span></div></div>
+        <div class="feat"><svg><use href="#i-timer"/></svg><div><b data-l="en">Delay, repeat, auto capture</b><b data-l="tr">Gecikme, tekrar, otomatik</b>
+          <span data-l="en">Countdown capture, repeat the last region, or a screenshot every N seconds.</span>
+          <span data-l="tr">Geri sayımlı yakalama, son alanı tekrar al ya da her N saniyede bir görüntü.</span></div></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="group">
+      <legend><span data-l="en">Record</span><span data-l="tr">Kayıt</span></legend>
+      <div class="features">
+        <div class="feat"><svg><use href="#i-video"/></svg><div><b data-l="en">MP4 screen recording</b><b data-l="tr">MP4 ekran kaydı</b>
+          <span data-l="en">Select an area, press Start. A small bar shows the timer, Stop and Cancel.</span>
+          <span data-l="tr">Alanı seç, Başlat'a bas. Küçük bir çubukta sayaç, Durdur ve İptal var.</span></div></div>
+        <div class="feat"><svg><use href="#i-gif"/></svg><div><b data-l="en">Animated GIF</b><b data-l="tr">Hareketli GIF</b>
+          <span data-l="en">Record a region straight to a GIF for chats and bug reports.</span>
+          <span data-l="tr">Bir alanı doğrudan GIF olarak kaydet; sohbet ve hata bildirimleri için.</span></div></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="group">
+      <legend><span data-l="en">Annotate &amp; share</span><span data-l="tr">İşaretle ve paylaş</span></legend>
+      <div class="features">
+        <div class="feat"><svg><use href="#i-edit"/></svg><div><b data-l="en">Annotation editor</b><b data-l="tr">Düzenleme editörü</b>
+          <span data-l="en">Pen, marker, arrows, shapes, text, highlight, step numbers, pixelate and blur. Undo and redo included.</span>
+          <span data-l="tr">Kalem, işaretleyici, ok, şekil, metin, vurgu, adım numarası, pikselleştirme ve bulanıklaştırma. Geri al ve yinele de var.</span></div></div>
+        <div class="feat"><svg><use href="#i-upload"/></svg><div><b data-l="en">Upload</b><b data-l="tr">Yükleme</b>
+          <span data-l="en">Imgur, any HTTP endpoint, or ShareX <code>.sxcu</code> uploaders. The link is copied for you.</span>
+          <span data-l="tr">Imgur, herhangi bir HTTP adresi ya da ShareX <code>.sxcu</code> yükleyicileri. Bağlantı otomatik kopyalanır.</span></div></div>
+        <div class="feat"><svg><use href="#i-pin"/></svg><div><b data-l="en">Pin to screen</b><b data-l="tr">Ekrana sabitle</b>
+          <span data-l="en">Keep a screenshot floating above all windows. Zoom it, fade it, move it.</span>
+          <span data-l="tr">Bir görüntüyü tüm pencerelerin üstünde tut. Yakınlaştır, saydamlaştır, taşı.</span></div></div>
+        <div class="feat"><svg><use href="#i-effects"/></svg><div><b data-l="en">Image effects</b><b data-l="tr">Resim efektleri</b>
+          <span data-l="en">Background, rounded corners, shadow, border and watermark, with a live preview.</span>
+          <span data-l="tr">Arka plan, yuvarlak köşe, gölge, kenarlık ve filigran; canlı önizlemeyle.</span></div></div>
+        <div class="feat"><svg><use href="#i-history"/></svg><div><b data-l="en">History</b><b data-l="tr">Geçmiş</b>
+          <span data-l="en">Every saved or uploaded capture, searchable, with thumbnails.</span>
+          <span data-l="tr">Kaydedilen veya yüklenen her yakalama; küçük resimli ve aranabilir.</span></div></div>
+        <div class="feat"><svg><use href="#i-link"/></svg><div><b data-l="en">Paste anywhere</b><b data-l="tr">Her yere yapıştır</b>
+          <span data-l="en">Copied images paste into chat apps, documents, Explorer, and even terminals.</span>
+          <span data-l="tr">Kopyalanan resimler sohbet uygulamalarına, belgelere, Gezgin'e, hatta terminale yapışır.</span></div></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="group">
+      <legend><span data-l="en">Tools</span><span data-l="tr">Araçlar</span></legend>
+      <div class="features">
+        <div class="feat"><svg><use href="#i-ocr"/></svg><div><b data-l="en">Text recognition (OCR)</b><b data-l="tr">Metin tanıma (OCR)</b>
+          <span data-l="en">Select any text on screen and copy it. English and Turkish included.</span>
+          <span data-l="tr">Ekrandaki herhangi bir metni seç ve kopyala. İngilizce ve Türkçe dahil.</span></div></div>
+        <div class="feat"><svg><use href="#i-qr"/></svg><div><b data-l="en">QR codes</b><b data-l="tr">QR kodlar</b>
+          <span data-l="en">Scan QR codes and barcodes from the screen, or create your own.</span>
+          <span data-l="tr">Ekrandaki QR kod ve barkodları tara ya da kendin oluştur.</span></div></div>
+        <div class="feat"><svg><use href="#i-color"/></svg><div><b data-l="en">Color picker &amp; ruler</b><b data-l="tr">Renk seçici ve cetvel</b>
+          <span data-l="en">Copy the HEX color of any pixel; measure distances and angles.</span>
+          <span data-l="tr">Herhangi bir pikselin HEX rengini kopyala; mesafe ve açı ölç.</span></div></div>
+        <div class="feat"><svg><use href="#i-combine"/></svg><div><b data-l="en">Combiner &amp; hash checker</b><b data-l="tr">Birleştirici ve hash kontrolü</b>
+          <span data-l="en">Join images side by side or stacked; verify MD5 / SHA checksums.</span>
+          <span data-l="tr">Resimleri yan yana ya da alt alta birleştir; MD5 / SHA doğrula.</span></div></div>
+        <div class="feat"><svg><use href="#i-keyboard"/></svg><div><b data-l="en">Global hotkeys</b><b data-l="tr">Genel kısayollar</b>
+          <span data-l="en">Every action can have a hotkey. On Windows, PrintScreen opens EagleShot instead of the Snipping Tool.</span>
+          <span data-l="tr">Her işleme kısayol atanabilir. Windows'ta PrintScreen, Ekran Alıntısı Aracı yerine EagleShot'ı açar.</span></div></div>
+        <div class="feat"><svg><use href="#i-auto"/></svg><div><b data-l="en">Command line</b><b data-l="tr">Komut satırı</b>
+          <span data-l="en"><code>eagleshot --region</code>, <code>--record</code>, <code>--ocr</code>… Handy for desktop shortcuts and Wayland.</span>
+          <span data-l="tr"><code>eagleshot --region</code>, <code>--record</code>, <code>--ocr</code>… Masaüstü kısayolları ve Wayland için kullanışlı.</span></div></div>
+      </div>
+    </fieldset>
+  </div>
+</section>
+
+<!-- ═════════ Screenshots (tab control) ═════════ -->
+<section class="window raised" id="screenshots" aria-labelledby="shots-title">
+  <div class="titlebar">
+    <svg width="16" height="16" fill="#fff" aria-hidden="true"><use href="#i-image"/></svg>
+    <h2 class="t" id="shots-title" style="margin:0;font-size:12px"><span data-l="en">Screenshots</span><span data-l="tr">Ekran Görüntüleri</span></h2>
+    <span class="caps" aria-hidden="true"><span class="cap close"><svg><use href="#i-x"/></svg></span></span>
+  </div>
+  <div class="body">
+    <div class="tabs" role="tablist" aria-label="Screenshots">
+      <button class="tab" role="tab" aria-selected="true" aria-controls="tp-editor" id="t-editor"><span data-l="en">Editor</span><span data-l="tr">Editör</span></button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="tp-menu" id="t-menu" tabindex="-1"><span data-l="en">Menus</span><span data-l="tr">Menüler</span></button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="tp-tools" id="t-tools" tabindex="-1"><span data-l="en">Tools</span><span data-l="tr">Araçlar</span></button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="tp-history" id="t-history" tabindex="-1"><span data-l="en">History</span><span data-l="tr">Geçmiş</span></button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="tp-options" id="t-options" tabindex="-1"><span data-l="en">Options</span><span data-l="tr">Seçenekler</span></button>
+    </div>
+    <div class="tabpage raised">
+      <figure role="tabpanel" id="tp-editor" aria-labelledby="t-editor">
+        <div class="sunken"><img src="screenshots/editor.png" width="820" height="530" loading="lazy" alt="Annotation editor with a rectangle, arrow, step number and text on a captured region"></div>
+        <figcaption><span data-l="en">Select a region, annotate it, then copy, save, pin or upload it from the toolbar.</span><span data-l="tr">Alanı seç, işaretle; araç çubuğundan kopyala, kaydet, sabitle ya da yükle.</span></figcaption>
+      </figure>
+      <figure role="tabpanel" id="tp-menu" aria-labelledby="t-menu" hidden>
+        <div class="sunken"><img src="screenshots/menu.png" width="790" height="600" loading="lazy" alt="Capture menu listing every capture mode with its hotkey"></div>
+        <figcaption><span data-l="en">Classic menus show the hotkey of every capture mode.</span><span data-l="tr">Klasik menüler her yakalama modunun kısayolunu gösterir.</span></figcaption>
+      </figure>
+      <figure role="tabpanel" id="tp-tools" aria-labelledby="t-tools" hidden>
+        <div class="sunken"><img src="screenshots/tools.png" width="790" height="600" loading="lazy" alt="Tools tab with recording, OCR, QR code and image tools"></div>
+        <figcaption><span data-l="en">Recording, scrolling capture, OCR, QR codes, ruler, image combiner and more.</span><span data-l="tr">Kayıt, kaydırmalı yakalama, OCR, QR kod, cetvel, resim birleştirici ve daha fazlası.</span></figcaption>
+      </figure>
+      <figure role="tabpanel" id="tp-history" aria-labelledby="t-history" hidden>
+        <div class="sunken"><img src="screenshots/history.png" width="790" height="600" loading="lazy" alt="History tab with thumbnails of saved captures"></div>
+        <figcaption><span data-l="en">Everything you saved or uploaded, with thumbnails.</span><span data-l="tr">Kaydettiğin ya da yüklediğin her şey, küçük resimleriyle.</span></figcaption>
+      </figure>
+      <figure role="tabpanel" id="tp-options" aria-labelledby="t-options" hidden>
+        <div class="sunken"><img src="screenshots/settings.png" width="790" height="600" loading="lazy" alt="Options tab with general, capture and after-capture settings"></div>
+        <figcaption><span data-l="en">Hotkeys, file names, uploaders, image effects and recording settings.</span><span data-l="tr">Kısayollar, dosya adları, yükleyiciler, resim efektleri ve kayıt ayarları.</span></figcaption>
+      </figure>
+    </div>
+
+    <div class="thumbs">
+      <figure><div class="sunken"><img src="screenshots/splash.png" width="440" height="214" loading="lazy" alt="Splash screen with a block progress bar"></div>
+        <figcaption><span data-l="en">Splash screen</span><span data-l="tr">Açılış ekranı</span></figcaption></figure>
+      <figure><div class="sunken"><img src="screenshots/recorder.png" width="368" height="64" loading="lazy" alt="Screen recorder bar with an LCD timer, Start and Cancel"></div>
+        <figcaption><span data-l="en">Screen recorder</span><span data-l="tr">Ekran kaydedici</span></figcaption></figure>
+      <figure><div class="sunken"><img src="screenshots/toast.png" width="326" height="100" loading="lazy" alt="Screenshot saved notification with a thumbnail"></div>
+        <figcaption><span data-l="en">Notification</span><span data-l="tr">Bildirim</span></figcaption></figure>
+      <figure><div class="sunken"><img src="screenshots/about.png" width="380" height="176" loading="lazy" alt="About EagleShot dialog"></div>
+        <figcaption><span data-l="en">About dialog</span><span data-l="tr">Hakkında penceresi</span></figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ Download (setup wizard) ═════════ -->
+<section class="window raised" id="download" aria-labelledby="dl-title">
+  <div class="titlebar">
+    <img src="assets/logo-64.png" alt="">
+    <h2 class="t" id="dl-title" style="margin:0;font-size:12px"><span data-l="en">EagleShot Setup</span><span data-l="tr">EagleShot Kurulumu</span></h2>
+    <span class="caps" aria-hidden="true"><span class="cap close"><svg><use href="#i-x"/></svg></span></span>
+  </div>
+  <div class="wizard">
+    <div class="side">
+      <img src="assets/logo-256.png" alt="" width="96" height="96">
+      <div>
+        <div class="wm">EagleShot</div>
+        <div class="hide-sm"><span class="version-text">v3.2.0</span></div>
+      </div>
+    </div>
+    <div class="main">
+      <h3><span data-l="en">Welcome to the EagleShot Setup Wizard</span><span data-l="tr">EagleShot Kurulum Sihirbazına Hoş Geldiniz</span></h3>
+      <p data-l="en">Choose your system below. Downloads come straight from GitHub Releases.</p>
+      <p data-l="tr">Aşağıdan sisteminizi seçin. Dosyalar doğrudan GitHub Releases'tan iner.</p>
+      <div class="progress sunken" aria-hidden="true" id="progress"></div>
+
+      <div class="platforms">
+        <div class="platform sunken" data-os="win">
+          <svg><use href="#i-win"/></svg>
+          <div class="name"><b>Windows 10 / 11</b>
+            <span data-l="en">Installer includes FFmpeg (recording) and Tesseract OCR</span>
+            <span data-l="tr">Kurulum dosyası FFmpeg (kayıt) ve Tesseract OCR içerir</span></div>
+          <div class="acts">
+            <a class="btn default" data-asset="win-setup" href="https://github.com/hhasanguclu/EagleShot/releases/latest"><span data-l="en">Installer (.exe)</span><span data-l="tr">Kurulum (.exe)</span></a>
+            <a class="btn" data-asset="win-zip" href="https://github.com/hhasanguclu/EagleShot/releases/latest"><span data-l="en">Portable (.zip)</span><span data-l="tr">Taşınabilir (.zip)</span></a>
+          </div>
+        </div>
+        <div class="platform sunken" data-os="mac">
+          <svg><use href="#i-apple"/></svg>
+          <div class="name"><b>macOS</b>
+            <span data-l="en">Apple Silicon (M1/M2/M3/M4) and Intel</span>
+            <span data-l="tr">Apple Silicon (M1/M2/M3/M4) ve Intel</span></div>
+          <div class="acts">
+            <a class="btn default" data-asset="mac-arm" href="https://github.com/hhasanguclu/EagleShot/releases/latest">Apple Silicon (.dmg)</a>
+            <a class="btn" data-asset="mac-x64" href="https://github.com/hhasanguclu/EagleShot/releases/latest">Intel (.dmg)</a>
+          </div>
+        </div>
+        <div class="platform sunken" data-os="linux">
+          <svg><use href="#i-linux"/></svg>
+          <div class="name"><b>Linux x64</b>
+            <span data-l="en">X11 and Wayland (GNOME, KDE)</span>
+            <span data-l="tr">X11 ve Wayland (GNOME, KDE)</span></div>
+          <div class="acts">
+            <a class="btn default" data-asset="linux" href="https://github.com/hhasanguclu/EagleShot/releases/latest">.tar.gz</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="howto">
+        <details class="sunken" style="background:#fff">
+          <summary><span data-l="en">Installing on Windows</span><span data-l="tr">Windows'a kurulum</span></summary>
+          <ol data-l="en">
+            <li>Run <code>EagleShot_Setup_…_win-x64.exe</code> and follow the steps.</li>
+            <li>Keep <b>"Use the PrintScreen key for EagleShot"</b> checked so PrintScreen opens EagleShot instead of the Snipping Tool.</li>
+            <li>If Windows SmartScreen warns you, click <b>More info → Run anyway</b> (the app isn't code-signed).</li>
+          </ol>
+          <ol data-l="tr">
+            <li><code>EagleShot_Setup_…_win-x64.exe</code> dosyasını çalıştırın ve adımları izleyin.</li>
+            <li>PrintScreen'in Ekran Alıntısı Aracı yerine EagleShot'ı açması için <b>"PrintScreen tuşunu EagleShot için kullan"</b> seçeneğini açık bırakın.</li>
+            <li>SmartScreen uyarı verirse <b>Ek bilgi → Yine de çalıştır</b>'a tıklayın (uygulama imzalı değil).</li>
+          </ol>
+        </details>
+        <details class="sunken" style="background:#fff">
+          <summary><span data-l="en">Installing on macOS</span><span data-l="tr">macOS'a kurulum</span></summary>
+          <ol data-l="en">
+            <li>Open the <code>.dmg</code> and drag <b>EagleShot</b> to <b>Applications</b>.</li>
+            <li>First launch: right-click EagleShot → <b>Open</b>. On macOS 15 and later use <b>System Settings → Privacy &amp; Security → Open Anyway</b>.</li>
+            <li>Allow <b>Screen Recording</b> and <b>Accessibility</b> (for hotkeys).</li>
+            <li>If macOS says the app is "damaged": <code>xattr -cr /Applications/EagleShot.app</code></li>
+          </ol>
+          <ol data-l="tr">
+            <li><code>.dmg</code> dosyasını açın, <b>EagleShot</b>'ı <b>Uygulamalar</b> klasörüne sürükleyin.</li>
+            <li>İlk açılışta EagleShot'a sağ tıklayıp <b>Aç</b>'ı seçin. macOS 15 ve sonrasında <b>Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç</b>.</li>
+            <li><b>Ekran Kaydı</b> ve <b>Erişilebilirlik</b> (kısayollar için) izinlerini verin.</li>
+            <li>macOS uygulamanın "hasarlı" olduğunu söylerse: <code>xattr -cr /Applications/EagleShot.app</code></li>
+          </ol>
+        </details>
+        <details class="sunken" style="background:#fff">
+          <summary><span data-l="en">Installing on Linux</span><span data-l="tr">Linux'a kurulum</span></summary>
+          <ol data-l="en">
+            <li>Extract the archive: <code>tar xzf EagleShot_…_linux-x64.tar.gz</code></li>
+            <li>Run <code>./installers/linux/install.sh</code> inside the extracted folder.</li>
+            <li>Optional: <code>xclip</code> or <code>wl-clipboard</code> for the clipboard, <code>ffmpeg</code> for recording, <code>tesseract-ocr</code> for OCR.</li>
+          </ol>
+          <ol data-l="tr">
+            <li>Arşivi açın: <code>tar xzf EagleShot_…_linux-x64.tar.gz</code></li>
+            <li>Açılan klasörde <code>./installers/linux/install.sh</code> komutunu çalıştırın.</li>
+            <li>İsteğe bağlı: pano için <code>xclip</code> veya <code>wl-clipboard</code>, kayıt için <code>ffmpeg</code>, OCR için <code>tesseract-ocr</code>.</li>
+          </ol>
+        </details>
+      </div>
+
+      <div class="nav">
+        <a class="btn" href="https://github.com/hhasanguclu/EagleShot/releases"><span data-l="en">&lt; All releases</span><span data-l="tr">&lt; Tüm sürümler</span></a>
+        <a class="btn" href="https://github.com/hhasanguclu/EagleShot#build-from-source"><span data-l="en">Build from source</span><span data-l="tr">Kaynaktan derle</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ Hotkeys ═════════ -->
+<section class="window raised" id="hotkeys" aria-labelledby="keys-title">
+  <div class="titlebar">
+    <svg width="16" height="16" fill="#fff" aria-hidden="true"><use href="#i-keyboard"/></svg>
+    <h2 class="t" id="keys-title" style="margin:0;font-size:12px"><span data-l="en">Default hotkeys</span><span data-l="tr">Varsayılan kısayollar</span></h2>
+    <span class="caps" aria-hidden="true"><span class="cap close"><svg><use href="#i-x"/></svg></span></span>
+  </div>
+  <div class="body">
+    <div class="sunken" style="padding:0">
+      <table class="list">
+        <thead><tr><th><span data-l="en">Keys</span><span data-l="tr">Tuşlar</span></th><th><span data-l="en">Action</span><span data-l="tr">İşlem</span></th></tr></thead>
+        <tbody>
+          <tr><td><code>PrintScreen</code> <span data-l="en">(F12 on macOS)</span><span data-l="tr">(macOS'ta F12)</span></td><td><span data-l="en">Capture region</span><span data-l="tr">Alan yakala</span></td></tr>
+          <tr><td><code>Ctrl+PrintScreen</code></td><td><span data-l="en">Capture full screen</span><span data-l="tr">Tam ekran yakala</span></td></tr>
+          <tr><td><code>Alt+PrintScreen</code></td><td><span data-l="en">Capture active monitor</span><span data-l="tr">Etkin monitörü yakala</span></td></tr>
+          <tr><td><code>Shift+PrintScreen</code></td><td><span data-l="en">Repeat last region</span><span data-l="tr">Son alanı tekrarla</span></td></tr>
+          <tr><td><code>Ctrl+Shift+PrintScreen</code></td><td><span data-l="en">Delayed region capture</span><span data-l="tr">Gecikmeli alan yakalama</span></td></tr>
+          <tr><td><code>Ctrl+Shift+K</code></td><td><span data-l="en">Color picker</span><span data-l="tr">Renk seçici</span></td></tr>
+          <tr><td><code>Enter</code> / <code>Ctrl+C</code> / <code>Ctrl+S</code></td><td><span data-l="en">In the editor: done, copy, save</span><span data-l="tr">Editörde: bitti, kopyala, kaydet</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="meta-line"><span data-l="en">Every action, including recording, OCR and QR scanning, can get its own hotkey in Options.</span><span data-l="tr">Kayıt, OCR ve QR tarama dahil her işleme Seçenekler'den kısayol atanabilir.</span></p>
+  </div>
+</section>
+
+<!-- ═════════ About dialog ═════════ -->
+<section class="window raised" id="about" aria-labelledby="about-title" style="max-width:560px">
+  <div class="titlebar">
+    <img src="assets/logo-64.png" alt="">
+    <h2 class="t" id="about-title" style="margin:0;font-size:12px"><span data-l="en">About EagleShot</span><span data-l="tr">EagleShot Hakkında</span></h2>
+    <span class="caps" aria-hidden="true"><span class="cap"><svg viewBox="0 0 24 24" style="width:10px;height:10px"><use href="#i-help"/></svg></span><span class="cap close"><svg><use href="#i-x"/></svg></span></span>
+  </div>
+  <div class="body">
+    <div class="about">
+      <img src="assets/logo-64.png" alt="" width="64" height="64">
+      <div>
+        <p><b style="font-size:14px">EagleShot</b><br><span data-l="en">Version</span><span data-l="tr">Sürüm</span> <span class="version-text">3.2.0</span></p>
+        <p data-l="en">EagleShot is a free, open-source screenshot and screen recording tool for Windows, macOS and Linux. It pairs the speed of Lightshot with a ShareX-style workflow: capture modes, an annotation editor, after-capture tasks, uploads, history and pinned screenshots, in a classic Windows 9x/2000-style interface.</p>
+        <p data-l="tr">EagleShot; Windows, macOS ve Linux için ücretsiz ve açık kaynaklı bir ekran görüntüsü ve ekran kaydı aracıdır. Lightshot'ın hızını ShareX tarzı bir iş akışıyla birleştirir: yakalama modları, düzenleme editörü, yakalama sonrası görevler, yükleme, geçmiş ve ekrana sabitleme; klasik Windows 9x/2000 tarzı bir arayüzde.</p>
+        <p data-l="en">Built with .NET 9 and Avalonia UI. Released under the MIT License.</p>
+        <p data-l="tr">.NET 9 ve Avalonia UI ile geliştirildi. MIT Lisansı ile yayınlanır.</p>
+        <p><a href="https://github.com/hhasanguclu/EagleShot">github.com/hhasanguclu/EagleShot</a></p>
+      </div>
+    </div>
+    <div class="rule"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
+      <a class="btn" href="https://github.com/hhasanguclu/EagleShot/issues"><span data-l="en">Report a bug...</span><span data-l="tr">Hata bildir...</span></a>
+      <a class="btn default" href="#top">OK</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ═════════ Start menu + taskbar ═════════ -->
+<div class="startmenu raised" id="startmenu" role="menu" aria-label="Start menu">
+  <div class="stripe"><b>Eagle</b>Shot</div>
+  <ul>
+    <li><a role="menuitem" href="#download"><svg><use href="#i-download"/></svg><span data-l="en">Download</span><span data-l="tr">İndir</span></a></li>
+    <li><a role="menuitem" href="#features"><svg><use href="#i-capture"/></svg><span data-l="en">Features</span><span data-l="tr">Özellikler</span></a></li>
+    <li><a role="menuitem" href="#screenshots"><svg><use href="#i-image"/></svg><span data-l="en">Screenshots</span><span data-l="tr">Ekran Görüntüleri</span></a></li>
+    <li><a role="menuitem" href="#hotkeys"><svg><use href="#i-keyboard"/></svg><span data-l="en">Hotkeys</span><span data-l="tr">Kısayollar</span></a></li>
+    <li class="div" role="separator"></li>
+    <li><a role="menuitem" href="https://github.com/hhasanguclu/EagleShot"><svg><use href="#i-github"/></svg><span data-l="en">Source code</span><span data-l="tr">Kaynak kod</span></a></li>
+    <li><a role="menuitem" href="https://github.com/hhasanguclu/EagleShot/releases"><svg><use href="#i-history"/></svg><span data-l="en">All releases</span><span data-l="tr">Tüm sürümler</span></a></li>
+    <li class="div" role="separator"></li>
+    <li><a role="menuitem" href="#about"><svg><use href="#i-help"/></svg><span data-l="en">About EagleShot</span><span data-l="tr">EagleShot Hakkında</span></a></li>
+  </ul>
+</div>
+
+<div class="taskbar" role="navigation" aria-label="Taskbar">
+  <button class="btn start" id="start-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="startmenu"><img src="assets/logo-64.png" alt=""> Start</button>
+  <span class="sep"></span>
+  <a class="btn task pressed" href="#top"><img src="assets/logo-64.png" alt=""> EagleShot</a>
+  <a class="btn task" href="#download"><img src="assets/logo-64.png" alt=""> <span data-l="en">Setup</span><span data-l="tr">Kurulum</span></a>
+  <div class="tray field">
+    <img src="assets/logo-64.png" alt="EagleShot is running" title="EagleShot">
+    <span id="clock">12:00</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  // ── Language: Turkish browsers get Turkish, the choice is remembered ──
+  function stored() { try { return localStorage.getItem("eagleshot-lang"); } catch (e) { return null; } }
+  function setLang(l) {
+    root.lang = l;
+    try { localStorage.setItem("eagleshot-lang", l); } catch (e) {}
+  }
+  setLang(stored() || ((navigator.language || "").toLowerCase().indexOf("tr") === 0 ? "tr" : "en"));
+  document.getElementById("lang-toggle").addEventListener("click", function () {
+    setLang(root.lang === "tr" ? "en" : "tr");
+  });
+
+  // ── Clock in the tray ──
+  var clock = document.getElementById("clock");
+  function tick() {
+    var d = new Date();
+    clock.textContent = d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  tick(); setInterval(tick, 15000);
+
+  // ── Start menu ──
+  var start = document.getElementById("start-btn"), menu = document.getElementById("startmenu");
+  function toggleMenu(open) {
+    menu.classList.toggle("open", open);
+    start.classList.toggle("pressed", open);
+    start.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  start.addEventListener("click", function (e) { e.stopPropagation(); toggleMenu(!menu.classList.contains("open")); });
+  document.addEventListener("click", function (e) { if (!menu.contains(e.target)) toggleMenu(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") toggleMenu(false); });
+  menu.addEventListener("click", function (e) { if (e.target.closest("a")) toggleMenu(false); });
+
+  // ── Screenshot tabs ──
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function select(tab) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { select(t); });
+    t.addEventListener("keydown", function (e) {
+      var n = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!n) return;
+      var next = tabs[(i + n + tabs.length) % tabs.length];
+      select(next); next.focus();
+    });
+  });
+
+  // ── Decorative block progress bar in the setup window ──
+  var bar = document.getElementById("progress");
+  for (var i = 0; i < 60; i++) bar.appendChild(document.createElement("i"));
+
+  // ── Highlight the visitor's platform ──
+  var ua = (navigator.userAgent || "").toLowerCase();
+  var os = ua.indexOf("windows") >= 0 ? "win" : (ua.indexOf("mac") >= 0 && ua.indexOf("iphone") < 0 && ua.indexOf("ipad") < 0) ? "mac" : (ua.indexOf("linux") >= 0 && ua.indexOf("android") < 0) ? "linux" : null;
+  if (os) {
+    var row = document.querySelector('.platform[data-os="' + os + '"]');
+    if (row) { row.classList.add("detected"); row.parentNode.insertBefore(row, row.parentNode.firstChild); }
+  }
+
+  // ── Real download links and version from the latest GitHub release ──
+  var patterns = {
+    "win-setup": /_Setup_.*win-x64\.exe$/,
+    "win-zip": /win-x64\.zip$/,
+    "mac-arm": /osx-arm64\.dmg$/,
+    "mac-x64": /osx-x64\.dmg$/,
+    "linux": /linux-x64\.tar\.gz$/
+  };
+  var primaryFor = { win: "win-setup", mac: "mac-arm", linux: "linux" };
+  var labels = {
+    win: { en: "for Windows (installer)", tr: "Windows için (kurulum)" },
+    mac: { en: "for macOS (Apple Silicon)", tr: "macOS için (Apple Silicon)" },
+    linux: { en: "for Linux (.tar.gz)", tr: "Linux için (.tar.gz)" }
+  };
+
+  fetch("https://api.github.com/repos/hhasanguclu/EagleShot/releases/latest")
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function (rel) {
+      var urls = {};
+      (rel.assets || []).forEach(function (a) {
+        for (var k in patterns) if (patterns[k].test(a.name)) urls[k] = a.browser_download_url;
+      });
+      document.querySelectorAll("[data-asset]").forEach(function (el) {
+        var u = urls[el.getAttribute("data-asset")];
+        if (u) el.href = u;
+      });
+      var v = (rel.tag_name || "").replace(/^v/, "");
+      if (v) document.querySelectorAll(".version-text").forEach(function (el) {
+        el.textContent = /^\d/.test(el.textContent) ? v : "v" + v;
+      });
+      if (os && urls[primaryFor[os]]) {
+        document.getElementById("hero-primary").href = urls[primaryFor[os]];
+        document.getElementById("hero-primary-sub").innerHTML =
+          '<span data-l="en">' + labels[os].en + " · v" + v + '</span><span data-l="tr">' + labels[os].tr + " · v" + v + "</span>";
+      }
+      document.getElementById("status-text").innerHTML =
+        '<span data-l="en">Ready. Latest release: v' + v + '</span><span data-l="tr">Hazır. Son sürüm: v' + v + "</span>";
+    })
+    .catch(function () { /* links already point to the releases page */ });
+})();
+</script>
+</body>
+</html>

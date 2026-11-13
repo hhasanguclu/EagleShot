@@ -116,6 +116,7 @@ public partial class OverlayWindow : Window
         PopulateColorGrid();
         PopulateWidths();
         UpdateUndoButtons();
+        L.Apply(this);
     }
 
     private PixelRect _desktop;
@@ -400,7 +401,7 @@ public partial class OverlayWindow : Window
         Topmost = false;
         var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Save Screenshot",
+            Title = L.T("Save Screenshot"),
             SuggestedFileName = $"EagleShot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}",
             DefaultExtension = "png",
             ShowOverwritePrompt = true,
@@ -526,7 +527,7 @@ public partial class OverlayWindow : Window
             Padding = new Thickness(4, 2),
             AcceptsReturn = true,
             Text = existing?.Text ?? "",
-            Watermark = "Type here…  (Enter to place, Shift+Enter for new line)"
+            Watermark = L.T("Type here…  (Enter to place, Shift+Enter for new line)")
         };
         _activeTextBox.Classes.Add("canvas-text");
 

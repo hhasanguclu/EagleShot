@@ -5,6 +5,8 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using EagleShot.Core;
+
 namespace EagleShot.Views;
 
 public partial class SplashWindow : Window
@@ -15,7 +17,8 @@ public partial class SplashWindow : Window
     {
         InitializeComponent();
         var v = Assembly.GetExecutingAssembly().GetName().Version;
-        if (v != null) this.FindControl<TextBlock>("VersionText")!.Text = $"Version {v.Major}.{v.Minor}.{v.Build}";
+        if (v != null) this.FindControl<TextBlock>("VersionText")!.Text = L.F("Version {0}", $"{v.Major}.{v.Minor}.{v.Build}");
+        L.Apply(this);
     }
 
     protected override async void OnOpened(EventArgs e)
@@ -29,7 +32,7 @@ public partial class SplashWindow : Window
         for (int i = 0; i < count; i++)
         {
             blocks.Children.Add(new Rectangle { Width = 13, Fill = new SolidColorBrush(Color.FromRgb(0, 0, 128)) });
-            status.Text = Steps[Math.Min(Steps.Length - 1, i * Steps.Length / count)];
+            status.Text = L.T(Steps[Math.Min(Steps.Length - 1, i * Steps.Length / count)]);
             await Task.Delay(45);
         }
         await Task.Delay(250);

@@ -5,6 +5,8 @@ using Avalonia.Media;
 using System;
 using System.Threading.Tasks;
 
+using EagleShot.Core;
+
 namespace EagleShot.Views;
 
 /// <summary>
@@ -57,6 +59,7 @@ public class CountdownWindow : Window
         });
 
         PointerPressed += (_, _) => { _cancelled = true; Close(); };
+        L.Apply(this);
     }
 
     /// <summary>Counts down and returns false if the user cancelled.</summary>

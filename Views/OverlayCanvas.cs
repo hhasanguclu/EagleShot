@@ -263,7 +263,7 @@ public class OverlayCanvas : Control
             _ when WindowRects.Count > 0 => "Drag to select a region  ·  Click a window or monitor  ·  Esc to cancel",
             _ => "Drag to select a region  ·  Click to capture a monitor  ·  Esc to cancel"
         };
-        var ft = Text(hint, 13, Brushes.White);
+        var ft = Text(L.T(hint), 13, Brushes.White);
         double w = ft.Width + 28, h = ft.Height + 16;
         var monitor = MonitorRects.FirstOrDefault(r => r.Contains(_mouse));
         if (monitor == default) monitor = bounds;

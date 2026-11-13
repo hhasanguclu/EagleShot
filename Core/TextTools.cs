@@ -46,9 +46,10 @@ public static class OcrService
         var langs = App.Settings.OcrLanguages?.Trim();
         if (string.IsNullOrEmpty(langs))
         {
-            // English plus Turkish when installed; Tesseract accepts "a+b"
+            // English plus the app's language when installed; Tesseract accepts "a+b"
             var available = await AvailableLanguagesAsync();
-            langs = string.Join("+", new[] { "eng", "tur" }.Where(available.Contains).DefaultIfEmpty("eng"));
+            var wanted = new[] { "eng", L.OcrLanguage.GetValueOrDefault(L.Current, "eng") }.Distinct();
+            langs = string.Join("+", wanted.Where(available.Contains).DefaultIfEmpty("eng"));
         }
 
         var tmp = Path.Combine(Path.GetTempPath(), $"eagleshot_ocr_{Guid.NewGuid():N}.png");

@@ -110,6 +110,9 @@ public class AppSettings
     public bool ShowMainWindowOnStartup { get; set; } = true;
     public bool ShowSplash { get; set; } = true;
 
+    /// <summary>UI language code such as "tr" or "zh-CN"; empty follows the system language.</summary>
+    public string Language { get; set; } = "";
+
     // Capture
     public int CaptureDelaySeconds { get; set; } = 3;
     public bool ShowMagnifier { get; set; } = true;

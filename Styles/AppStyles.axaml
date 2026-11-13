@@ -240,6 +240,10 @@
         <Setter Property="Padding" Value="6,3"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
     </Style>
+    <!-- Long translated titles end in "…" instead of being cut off -->
+    <Style Selector="Button.capture-card TextBlock, Button.tool-card TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
     <Style Selector="Button.tool-card.active">
         <Setter Property="FontWeight" Value="Bold"/>
     </Style>

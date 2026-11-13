@@ -61,6 +61,7 @@ public class ToolsView : UserControl
         if (App.Capture != null)
             App.Capture.AutoCapture.Changed += UpdateAutoCapture;
         UpdateAutoCapture();
+        L.Apply(this);
     }
 
     private static void Run(HotkeyAction action) => App.Capture?.Run(action);
@@ -111,8 +112,8 @@ public class ToolsView : UserControl
         bool running = App.Capture?.AutoCapture.IsRunning == true;
         if (_autoCaptureText != null)
             _autoCaptureText.Text = running
-                ? "Running — click to stop."
-                : $"Screenshot every {App.Settings.AutoCaptureIntervalSeconds}s ({App.Settings.AutoCaptureMode}).";
+                ? L.T("Running — click to stop.")
+                : L.F("Screenshot every {0}s ({1}).", App.Settings.AutoCaptureIntervalSeconds, L.T(App.Settings.AutoCaptureMode.ToString()));
         _autoCaptureCard?.Classes.Set("active", running);
     }
 
@@ -127,7 +128,7 @@ public class ToolsView : UserControl
     {
         var top = TopLevel.GetTopLevel(this);
         if (top == null || App.Capture == null) return;
-        var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = "Upload files", AllowMultiple = true });
+        var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = L.T("Upload files"), AllowMultiple = true });
         var paths = files.Select(f => f.TryGetLocalPath()).OfType<string>().ToList();
         if (paths.Count > 0) await App.Capture.UploadFilesAsync(paths);
     }

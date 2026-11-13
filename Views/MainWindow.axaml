@@ -62,9 +62,9 @@
             <StackPanel Orientation="Horizontal" Name="Toolbar">
                 <StackPanel.Styles>
                     <Style Selector="Button.flat">
-                        <Setter Property="Width" Value="56"/>
+                        <Setter Property="MinWidth" Value="54"/>
                         <Setter Property="Height" Value="44"/>
-                        <Setter Property="Padding" Value="0,2"/>
+                        <Setter Property="Padding" Value="5,2"/>
                     </Style>
                     <Style Selector="Button.flat PathIcon">
                         <Setter Property="Width" Value="20"/>

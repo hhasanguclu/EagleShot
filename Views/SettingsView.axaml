@@ -18,6 +18,13 @@
                     <CheckBox Name="StartWithSystem" Content="Start EagleShot when I sign in"/>
                     <CheckBox Name="ShowMainOnStartup" Content="Open this window on startup (otherwise start in the tray)"/>
                     <CheckBox Name="ShowSplash" Content="Show splash screen"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
+                        <TextBlock Classes="label" Text="Language"/>
+                        <ComboBox Name="LanguageBox" Width="210"/>
+                        <TextBlock Name="LanguageNote" Classes="muted" VerticalAlignment="Center" IsVisible="False"
+                                   Text="Restart EagleShot to use the new language."/>
+                        <Button Name="RestartButton" Classes="ghost" Content="Restart now" IsVisible="False" Click="OnRestartClick"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
@@ -235,7 +242,7 @@
                     </Grid>
                     <Grid ColumnDefinitions="150,*" Classes="form">
                         <TextBlock Classes="label" Text="OCR languages"/>
-                        <TextBox Grid.Column="1" Name="OcrLanguages" Watermark="Automatic (eng+tur when installed), e.g. eng+deu"/>
+                        <TextBox Grid.Column="1" Name="OcrLanguages" Watermark="Automatic (English + the app language when installed), e.g. eng+deu"/>
                     </Grid>
                     <Grid ColumnDefinitions="150,Auto,Auto,Auto" Classes="form">
                         <TextBlock Classes="label" Text="Scrolling: max / delay ms"/>

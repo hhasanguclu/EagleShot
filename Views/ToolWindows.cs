@@ -19,7 +19,7 @@ public abstract class ToolWindow : Window
 {
     protected ToolWindow(string title, double width, double height)
     {
-        Title = $"EagleShot — {title}";
+        Title = $"EagleShot — {L.T(title)}";
         Width = width;
         Height = height;
         MinWidth = 380;
@@ -28,6 +28,7 @@ public abstract class ToolWindow : Window
         Background = (IBrush)Application.Current!.FindResource("WindowBrush")!;
         Icon = new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://EagleShot/Resources/icon.ico")));
         ClassicChrome.Apply(this);
+        Opened += (_, _) => L.Apply(this);
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
     }
 
@@ -50,7 +51,7 @@ public abstract class ToolWindow : Window
     {
         var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Save image",
+            Title = L.T("Save image"),
             SuggestedFileName = suggested,
             DefaultExtension = "png",
             FileTypeChoices = new[] { new FilePickerFileType("PNG Image") { Patterns = new[] { "*.png" } }, new FilePickerFileType("JPEG Image") { Patterns = new[] { "*.jpg" } } }
@@ -67,7 +68,7 @@ public class AboutWindow : ToolWindow
 {
     public AboutWindow() : base("About", 380, 230)
     {
-        Title = "About EagleShot";
+        Title = L.T("About EagleShot");
         MinHeight = 0;
         CanResize = false;
         ShowInTaskbar = false;
@@ -90,7 +91,7 @@ public class AboutWindow : ToolWindow
             Children =
             {
                 new TextBlock { Text = "EagleShot", FontWeight = FontWeight.Bold, FontSize = 13 },
-                new TextBlock { Text = v == null ? "" : $"Version {v.Major}.{v.Minor}.{v.Build}" },
+                new TextBlock { Text = v == null ? "" : L.F("Version {0}", $"{v.Major}.{v.Minor}.{v.Build}") },
                 new TextBlock { Text = "Screenshots, screen recording and capture tools.", TextWrapping = TextWrapping.Wrap },
                 link
             }
@@ -130,7 +131,7 @@ public class QrGeneratorWindow : ToolWindow
         Opened += (_, _) => input.Focus();
 
         var copy = Btn("Copy image", true);
-        copy.Click += (_, _) => { if (current != null && ClipboardService.CopyImage(current)) copy.Content = "Copied ✓"; };
+        copy.Click += (_, _) => { if (current != null && ClipboardService.CopyImage(current)) copy.Content = L.T("Copied ✓"); };
         var save = Btn("Save…");
         save.Click += async (_, _) => { if (current != null) await SaveImageAsync(current, "QR"); };
         var pin = Btn("Pin");
@@ -165,7 +166,7 @@ public class HashWindow : ToolWindow
         var browse = Btn("Browse…", true);
         browse.Click += async (_, _) =>
         {
-            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = "Choose a file" });
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = L.T("Choose a file") });
             var path = files.FirstOrDefault()?.TryGetLocalPath();
             if (path != null) await ComputeAsync(path);
         };
@@ -232,7 +233,7 @@ public class HashWindow : ToolWindow
         var target = (_compare.Text ?? "").Trim().ToLowerInvariant();
         if (target.Length == 0) { _match.Text = ""; return; }
         var hit = _boxes.FirstOrDefault(kv => kv.Value.Text == target);
-        _match.Text = hit.Key != null ? $"✓ Matches {hit.Key}" : "✗ No match";
+        _match.Text = hit.Key != null ? L.F("✓ Matches {0}", hit.Key) : L.T("✗ No match");
         _match.Foreground = (IBrush)Application.Current!.FindResource(hit.Key != null ? "SuccessBrush" : "DangerBrush")!;
     }
 }
@@ -255,7 +256,7 @@ public class ImageCombinerWindow : ToolWindow
         {
             var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
-                Title = "Add images",
+                Title = L.T("Add images"),
                 AllowMultiple = true,
                 FileTypeFilter = new[] { new FilePickerFileType("Images") { Patterns = new[] { "*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.gif" } } }
             });

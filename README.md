@@ -104,7 +104,7 @@ eagleshot --upload <files…>     # upload files
 #### Windows
 
 **Using the installer:**
-1. Download `EagleShot_Setup_v3.2.0_win-x64.exe` from [Releases](https://github.com/hhasanguclu/EagleShot/releases).
+1. Download `EagleShot_Setup_v3.3.0_win-x64.exe` from [Releases](https://github.com/hhasanguclu/EagleShot/releases).
 2. Run the installer and follow the steps. If FFmpeg (recording) or Tesseract OCR (text recognition) aren't installed yet, the installer offers to install them too.
 
 **Manual:**
@@ -283,7 +283,7 @@ eagleshot --upload <dosyalar…>  # dosya yükle
 #### Windows
 
 **Installer ile:**
-1. [Releases](https://github.com/hhasanguclu/EagleShot/releases) sayfasından `EagleShot_Setup_v3.2.0_win-x64.exe` indirin.
+1. [Releases](https://github.com/hhasanguclu/EagleShot/releases) sayfasından `EagleShot_Setup_v3.3.0_win-x64.exe` indirin.
 2. Installer'ı çalıştırın ve adımları takip edin. FFmpeg (kayıt) veya Tesseract OCR (metin tanıma) kurulu değilse installer onları da kurmayı önerir.
 
 **Manuel:**

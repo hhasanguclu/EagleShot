@@ -87,15 +87,15 @@ public class PinWindow : Window
 
     private ContextMenu BuildMenu()
     {
-        var copy = new MenuItem { Header = "Copy" };
+        var copy = new MenuItem { Header = L.T("Copy") };
         copy.Click += (_, _) => ClipboardService.CopyImage(_image);
 
-        var save = new MenuItem { Header = "Save as…" };
+        var save = new MenuItem { Header = L.T("Save as…") };
         save.Click += async (_, _) =>
         {
             var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
             {
-                Title = "Save Pinned Image",
+                Title = L.T("Save Pinned Image"),
                 SuggestedFileName = $"EagleShot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}",
                 DefaultExtension = "png",
                 FileTypeChoices = new[]
@@ -109,13 +109,13 @@ public class PinWindow : Window
                 await File.WriteAllBytesAsync(path, ImageHelper.Encode(_image, ImageHelper.FormatFromExtension(path)));
         };
 
-        var reset = new MenuItem { Header = "Actual size (100%)" };
+        var reset = new MenuItem { Header = L.T("Actual size (100%)") };
         reset.Click += (_, _) => SetZoom(1);
 
-        var topmost = new MenuItem { Header = "Always on top", ToggleType = MenuItemToggleType.CheckBox, IsChecked = true };
+        var topmost = new MenuItem { Header = L.T("Always on top"), ToggleType = MenuItemToggleType.CheckBox, IsChecked = true };
         topmost.Click += (_, _) => { Topmost = !Topmost; topmost.IsChecked = Topmost; };
 
-        var close = new MenuItem { Header = "Close" };
+        var close = new MenuItem { Header = L.T("Close") };
         close.Click += (_, _) => Close();
 
         return new ContextMenu { Items = { copy, save, new Separator(), reset, topmost, new Separator(), close } };
@@ -133,7 +133,7 @@ public class PinWindow : Window
     {
         _zoom = Math.Clamp(zoom, 0.1, 8);
         ApplyZoom();
-        _zoomText.Text = $"{Math.Round(_zoom * 100)}%  ·  {Math.Round(Opacity * 100)}% opacity";
+        _zoomText.Text = L.F("{0}%  ·  {1}% opacity", Math.Round(_zoom * 100), Math.Round(Opacity * 100));
         _zoomBadge.IsVisible = true;
         var shownAt = _badgeShownAt = DateTime.Now;
         Avalonia.Threading.DispatcherTimer.RunOnce(() =>

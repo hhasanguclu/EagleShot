@@ -48,6 +48,7 @@ public partial class MainWindow : Window
 
         RefreshCapturePage();
         RefreshRecent();
+        L.Apply(this);
     }
 
     /// <summary>Closing the window only hides it; EagleShot keeps running in the tray.</summary>
@@ -152,7 +153,7 @@ public partial class MainWindow : Window
     {
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Pin an image",
+            Title = L.T("Pin an image"),
             AllowMultiple = false,
             FileTypeFilter = new[] { new FilePickerFileType("Images") { Patterns = new[] { "*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.gif" } } }
         });
@@ -174,7 +175,7 @@ public partial class MainWindow : Window
             var chip = this.FindControl<Border>($"Key{action}");
             if (chip?.Child is not TextBlock tb) continue;
             s.Hotkeys.TryGetValue(action, out var combo);
-            tb.Text = string.IsNullOrEmpty(combo) ? "" : $"Hotkey: {combo}";
+            tb.Text = string.IsNullOrEmpty(combo) ? "" : L.F("Hotkey: {0}", combo);
             chip.IsVisible = !string.IsNullOrEmpty(combo);
             // The description takes the hotkey's place when there is none
             var desc = this.FindControl<TextBlock>($"Desc{action}");
@@ -185,7 +186,7 @@ public partial class MainWindow : Window
             }
         }
 
-        this.FindControl<TextBlock>("DelayTitle")!.Text = $"Delayed region ({s.CaptureDelaySeconds}s)";
+        this.FindControl<TextBlock>("DelayTitle")!.Text = L.F("Delayed region ({0}s)", s.CaptureDelaySeconds);
 
         var a = s.AfterCapture;
         this.FindControl<ToggleButton>("ChipCopy")!.IsChecked = a.CopyToClipboard;
@@ -196,9 +197,9 @@ public partial class MainWindow : Window
 
         bool hotkeys = App.Hotkeys != null && App.Hotkeys.IsRunning;
         this.FindControl<Border>("HotkeyWarning")!.IsVisible = !hotkeys;
-        this.FindControl<TextBlock>("HotkeyStatusText")!.Text = hotkeys ? "Hotkeys: on" : "Hotkeys: off";
-        this.FindControl<MenuItem>("DelayMenuItem")!.Header = $"_Delayed region ({s.CaptureDelaySeconds}s)";
-        this.FindControl<MenuItem>("AutoCaptureMenuItem")!.Header = App.Capture?.AutoCapture.IsRunning == true ? "Stop _auto capture" : "Start _auto capture";
+        this.FindControl<TextBlock>("HotkeyStatusText")!.Text = L.T(hotkeys ? "Hotkeys: on" : "Hotkeys: off");
+        this.FindControl<MenuItem>("DelayMenuItem")!.Header = L.F("_Delayed region ({0}s)", s.CaptureDelaySeconds);
+        this.FindControl<MenuItem>("AutoCaptureMenuItem")!.Header = L.T(App.Capture?.AutoCapture.IsRunning == true ? "Stop _auto capture" : "Start _auto capture");
 
         // Show each hotkey next to its menu entry, like classic accelerators
         foreach (var menu in new[] { "CaptureMenu", "ToolsMenu" })

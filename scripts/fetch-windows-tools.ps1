@@ -73,7 +73,8 @@ Copy-Item (Join-Path $tx "*") $tessDir -Recurse -Force
 
 $tessdata = Join-Path $tessDir "tessdata"
 New-Item -ItemType Directory -Force $tessdata | Out-Null
-foreach ($lang in @("eng", "tur", "osd")) {
+# English, every UI language and orientation detection
+foreach ($lang in @("eng", "tur", "chi_sim", "chi_tra", "jpn", "kor", "deu", "fra", "pol", "ukr", "rus", "osd")) {
     $file = Join-Path $tessdata "$lang.traineddata"
     if (-not (Test-Path $file)) {
         Write-Host "Downloading $lang.traineddata"

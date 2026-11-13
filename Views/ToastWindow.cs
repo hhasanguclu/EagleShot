@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using EagleShot.Core;
+
 namespace EagleShot.Views;
 
 /// <summary>
@@ -23,6 +25,8 @@ public class ToastWindow : Window
     public ToastWindow(string title, string message, Bitmap? thumbnail = null, Color? swatch = null, Action? onClick = null, bool isError = false)
     {
         _onClick = onClick;
+        title = L.T(title);
+        message = L.T(message);
         SystemDecorations = SystemDecorations.None;
         Topmost = true;
         ShowInTaskbar = false;

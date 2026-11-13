@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hhasanguclu.github.io/EagleShot/sitemap.xml
