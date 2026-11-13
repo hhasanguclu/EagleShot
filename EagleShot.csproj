@@ -5,9 +5,9 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>3.1.1</Version>
-    <AssemblyVersion>3.1.1.0</AssemblyVersion>
-    <FileVersion>3.1.1.0</FileVersion>
+    <Version>3.3.0</Version>
+    <AssemblyVersion>3.3.0.0</AssemblyVersion>
+    <FileVersion>3.3.0.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
@@ -25,10 +25,17 @@
     <PackageReference Include="ZXing.Net" Version="0.16.9" />
   </ItemGroup>
 
+  <!-- Test projects live under tests/ and are built separately -->
+  <ItemGroup>
+    <Compile Remove="tests/**" />
+    <None Remove="tests/**" />
+  </ItemGroup>
+
   <ItemGroup>
     <AvaloniaResource Include="Resources\logo.png" />
     <AvaloniaResource Include="Resources\splash_logo.jpg" />
     <AvaloniaResource Include="Resources\icon.ico" />
+    <AvaloniaResource Include="Resources\i18n\*.json" />
   </ItemGroup>
 
 </Project>

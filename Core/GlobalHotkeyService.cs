@@ -97,6 +97,7 @@ public class GlobalHotkeyService : IDisposable
         {
             _hook = new SimpleGlobalHook();
             _hook.KeyPressed += OnKeyPressed;
+            _hook.KeyReleased += OnKeyReleased;
             _hook.MouseMoved += OnMouseMoved;
             _hook.MouseDragged += OnMouseMoved;
             _failed = false;
@@ -134,6 +135,7 @@ public class GlobalHotkeyService : IDisposable
         if (capture != null)
         {
             _captureCallback = null;
+            Suppress(e, code);
             capture(code == KeyCode.VcEscape && !pressed.Ctrl && !pressed.Shift && !pressed.Alt ? null : pressed);
             return;
         }
@@ -142,11 +144,37 @@ public class GlobalHotkeyService : IDisposable
         {
             if (hk == pressed)
             {
+                Suppress(e, code);
                 HotkeyPressed?.Invoke(action);
                 break;
             }
         }
     }
+
+    private KeyCode? _suppressedKey;
+
+    /// <summary>
+    /// Hides a hotkey from other apps (Windows and macOS), e.g. so PrintScreen doesn't also open
+    /// the Windows Snipping Tool. Its key-up is hidden too, since Windows reacts on release.
+    /// </summary>
+    private void Suppress(KeyboardHookEventArgs e, KeyCode code)
+    {
+        if (!SuppressHotkeys) return;
+        e.SuppressEvent = true;
+        _suppressedKey = code;
+    }
+
+    private void OnKeyReleased(object? sender, KeyboardHookEventArgs e)
+    {
+        if (_suppressedKey == e.Data.KeyCode)
+        {
+            e.SuppressEvent = true;
+            _suppressedKey = null;
+        }
+    }
+
+    /// <summary>When true, matched hotkeys are not passed on to other applications.</summary>
+    public bool SuppressHotkeys { get; set; } = true;
 
     public void Stop()
     {

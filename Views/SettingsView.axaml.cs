@@ -48,13 +48,48 @@ public partial class SettingsView : UserControl
     {
         InitializeComponent();
         BuildHotkeyRows();
+        BuildLanguageBox();
         WireEvents();
 
-        this.FindControl<TextBlock>("PatternHelp")!.Text = FileNameFormatter.Help;
+        this.FindControl<TextBlock>("PatternHelp")!.Text = L.T(FileNameFormatter.Help);
         var v = Assembly.GetExecutingAssembly().GetName().Version;
         this.FindControl<TextBlock>("AboutText")!.Text =
-            $"EagleShot {v?.Major}.{v?.Minor}.{v?.Build} — a fast, cross-platform screenshot tool.\nSettings: {AppPaths.ConfigFolder}";
+            L.F("EagleShot {0} — a fast, cross-platform screenshot tool.", $"{v?.Major}.{v?.Minor}.{v?.Build}") + "\n" +
+            L.F("Settings: {0}", AppPaths.ConfigFolder);
+        L.Apply(this);
     }
+
+    // ───────────────────────────── Language ─────────────────────────────
+
+    private void BuildLanguageBox()
+    {
+        var box = C<ComboBox>("LanguageBox");
+        var system = L.Languages.First(l => l.Code == L.Detect()).Name;
+        box.Items.Add(new ComboBoxItem { Content = $"{L.T("System default")} ({system})" });
+        foreach (var (_, name) in L.Languages)
+            box.Items.Add(new ComboBoxItem { Content = name });
+        SelectLanguage();
+        box.SelectionChanged += (_, _) =>
+        {
+            if (_loading) return;
+            int i = box.SelectedIndex;
+            App.Settings.Language = i <= 0 ? "" : L.Languages[i - 1].Code;
+            App.Settings.Save();
+            bool changed = (i <= 0 ? L.Detect() : App.Settings.Language) != L.Current;
+            C<TextBlock>("LanguageNote").IsVisible = changed;
+            C<Button>("RestartButton").IsVisible = changed;
+            FlashSaved();
+        };
+    }
+
+    private void SelectLanguage()
+    {
+        var code = App.Settings.Language;
+        int index = Array.FindIndex(L.Languages, l => l.Code == code);
+        C<ComboBox>("LanguageBox").SelectedIndex = index < 0 ? 0 : index + 1;
+    }
+
+    private void OnRestartClick(object? sender, RoutedEventArgs e) => App.Restart();
 
     private T C<T>(string name) where T : Control => this.FindControl<T>(name)!;
 
@@ -68,6 +103,7 @@ public partial class SettingsView : UserControl
         C<CheckBox>("StartWithSystem").IsChecked = AutoStartService.IsEnabled();
         C<CheckBox>("ShowMainOnStartup").IsChecked = s.ShowMainWindowOnStartup;
         C<CheckBox>("ShowSplash").IsChecked = s.ShowSplash;
+        SelectLanguage();
 
         C<CheckBox>("ShowMagnifier").IsChecked = s.ShowMagnifier;
         C<CheckBox>("ShowCrosshair").IsChecked = s.ShowCrosshair;
@@ -95,7 +131,7 @@ public partial class SettingsView : UserControl
         C<TextBox>("CustomArguments").Text = s.CustomUploader.Arguments;
         C<ComboBox>("CustomMethod").SelectedIndex = s.CustomUploader.Method.ToUpperInvariant() switch { "PUT" => 1, "PATCH" => 2, _ => 0 };
         C<ComboBox>("CustomBody").SelectedIndex = s.CustomUploader.Body == "Binary" ? 1 : 0;
-        C<TextBlock>("CustomName").Text = string.IsNullOrEmpty(s.CustomUploader.Name) ? "" : $"Using “{s.CustomUploader.Name}”";
+        C<TextBlock>("CustomName").Text = string.IsNullOrEmpty(s.CustomUploader.Name) ? "" : L.F("Using “{0}”", s.CustomUploader.Name);
         C<CheckBox>("ShortenUrls").IsChecked = s.ShortenUrls;
 
         var e = s.Effects;
@@ -120,6 +156,8 @@ public partial class SettingsView : UserControl
         C<NumericUpDown>("RecordCountdown").Value = r.CountdownSeconds;
         C<CheckBox>("RecordCursor").IsChecked = r.ShowCursor;
         C<CheckBox>("RecordStartButton").IsChecked = r.ShowStartButton;
+        C<CheckBox>("TakeOverPrintScreen").IsChecked = s.TakeOverPrintScreen;
+        C<CheckBox>("TakeOverPrintScreen").IsVisible = OperatingSystem.IsWindows();
 
         C<TextBox>("TesseractPath").Text = s.TesseractPath;
         C<TextBox>("OcrLanguages").Text = s.OcrLanguages;
@@ -200,6 +238,11 @@ public partial class SettingsView : UserControl
         r.ShowCursor = C<CheckBox>("RecordCursor").IsChecked == true;
         r.ShowStartButton = C<CheckBox>("RecordStartButton").IsChecked == true;
 
+        bool takeOver = C<CheckBox>("TakeOverPrintScreen").IsChecked == true;
+        if (s.TakeOverPrintScreen && !takeOver)
+            WindowsIntegration.SetSnippingToolOnPrintScreen(true); // give PrintScreen back to Windows
+        s.TakeOverPrintScreen = takeOver;
+
         s.TesseractPath = C<TextBox>("TesseractPath").Text?.Trim() ?? "";
         s.OcrLanguages = C<TextBox>("OcrLanguages").Text?.Trim() ?? "";
         s.ScrollingMaxScrolls = Num("ScrollMax", 30);
@@ -236,7 +279,7 @@ public partial class SettingsView : UserControl
             if (e.Property == RangeBase.ValueProperty) Save();
         };
 
-        foreach (var name in new[] { "ShortenUrls", "EffectsEnabled", "EffShadow", "RecordCursor", "RecordStartButton" })
+        foreach (var name in new[] { "ShortenUrls", "EffectsEnabled", "EffShadow", "RecordCursor", "RecordStartButton", "TakeOverPrintScreen" })
             C<CheckBox>(name).IsCheckedChanged += (_, _) => Save();
         foreach (var name in new[] { "EffPadding", "EffRadius", "EffShadowSize", "EffBorder", "EffWatermarkSize", "EffWatermarkOpacity",
                                      "VideoFps", "GifFps", "GifMaxWidth", "RecordCountdown", "ScrollMax", "ScrollDelay", "AutoInterval" })
@@ -309,9 +352,9 @@ public partial class SettingsView : UserControl
     private void UpdateToolStatus()
     {
         var ffmpeg = ScreenRecorder.FindFfmpeg();
-        C<TextBlock>("FfmpegStatus").Text = ffmpeg != null ? $"✓ ffmpeg found: {ffmpeg}" : "⚠ ffmpeg not found. " + ToolLocator.InstallHint("ffmpeg");
+        C<TextBlock>("FfmpegStatus").Text = ffmpeg != null ? L.F("✓ ffmpeg found: {0}", ffmpeg) : L.T("⚠ ffmpeg not found.") + " " + L.T(ToolLocator.InstallHint("ffmpeg"));
         var tesseract = OcrService.FindTesseract();
-        C<TextBlock>("TesseractStatus").Text = tesseract != null ? $"✓ Tesseract found: {tesseract}" : "⚠ Tesseract not found (needed for text recognition). " + ToolLocator.InstallHint("tesseract");
+        C<TextBlock>("TesseractStatus").Text = tesseract != null ? L.F("✓ Tesseract found: {0}", tesseract) : L.T("⚠ Tesseract not found (needed for text recognition).") + " " + L.T(ToolLocator.InstallHint("tesseract"));
     }
 
     private async void OnBrowseTool(object? sender, RoutedEventArgs e)
@@ -319,7 +362,7 @@ public partial class SettingsView : UserControl
         if (sender is not Button { Tag: string box }) return;
         var top = TopLevel.GetTopLevel(this);
         if (top == null) return;
-        var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = "Choose the program", AllowMultiple = false });
+        var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = L.T("Choose the program"), AllowMultiple = false });
         var path = files.FirstOrDefault()?.TryGetLocalPath();
         if (path == null) return;
         C<TextBox>(box).Text = path;
@@ -332,7 +375,7 @@ public partial class SettingsView : UserControl
         if (top == null) return;
         var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Import ShareX custom uploader",
+            Title = L.T("Import ShareX custom uploader"),
             AllowMultiple = false,
             FileTypeFilter = new[] { new FilePickerFileType("ShareX custom uploader") { Patterns = new[] { "*.sxcu", "*.json" } } }
         });
@@ -375,7 +418,7 @@ public partial class SettingsView : UserControl
         if (top == null) return;
         var folders = await top.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "Choose screenshot folder",
+            Title = L.T("Choose screenshot folder"),
             AllowMultiple = false
         });
         var path = folders.FirstOrDefault()?.TryGetLocalPath();
@@ -404,12 +447,12 @@ public partial class SettingsView : UserControl
         if (!_resetArmed)
         {
             _resetArmed = true;
-            btn.Content = "Click again to reset";
-            DispatcherTimer.RunOnce(() => { _resetArmed = false; btn.Content = "Reset to defaults"; }, TimeSpan.FromSeconds(4));
+            btn.Content = L.T("Click again to reset");
+            DispatcherTimer.RunOnce(() => { _resetArmed = false; btn.Content = L.T("Reset to defaults"); }, TimeSpan.FromSeconds(4));
             return;
         }
         _resetArmed = false;
-        btn.Content = "Reset to defaults";
+        btn.Content = L.T("Reset to defaults");
         App.ResetSettings();
         Load();
         SettingsChanged?.Invoke();
@@ -421,7 +464,7 @@ public partial class SettingsView : UserControl
         Save();
         var result = C<TextBlock>("TestUploadResult");
         result.Foreground = (IBrush)Application.Current!.FindResource("TextMutedBrush")!;
-        result.Text = "Uploading a test image…";
+        result.Text = L.T("Uploading a test image…");
         try
         {
             var bmp = new Avalonia.Media.Imaging.RenderTargetBitmap(new PixelSize(64, 64));
@@ -435,7 +478,7 @@ public partial class SettingsView : UserControl
         catch (Exception ex)
         {
             result.Foreground = (IBrush)Application.Current!.FindResource("DangerBrush")!;
-            result.Text = ex.Message;
+            result.Text = L.T(ex.Message);
         }
     }
 
@@ -449,7 +492,7 @@ public partial class SettingsView : UserControl
         {
             grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
 
-            var text = new TextBlock { Text = label };
+            var text = new TextBlock { Text = L.T(label) };
             text.Classes.Add("label");
             Grid.SetRow(text, row);
 
@@ -466,7 +509,7 @@ public partial class SettingsView : UserControl
                 Tag = action
             };
             clear.Classes.Add("ghost");
-            ToolTip.SetTip(clear, "Clear");
+            ToolTip.SetTip(clear, L.T("Clear"));
             clear.Click += (_, _) => SetHotkey(action, "");
             Grid.SetRow(clear, row);
             Grid.SetColumn(clear, 2);
@@ -481,7 +524,7 @@ public partial class SettingsView : UserControl
         }
     }
 
-    private static string HotkeyText(string? combo) => string.IsNullOrEmpty(combo) ? "Not set" : combo;
+    private static string HotkeyText(string? combo) => string.IsNullOrEmpty(combo) ? L.T("Not set") : combo;
 
     private void OnHotkeyBoxClick(object? sender, RoutedEventArgs e)
     {
@@ -489,14 +532,14 @@ public partial class SettingsView : UserControl
         var hotkeys = App.Hotkeys;
         if (hotkeys == null || !hotkeys.IsRunning)
         {
-            C<TextBlock>("HotkeyStatus").Text = "⚠ Hotkeys can't be recorded because the global keyboard hook isn't running.";
+            C<TextBlock>("HotkeyStatus").Text = L.T("⚠ Hotkeys can't be recorded because the global keyboard hook isn't running.");
             return;
         }
 
         StopRecording();
         _recordingButton = btn;
         btn.Classes.Add("recording");
-        btn.Content = "Press keys…";
+        btn.Content = L.T("Press keys…");
 
         // The global hook sees keys like PrintScreen that never reach a window
         hotkeys.CaptureNextHotkey(hk => Dispatcher.UIThread.Post(() =>

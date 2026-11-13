@@ -19,7 +19,7 @@ public abstract class ToolWindow : Window
 {
     protected ToolWindow(string title, double width, double height)
     {
-        Title = $"EagleShot — {title}";
+        Title = $"EagleShot — {L.T(title)}";
         Width = width;
         Height = height;
         MinWidth = 380;
@@ -27,6 +27,8 @@ public abstract class ToolWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = (IBrush)Application.Current!.FindResource("WindowBrush")!;
         Icon = new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://EagleShot/Resources/icon.ico")));
+        ClassicChrome.Apply(this);
+        Opened += (_, _) => L.Apply(this);
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
     }
 
@@ -49,7 +51,7 @@ public abstract class ToolWindow : Window
     {
         var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Save image",
+            Title = L.T("Save image"),
             SuggestedFileName = suggested,
             DefaultExtension = "png",
             FileTypeChoices = new[] { new FilePickerFileType("PNG Image") { Patterns = new[] { "*.png" } }, new FilePickerFileType("JPEG Image") { Patterns = new[] { "*.jpg" } } }
@@ -61,6 +63,47 @@ public abstract class ToolWindow : Window
 }
 
 /// <summary>Live QR code generator.</summary>
+/// <summary>Help → About: logo, version and a link to the project.</summary>
+public class AboutWindow : ToolWindow
+{
+    public AboutWindow() : base("About", 380, 230)
+    {
+        Title = L.T("About EagleShot");
+        MinHeight = 0;
+        CanResize = false;
+        ShowInTaskbar = false;
+        WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        SizeToContent = SizeToContent.Height;
+
+        var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        var logo = new Image { Width = 48, Height = 48, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 0, 14, 0) };
+        try { logo.Source = Bitmap.DecodeToWidth(Avalonia.Platform.AssetLoader.Open(new Uri("avares://EagleShot/Resources/logo.png")), 96); } catch { }
+
+        var link = new Button { Content = "github.com/hhasanguclu/EagleShot", Classes = { "flat" }, Foreground = Brushes.Blue, HorizontalAlignment = HorizontalAlignment.Left, Padding = new Thickness(0), MinHeight = 0 };
+        link.Click += (_, _) => ShellHelper.Open("https://github.com/hhasanguclu/EagleShot");
+        var ok = Btn("OK", accent: true);
+        ok.HorizontalAlignment = HorizontalAlignment.Right;
+        ok.Click += (_, _) => Close();
+
+        var text = new StackPanel
+        {
+            Spacing = 3,
+            Children =
+            {
+                new TextBlock { Text = "EagleShot", FontWeight = FontWeight.Bold, FontSize = 13 },
+                new TextBlock { Text = v == null ? "" : L.F("Version {0}", $"{v.Major}.{v.Minor}.{v.Build}") },
+                new TextBlock { Text = "Screenshots, screen recording and capture tools.", TextWrapping = TextWrapping.Wrap },
+                link
+            }
+        };
+        var top = new DockPanel { Children = { logo, text } };
+        DockPanel.SetDock(logo, Dock.Left);
+        var rule = new Border { Height = 2, Margin = new Thickness(0, 12, 0, 10), BorderBrush = Brushes.White, BorderThickness = new Thickness(0, 0, 0, 1), Background = new SolidColorBrush(Color.FromRgb(128, 128, 128)) };
+
+        Content = new StackPanel { Margin = new Thickness(14), Children = { top, rule, ok } };
+    }
+}
+
 public class QrGeneratorWindow : ToolWindow
 {
     public QrGeneratorWindow(string? initial = null) : base("QR code", 520, 600)
@@ -88,7 +131,7 @@ public class QrGeneratorWindow : ToolWindow
         Opened += (_, _) => input.Focus();
 
         var copy = Btn("Copy image", true);
-        copy.Click += (_, _) => { if (current != null && ClipboardService.CopyImage(current)) copy.Content = "Copied ✓"; };
+        copy.Click += (_, _) => { if (current != null && ClipboardService.CopyImage(current)) copy.Content = L.T("Copied ✓"); };
         var save = Btn("Save…");
         save.Click += async (_, _) => { if (current != null) await SaveImageAsync(current, "QR"); };
         var pin = Btn("Pin");
@@ -123,7 +166,7 @@ public class HashWindow : ToolWindow
         var browse = Btn("Browse…", true);
         browse.Click += async (_, _) =>
         {
-            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = "Choose a file" });
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = L.T("Choose a file") });
             var path = files.FirstOrDefault()?.TryGetLocalPath();
             if (path != null) await ComputeAsync(path);
         };
@@ -190,7 +233,7 @@ public class HashWindow : ToolWindow
         var target = (_compare.Text ?? "").Trim().ToLowerInvariant();
         if (target.Length == 0) { _match.Text = ""; return; }
         var hit = _boxes.FirstOrDefault(kv => kv.Value.Text == target);
-        _match.Text = hit.Key != null ? $"✓ Matches {hit.Key}" : "✗ No match";
+        _match.Text = hit.Key != null ? L.F("✓ Matches {0}", hit.Key) : L.T("✗ No match");
         _match.Foreground = (IBrush)Application.Current!.FindResource(hit.Key != null ? "SuccessBrush" : "DangerBrush")!;
     }
 }
@@ -213,7 +256,7 @@ public class ImageCombinerWindow : ToolWindow
         {
             var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
-                Title = "Add images",
+                Title = L.T("Add images"),
                 AllowMultiple = true,
                 FileTypeFilter = new[] { new FilePickerFileType("Images") { Patterns = new[] { "*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.gif" } } }
             });
@@ -261,8 +304,7 @@ public class ImageCombinerWindow : ToolWindow
         var previewFrame = new Border
         {
             Margin = new Thickness(0, 10, 0, 0),
-            CornerRadius = new CornerRadius(8),
-            Background = (IBrush)Application.Current!.FindResource("CardBrush")!,
+            Classes = { "sunken-deep" },
             Child = _preview
         };
 

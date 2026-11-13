@@ -50,29 +50,112 @@ public static class ClipboardService
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private static bool CopyImageWindows(Bitmap bitmap)
     {
-        var pngBytes = ImageHelper.Encode(bitmap, ImageFormatKind.Png);
-        var pixels = ImageHelper.ReadPixels(bitmap);
+        var png = ImageHelper.Encode(bitmap, ImageFormatKind.Png);
+        string? file = null;
+        try { file = WriteClipboardFile(png); } catch (Exception ex) { Debug.WriteLine($"Clipboard file failed: {ex.Message}"); }
+        return CopyImageWin32(png, ImageHelper.ReadPixels(bitmap), file);
+    }
 
-        if (!OpenClipboard(IntPtr.Zero))
+    /// <summary>
+    /// Puts an image on the Windows clipboard as PNG, CF_DIB (which Windows converts to
+    /// CF_BITMAP for older apps) and, when <paramref name="filePath"/> is given, as a file
+    /// (CF_HDROP) so terminals, chat apps and Explorer can paste it too.
+    /// </summary>
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    public static bool CopyImageWin32(byte[] png, PixelBuffer pixels, string? filePath)
+    {
+        // The clipboard needs a real owner window: with a NULL owner, EmptyClipboard leaves
+        // the clipboard ownerless and SetClipboardData fails.
+        IntPtr owner = ClipboardOwnerWindow();
+        if (!OpenClipboardWithRetry(owner))
             return false;
 
         try
         {
-            EmptyClipboard();
+            if (!EmptyClipboard()) return false;
+            bool ok = true;
+
+            // CF_DIB first: the format most apps (and .NET / PowerShell Get-Clipboard) read
+            ok &= Set(CF_DIB, BuildDib(pixels));
 
             // PNG keeps transparency for apps that support it
             uint cfPng = RegisterClipboardFormatW("PNG");
-            if (cfPng != 0)
-                SetClipboardData(cfPng, ToGlobal(pngBytes));
+            if (cfPng != 0) ok &= Set(cfPng, png);
 
-            // CF_DIB for everything else
-            SetClipboardData(8, ToGlobal(BuildDib(pixels)));
-            return true;
+            if (filePath != null && File.Exists(filePath))
+            {
+                ok &= Set(CF_HDROP, BuildDropFiles(filePath));
+                uint cfEffect = RegisterClipboardFormatW("Preferred DropEffect");
+                if (cfEffect != 0) Set(cfEffect, BitConverter.GetBytes(1)); // DROPEFFECT_COPY
+            }
+            return ok;
         }
         finally
         {
             CloseClipboard();
         }
+    }
+
+    private const uint CF_DIB = 8;
+    private const uint CF_HDROP = 15;
+
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    private static bool Set(uint format, byte[] data)
+    {
+        IntPtr handle = ToGlobal(data);
+        if (handle == IntPtr.Zero) return false;
+        if (SetClipboardData(format, handle) != IntPtr.Zero) return true;
+        GlobalFree(handle); // ownership only moves to the clipboard on success
+        return false;
+    }
+
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    private static bool OpenClipboardWithRetry(IntPtr owner)
+    {
+        // Another app (clipboard managers, RDP) may hold the clipboard for a moment
+        for (int i = 0; i < 10; i++)
+        {
+            if (OpenClipboard(owner)) return true;
+            System.Threading.Thread.Sleep(30);
+        }
+        return false;
+    }
+
+    private static IntPtr _ownerWindow;
+
+    /// <summary>A hidden message-only window that owns what EagleShot puts on the clipboard.</summary>
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    private static IntPtr ClipboardOwnerWindow()
+    {
+        if (_ownerWindow == IntPtr.Zero || !IsWindow(_ownerWindow))
+            _ownerWindow = CreateWindowExW(0, "STATIC", "EagleShot clipboard", 0, 0, 0, 0, 0,
+                new IntPtr(-3) /* HWND_MESSAGE */, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+        return _ownerWindow;
+    }
+
+    /// <summary>DROPFILES header followed by a double-null-terminated UTF-16 path list.</summary>
+    private static byte[] BuildDropFiles(string path)
+    {
+        var chars = System.Text.Encoding.Unicode.GetBytes(path + "\0\0");
+        var data = new byte[20 + chars.Length];
+        BitConverter.GetBytes(20).CopyTo(data, 0);  // pFiles: offset of the list
+        BitConverter.GetBytes(1).CopyTo(data, 16);  // fWide: Unicode paths
+        chars.CopyTo(data, 20);
+        return data;
+    }
+
+    /// <summary>Saves the copied image as a PNG so it can also be pasted as a file.</summary>
+    private static string WriteClipboardFile(byte[] png)
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "EagleShot", "clipboard");
+        Directory.CreateDirectory(dir);
+        foreach (var old in Directory.GetFiles(dir, "*.png"))
+        {
+            try { if (File.GetLastWriteTime(old) < DateTime.Now.AddDays(-1)) File.Delete(old); } catch { }
+        }
+        var path = Path.Combine(dir, $"EagleShot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss-fff}.png");
+        File.WriteAllBytes(path, png);
+        return path;
     }
 
     private static byte[] BuildDib(PixelBuffer pixels)
@@ -97,6 +180,7 @@ public static class ClipboardService
     {
         // GMEM_MOVEABLE memory is required by SetClipboardData; the clipboard owns it afterwards.
         IntPtr hGlobal = GlobalAlloc(0x0002, (UIntPtr)data.Length);
+        if (hGlobal == IntPtr.Zero) return IntPtr.Zero;
         IntPtr ptr = GlobalLock(hGlobal);
         Marshal.Copy(data, 0, ptr, data.Length);
         GlobalUnlock(hGlobal);
@@ -181,4 +265,9 @@ public static class ClipboardService
     [DllImport("kernel32.dll")] private static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
     [DllImport("kernel32.dll")] private static extern IntPtr GlobalLock(IntPtr hMem);
     [DllImport("kernel32.dll")] private static extern bool GlobalUnlock(IntPtr hMem);
+    [DllImport("kernel32.dll")] private static extern IntPtr GlobalFree(IntPtr hMem);
+    [DllImport("user32.dll")] private static extern bool IsWindow(IntPtr hwnd);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr CreateWindowExW(int exStyle, string className, string windowName, int style,
+        int x, int y, int width, int height, IntPtr parent, IntPtr menu, IntPtr instance, IntPtr param);
 }

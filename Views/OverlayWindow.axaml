@@ -16,60 +16,59 @@
         <Border Name="ToolbarBorder"
                 IsVisible="False"
                 Background="{StaticResource ToolbarBrush}"
-                BorderBrush="#2E2F3C"
-                BorderThickness="1"
-                CornerRadius="12"
-                Padding="5"
-                BoxShadow="0 8 32 0 #90000000"
+                BorderBrush="Black"
+                BorderThickness="0,0,1,1"
+                Padding="3"
+                BoxShadow="inset 1 1 0 0 #FFFFFF, inset -1 -1 0 0 #808080"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top">
             <StackPanel Orientation="Horizontal" Spacing="2" Name="ToolbarPanel">
                 <!-- Drawing tools -->
-                <Button Classes="tool-btn selected" Tag="None" Click="OnToolClick" ToolTip.Tip="Select / move  (V)">
+                <Button Classes="flat tool-btn selected" Tag="None" Click="OnToolClick" ToolTip.Tip="Select / move  (V)">
                     <PathIcon Data="{StaticResource IconSelect}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Pen" Click="OnToolClick" ToolTip.Tip="Pen  (P)">
+                <Button Classes="flat tool-btn" Tag="Pen" Click="OnToolClick" ToolTip.Tip="Pen  (P)">
                     <PathIcon Data="{StaticResource IconPen}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Marker" Click="OnToolClick" ToolTip.Tip="Marker  (K)">
+                <Button Classes="flat tool-btn" Tag="Marker" Click="OnToolClick" ToolTip.Tip="Marker  (K)">
                     <PathIcon Data="{StaticResource IconMarker}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Line" Click="OnToolClick" ToolTip.Tip="Line  (L) · Shift snaps to 45°">
+                <Button Classes="flat tool-btn" Tag="Line" Click="OnToolClick" ToolTip.Tip="Line  (L) · Shift snaps to 45°">
                     <PathIcon Data="{StaticResource IconLine}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Arrow" Click="OnToolClick" ToolTip.Tip="Arrow  (A) · Shift snaps to 45°">
+                <Button Classes="flat tool-btn" Tag="Arrow" Click="OnToolClick" ToolTip.Tip="Arrow  (A) · Shift snaps to 45°">
                     <PathIcon Data="{StaticResource IconArrow}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Rectangle" Click="OnToolClick" ToolTip.Tip="Rectangle  (R) · Shift for square">
+                <Button Classes="flat tool-btn" Tag="Rectangle" Click="OnToolClick" ToolTip.Tip="Rectangle  (R) · Shift for square">
                     <PathIcon Data="{StaticResource IconRectangle}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Ellipse" Click="OnToolClick" ToolTip.Tip="Ellipse  (E) · Shift for circle">
+                <Button Classes="flat tool-btn" Tag="Ellipse" Click="OnToolClick" ToolTip.Tip="Ellipse  (E) · Shift for circle">
                     <PathIcon Data="{StaticResource IconEllipse}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Text" Click="OnToolClick" ToolTip.Tip="Text  (T) · double-click text to edit">
+                <Button Classes="flat tool-btn" Tag="Text" Click="OnToolClick" ToolTip.Tip="Text  (T) · double-click text to edit">
                     <PathIcon Data="{StaticResource IconText}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Highlight" Click="OnToolClick" ToolTip.Tip="Highlight  (H)">
-                    <Border Width="18" Height="10" Background="#B0FFE600" CornerRadius="2"/>
+                <Button Classes="flat tool-btn" Tag="Highlight" Click="OnToolClick" ToolTip.Tip="Highlight  (H)">
+                    <Border Width="16" Height="9" Background="#FFE600" BorderBrush="Black" BorderThickness="1"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Number" Click="OnToolClick" ToolTip.Tip="Step number  (N)">
+                <Button Classes="flat tool-btn" Tag="Number" Click="OnToolClick" ToolTip.Tip="Step number  (N)">
                     <PathIcon Data="{StaticResource IconNumber}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Mosaic" Click="OnToolClick" ToolTip.Tip="Pixelate  (X)">
+                <Button Classes="flat tool-btn" Tag="Mosaic" Click="OnToolClick" ToolTip.Tip="Pixelate  (X)">
                     <PathIcon Data="{StaticResource IconMosaic}"/>
                 </Button>
-                <Button Classes="tool-btn" Tag="Blur" Click="OnToolClick" ToolTip.Tip="Blur  (B)">
+                <Button Classes="flat tool-btn" Tag="Blur" Click="OnToolClick" ToolTip.Tip="Blur  (B)">
                     <PathIcon Data="{StaticResource IconBlur}"/>
                 </Button>
 
                 <Border Classes="separator"/>
 
                 <!-- Color -->
-                <Button Classes="tool-btn" Name="ColorButton" ToolTip.Tip="Color">
+                <Button Classes="flat tool-btn" Name="ColorButton" ToolTip.Tip="Color">
                     <Button.Flyout>
                         <Flyout Placement="Top">
                             <StackPanel Spacing="8" Margin="2">
-                                <TextBlock Text="Color" Foreground="#9A9CAE" FontSize="11"/>
+                                <TextBlock Text="Color" Foreground="Black" FontSize="11" FontWeight="Bold"/>
                                 <ItemsControl Name="ColorGrid">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -84,60 +83,60 @@
                             </StackPanel>
                         </Flyout>
                     </Button.Flyout>
-                    <Border Name="ColorPreview" Width="18" Height="18" CornerRadius="9" Background="#FF3B30" BorderBrush="White" BorderThickness="2"/>
+                    <Border Name="ColorPreview" Width="16" Height="16" Background="#FF3B30" BorderBrush="Black" BorderThickness="1"/>
                 </Button>
 
                 <!-- Stroke width -->
-                <Button Classes="tool-btn" Name="WidthButton" ToolTip.Tip="Stroke size  ([ and ])">
+                <Button Classes="flat tool-btn" Name="WidthButton" ToolTip.Tip="Stroke size  ([ and ])">
                     <Button.Flyout>
                         <Flyout Placement="Top">
                             <StackPanel Spacing="6" Margin="2">
-                                <TextBlock Text="Stroke size" Foreground="#9A9CAE" FontSize="11"/>
+                                <TextBlock Text="Stroke size" Foreground="Black" FontSize="11" FontWeight="Bold"/>
                                 <StackPanel Orientation="Horizontal" Spacing="2" Name="WidthPanel"/>
                             </StackPanel>
                         </Flyout>
                     </Button.Flyout>
-                    <Ellipse Name="WidthPreview" Width="7" Height="7" Fill="#E4E5EC"/>
+                    <Ellipse Name="WidthPreview" Width="7" Height="7" Fill="Black"/>
                 </Button>
 
-                <ToggleButton Classes="tool-btn" Name="FillToggle" Click="OnFillToggle" ToolTip.Tip="Fill rectangles &amp; ellipses  (F)">
+                <ToggleButton Classes="flat tool-btn" Name="FillToggle" Click="OnFillToggle" ToolTip.Tip="Fill rectangles &amp; ellipses  (F)">
                     <PathIcon Data="{StaticResource IconFill}"/>
                 </ToggleButton>
 
                 <Border Classes="separator"/>
 
-                <Button Classes="tool-btn" Name="UndoButton" Click="OnUndoClick" ToolTip.Tip="Undo  (Ctrl+Z)">
+                <Button Classes="flat tool-btn" Name="UndoButton" Click="OnUndoClick" ToolTip.Tip="Undo  (Ctrl+Z)">
                     <PathIcon Data="{StaticResource IconUndo}"/>
                 </Button>
-                <Button Classes="tool-btn" Name="RedoButton" Click="OnRedoClick" ToolTip.Tip="Redo  (Ctrl+Y)">
+                <Button Classes="flat tool-btn" Name="RedoButton" Click="OnRedoClick" ToolTip.Tip="Redo  (Ctrl+Y)">
                     <PathIcon Data="{StaticResource IconRedo}"/>
                 </Button>
 
                 <Border Classes="separator"/>
 
                 <!-- Outputs -->
-                <Button Classes="tool-btn" Click="OnPinClick" ToolTip.Tip="Pin to screen  (Ctrl+P)">
+                <Button Classes="flat tool-btn" Click="OnPinClick" ToolTip.Tip="Pin to screen  (Ctrl+P)">
                     <PathIcon Data="{StaticResource IconPin}"/>
                 </Button>
-                <Button Classes="tool-btn" Click="OnUploadClick" ToolTip.Tip="Upload  (Ctrl+U)">
+                <Button Classes="flat tool-btn" Click="OnUploadClick" ToolTip.Tip="Upload  (Ctrl+U)">
                     <PathIcon Data="{StaticResource IconUpload}"/>
                 </Button>
-                <Button Classes="tool-btn" Click="OnCopyClick" ToolTip.Tip="Copy to clipboard  (Ctrl+C)">
+                <Button Classes="flat tool-btn" Click="OnCopyClick" ToolTip.Tip="Copy to clipboard  (Ctrl+C)">
                     <PathIcon Data="{StaticResource IconCopy}"/>
                 </Button>
-                <Button Classes="tool-btn" Click="OnSaveClick" ToolTip.Tip="Quick save to screenshot folder  (Ctrl+S)">
+                <Button Classes="flat tool-btn" Click="OnSaveClick" ToolTip.Tip="Quick save to screenshot folder  (Ctrl+S)">
                     <PathIcon Data="{StaticResource IconSave}"/>
                 </Button>
-                <Button Classes="tool-btn" Click="OnSaveAsClick" ToolTip.Tip="Save as…  (Ctrl+Shift+S)">
+                <Button Classes="flat tool-btn" Click="OnSaveAsClick" ToolTip.Tip="Save as…  (Ctrl+Shift+S)">
                     <PathIcon Data="{StaticResource IconSaveAs}"/>
                 </Button>
 
                 <Border Classes="separator"/>
 
-                <Button Classes="tool-btn danger" Click="OnCloseClick" ToolTip.Tip="Cancel  (Esc)">
+                <Button Classes="flat tool-btn danger" Click="OnCloseClick" ToolTip.Tip="Cancel  (Esc)">
                     <PathIcon Data="{StaticResource IconClose}"/>
                 </Button>
-                <Button Classes="tool-btn primary" Click="OnConfirmClick" ToolTip.Tip="Done — run after-capture tasks  (Enter / double-click)">
+                <Button Classes="flat tool-btn primary" Click="OnConfirmClick" ToolTip.Tip="Done — run after-capture tasks  (Enter / double-click)">
                     <PathIcon Data="{StaticResource IconCheck}"/>
                 </Button>
             </StackPanel>

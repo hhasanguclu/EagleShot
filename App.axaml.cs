@@ -36,6 +36,11 @@ public class App : Application
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             Settings = AppSettings.Load();
+            L.Init(Settings.Language);
+            Styles.Add(new Avalonia.Styling.Style(x => Avalonia.Styling.Selectors.Is<TopLevel>(x))
+            {
+                Setters = { new Avalonia.Styling.Setter(Avalonia.Controls.Primitives.TemplatedControl.FontFamilyProperty, new Avalonia.Media.FontFamily(L.FontFamily())) }
+            });
             History = new HistoryService(Settings.MaxHistoryItems);
 
             var command = CommandLine.Parse(desktop.Args ?? Array.Empty<string>());
@@ -51,6 +56,7 @@ public class App : Application
             Hotkeys.UpdateBindings(Settings.Hotkeys);
             Hotkeys.HotkeyPressed += action => Dispatcher.UIThread.Post(() => OnHotkey(action));
             Hotkeys.Start();
+            WindowsIntegration.ApplyPrintScreenPreference(Settings);
 
             Capture = new CaptureManager(History, Hotkeys);
             Capture.AutoCapture.Changed += RefreshTrayMenu;
@@ -68,7 +74,7 @@ public class App : Application
             if (command != null)
                 Dispatcher.UIThread.Post(() => RunCommand(command, desktop.Args ?? Array.Empty<string>()), DispatcherPriority.Background);
             else if (Settings.ShowMainWindowOnStartup)
-                DispatcherTimer.RunOnce(() => MainWindowInstance.BringToFront(),
+                DispatcherTimer.RunOnce(() => { if (Capture?.IsRecording != true) MainWindowInstance.BringToFront(); },
                     TimeSpan.FromMilliseconds(Settings.ShowSplash ? 1500 : 0));
         }
 
@@ -116,6 +122,7 @@ public class App : Application
     public static void ApplySettings()
     {
         Hotkeys?.UpdateBindings(Settings.Hotkeys);
+        WindowsIntegration.ApplyPrintScreenPreference(Settings);
         RefreshTrayMenu();
     }
 
@@ -125,6 +132,28 @@ public class App : Application
         Settings = fresh;
         Settings.Save();
         ApplySettings();
+    }
+
+    /// <summary>Starts a fresh EagleShot and quits this one (used to switch the language).</summary>
+    public static void Restart()
+    {
+        try
+        {
+            var exe = Environment.ProcessPath;
+            if (exe == null) return;
+            var psi = new System.Diagnostics.ProcessStartInfo(exe) { UseShellExecute = false };
+            // Started as "dotnet EagleShot.dll": pass the assembly too
+            if (Path.GetFileNameWithoutExtension(exe).Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+                psi.ArgumentList.Add(typeof(App).Assembly.Location);
+            psi.ArgumentList.Add(CommandLine.Restarted);
+            System.Diagnostics.Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            ToastWindow.Show("Couldn't restart EagleShot", ex.Message, isError: true);
+            return;
+        }
+        Quit();
     }
 
     public static void Quit()
@@ -170,6 +199,7 @@ public class App : Application
         void AddCapture(string title, HotkeyAction action)
         {
             Settings.Hotkeys.TryGetValue(action, out var combo);
+            title = L.T(title);
             var item = new NativeMenuItem(string.IsNullOrEmpty(combo) ? title : $"{title}   ({combo})");
             item.Click += (_, _) => Capture?.Run(action);
             menu.Add(item);
@@ -178,7 +208,7 @@ public class App : Application
         AddCapture("Capture region", HotkeyAction.RegionCapture);
         AddCapture("Capture full screen", HotkeyAction.FullScreenCapture);
         AddCapture("Capture active monitor", HotkeyAction.ActiveMonitorCapture);
-        AddCapture($"Delayed region ({Settings.CaptureDelaySeconds}s)", HotkeyAction.DelayedRegionCapture);
+        AddCapture(L.F("Delayed region ({0}s)", Settings.CaptureDelaySeconds), HotkeyAction.DelayedRegionCapture);
         AddCapture("Repeat last region", HotkeyAction.RepeatLastRegion);
         AddCapture("Capture window", HotkeyAction.WindowCapture);
         AddCapture("Scrolling capture", HotkeyAction.ScrollingCapture);
@@ -192,10 +222,10 @@ public class App : Application
         AddCapture(recordTitle, HotkeyAction.RecordVideo);
         if (Capture?.IsRecording != true) AddCapture("GIF recording", HotkeyAction.RecordGif);
 
-        var tools = new NativeMenuItem("Tools") { Menu = new NativeMenu() };
+        var tools = new NativeMenuItem(L.T("Tools")) { Menu = new NativeMenu() };
         void AddTool(string title, Action action)
         {
-            var item = new NativeMenuItem(title);
+            var item = new NativeMenuItem(L.T(title));
             item.Click += (_, _) => action();
             tools.Menu.Add(item);
         }
@@ -211,15 +241,15 @@ public class App : Application
 
         menu.Add(new NativeMenuItemSeparator());
 
-        var open = new NativeMenuItem("Open EagleShot");
+        var open = new NativeMenuItem(L.T("Open EagleShot"));
         open.Click += (_, _) => ShowMainWindow("Capture");
         menu.Add(open);
 
-        var history = new NativeMenuItem("History");
+        var history = new NativeMenuItem(L.T("History"));
         history.Click += (_, _) => ShowMainWindow("History");
         menu.Add(history);
 
-        var folder = new NativeMenuItem("Open screenshot folder");
+        var folder = new NativeMenuItem(L.T("Open screenshot folder"));
         folder.Click += (_, _) =>
         {
             Directory.CreateDirectory(Settings.SaveFolder);
@@ -227,13 +257,13 @@ public class App : Application
         };
         menu.Add(folder);
 
-        var settings = new NativeMenuItem("Settings");
+        var settings = new NativeMenuItem(L.T("Settings"));
         settings.Click += (_, _) => ShowMainWindow("Settings");
         menu.Add(settings);
 
         menu.Add(new NativeMenuItemSeparator());
 
-        var startup = new NativeMenuItem("Start with system")
+        var startup = new NativeMenuItem(L.T("Start with system"))
         {
             ToggleType = NativeMenuItemToggleType.CheckBox,
             IsChecked = AutoStartService.IsEnabled()
@@ -248,7 +278,7 @@ public class App : Application
 
         menu.Add(new NativeMenuItemSeparator());
 
-        var exit = new NativeMenuItem("Exit");
+        var exit = new NativeMenuItem(L.T("Exit"));
         exit.Click += (_, _) => Quit();
         menu.Add(exit);
 
@@ -275,6 +305,8 @@ public static class CommandLine
     public const string Ruler = "ruler";
     public const string Editor = "editor";
     public const string Upload = "upload";
+    /// <summary>Internal: started by <see cref="App.Restart"/>; waits for the old instance to exit.</summary>
+    public const string Restarted = "--restarted";
 
     private static readonly string[] All = { Region, FullScreen, Monitor, Delay, Repeat, Color, Show, Window, Record, Gif, Scroll, Ocr, Qr, Ruler, Editor, Upload };
 

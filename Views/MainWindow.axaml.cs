@@ -20,6 +20,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ClassicChrome.Apply(this);
 
         _capturePage = this.FindControl<ScrollViewer>("CapturePage")!;
         _historyPage = this.FindControl<HistoryView>("HistoryPage")!;
@@ -39,11 +40,15 @@ public partial class MainWindow : Window
             RefreshCapturePage();
         };
 
+        if (App.Capture != null)
+            App.Capture.AutoCapture.Changed += () => Avalonia.Threading.Dispatcher.UIThread.Post(RefreshCapturePage);
+
         if (App.History != null)
             App.History.Changed += () => Avalonia.Threading.Dispatcher.UIThread.Post(RefreshRecent);
 
         RefreshCapturePage();
         RefreshRecent();
+        L.Apply(this);
     }
 
     /// <summary>Closing the window only hides it; EagleShot keeps running in the tray.</summary>
@@ -102,6 +107,40 @@ public partial class MainWindow : Window
 
     private void OnViewAllClick(object? sender, RoutedEventArgs e) => ShowPage("History");
 
+    private void OnToolbarPageClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string page }) ShowPage(page);
+    }
+
+    // ───────────────────────────── Menu bar ─────────────────────────────
+
+    private void OnMenuAction(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { Tag: string tag } && Enum.TryParse<HotkeyAction>(tag, out var action))
+            App.Capture?.Run(action);
+    }
+
+    private void OnMenuPage(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { Tag: string page }) ShowPage(page);
+    }
+
+    private void OnMenuOpenEditor(object? sender, RoutedEventArgs e) => _ = App.Capture?.OpenImageInEditorAsync();
+
+    private void OnMenuOpenFolder(object? sender, RoutedEventArgs e)
+    {
+        System.IO.Directory.CreateDirectory(App.Settings.SaveFolder);
+        ShellHelper.Open(App.Settings.SaveFolder);
+    }
+
+    private void OnMenuCloseWindow(object? sender, RoutedEventArgs e) => Hide();
+    private void OnMenuQrGenerator(object? sender, RoutedEventArgs e) => new QrGeneratorWindow().Show();
+    private void OnMenuCombiner(object? sender, RoutedEventArgs e) => new ImageCombinerWindow().Show();
+    private void OnMenuHash(object? sender, RoutedEventArgs e) => new HashWindow().Show();
+    private void OnMenuAutoCapture(object? sender, RoutedEventArgs e) => App.Capture?.AutoCapture.Toggle();
+    private void OnMenuWebsite(object? sender, RoutedEventArgs e) => ShellHelper.Open("https://github.com/hhasanguclu/EagleShot");
+    private void OnMenuAbout(object? sender, RoutedEventArgs e) => new AboutWindow().ShowDialog(this);
+
     private void OnQuitClick(object? sender, RoutedEventArgs e) => App.Quit();
 
     private void OnCaptureCardClick(object? sender, RoutedEventArgs e)
@@ -114,7 +153,7 @@ public partial class MainWindow : Window
     {
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Pin an image",
+            Title = L.T("Pin an image"),
             AllowMultiple = false,
             FileTypeFilter = new[] { new FilePickerFileType("Images") { Patterns = new[] { "*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.gif" } } }
         });
@@ -136,11 +175,18 @@ public partial class MainWindow : Window
             var chip = this.FindControl<Border>($"Key{action}");
             if (chip?.Child is not TextBlock tb) continue;
             s.Hotkeys.TryGetValue(action, out var combo);
-            tb.Text = combo ?? "";
+            tb.Text = string.IsNullOrEmpty(combo) ? "" : L.F("Hotkey: {0}", combo);
             chip.IsVisible = !string.IsNullOrEmpty(combo);
+            // The description takes the hotkey's place when there is none
+            var desc = this.FindControl<TextBlock>($"Desc{action}");
+            if (desc != null)
+            {
+                if (chip.Parent is Control holder) ToolTip.SetTip(holder, desc.Text);
+                desc.IsVisible = !chip.IsVisible;
+            }
         }
 
-        this.FindControl<TextBlock>("DelayTitle")!.Text = $"Delayed region ({s.CaptureDelaySeconds}s)";
+        this.FindControl<TextBlock>("DelayTitle")!.Text = L.F("Delayed region ({0}s)", s.CaptureDelaySeconds);
 
         var a = s.AfterCapture;
         this.FindControl<ToggleButton>("ChipCopy")!.IsChecked = a.CopyToClipboard;
@@ -149,7 +195,27 @@ public partial class MainWindow : Window
         this.FindControl<ToggleButton>("ChipPin")!.IsChecked = a.PinToScreen;
         this.FindControl<ToggleButton>("ChipNotify")!.IsChecked = a.ShowNotification;
 
-        this.FindControl<Border>("HotkeyWarning")!.IsVisible = App.Hotkeys == null || !App.Hotkeys.IsRunning;
+        bool hotkeys = App.Hotkeys != null && App.Hotkeys.IsRunning;
+        this.FindControl<Border>("HotkeyWarning")!.IsVisible = !hotkeys;
+        this.FindControl<TextBlock>("HotkeyStatusText")!.Text = L.T(hotkeys ? "Hotkeys: on" : "Hotkeys: off");
+        this.FindControl<MenuItem>("DelayMenuItem")!.Header = L.F("_Delayed region ({0}s)", s.CaptureDelaySeconds);
+        this.FindControl<MenuItem>("AutoCaptureMenuItem")!.Header = L.T(App.Capture?.AutoCapture.IsRunning == true ? "Stop _auto capture" : "Start _auto capture");
+
+        // Show each hotkey next to its menu entry, like classic accelerators
+        foreach (var menu in new[] { "CaptureMenu", "ToolsMenu" })
+            foreach (var item in this.FindControl<MenuItem>(menu)!.Items.OfType<MenuItem>())
+            {
+                if (item.Tag is not string tag || !Enum.TryParse<HotkeyAction>(tag, out var action)) continue;
+                s.Hotkeys.TryGetValue(action, out var combo);
+                item.InputGesture = TryParseGesture(combo);
+            }
+    }
+
+    private static KeyGesture? TryParseGesture(string? combo)
+    {
+        if (string.IsNullOrWhiteSpace(combo)) return null;
+        try { return KeyGesture.Parse(combo); }
+        catch { return null; }
     }
 
     private void OnChipClick(object? sender, RoutedEventArgs e)

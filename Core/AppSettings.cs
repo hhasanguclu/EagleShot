@@ -110,6 +110,9 @@ public class AppSettings
     public bool ShowMainWindowOnStartup { get; set; } = true;
     public bool ShowSplash { get; set; } = true;
 
+    /// <summary>UI language code such as "tr" or "zh-CN"; empty follows the system language.</summary>
+    public string Language { get; set; } = "";
+
     // Capture
     public int CaptureDelaySeconds { get; set; } = 3;
     public bool ShowMagnifier { get; set; } = true;
@@ -145,6 +148,9 @@ public class AppSettings
     public Dictionary<HotkeyAction, string> Hotkeys { get; set; } = DefaultHotkeys();
 
     public int MaxHistoryItems { get; set; } = 300;
+
+    /// <summary>Windows: stop PrintScreen from opening the Snipping Tool so only EagleShot reacts.</summary>
+    public bool TakeOverPrintScreen { get; set; } = true;
 
     public static Dictionary<HotkeyAction, string> DefaultHotkeys()
     {

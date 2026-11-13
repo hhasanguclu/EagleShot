@@ -13,7 +13,7 @@ public class TextResultWindow : Window
 {
     public TextResultWindow(string title, string text, string? subtitle = null)
     {
-        Title = $"EagleShot — {title}";
+        Title = $"EagleShot — {L.T(title)}";
         Width = 560;
         Height = 420;
         MinWidth = 360;
@@ -21,6 +21,8 @@ public class TextResultWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = (IBrush)Application.Current!.FindResource("WindowBrush")!;
         Topmost = true;
+        ClassicChrome.Apply(this);
+        Opened += (_, _) => L.Apply(this);
         KeyDown += (_, e) => { if (e.Key == Avalonia.Input.Key.Escape) Close(); };
 
         var box = new TextBox
@@ -36,7 +38,7 @@ public class TextResultWindow : Window
         copy.Classes.Add("accent");
         copy.Click += async (_, _) =>
         {
-            if (await ClipboardService.CopyTextAsync(this, box.Text ?? "")) copy.Content = "Copied ✓";
+            if (await ClipboardService.CopyTextAsync(this, box.Text ?? "")) copy.Content = L.T("Copied ✓");
         };
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right };

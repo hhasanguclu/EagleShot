@@ -132,7 +132,7 @@ public class CaptureManager
 
         var hex = OverlayCanvas.ToHex(color.Value);
         bool ok = await ClipboardService.CopyTextAsync(MainWindow, hex);
-        ToastWindow.Show(ok ? $"Copied {hex}" : hex,
+        ToastWindow.Show(ok ? L.F("Copied {0}", hex) : hex,
             $"RGB {color.Value.R}, {color.Value.G}, {color.Value.B}", swatch: color.Value);
     });
 
@@ -633,7 +633,7 @@ public class CaptureManager
                 bool copied = ClipboardService.CopyImage(image);
                 if (_settings.AfterCapture.ShowNotification || !copied)
                     ToastWindow.Show(copied ? "Copied to clipboard" : "Clipboard unavailable",
-                        copied ? $"{image.PixelSize.Width} × {image.PixelSize.Height}" : ClipboardHint(), image, isError: !copied);
+                        copied ? $"{image.PixelSize.Width} × {image.PixelSize.Height}" : L.T(ClipboardHint()), image, isError: !copied);
                 break;
 
             case OverlayAction.Save:
@@ -724,7 +724,8 @@ public class CaptureManager
         {
             var title = url != null ? "Uploaded" : file != null ? "Screenshot saved" : "Copied to clipboard";
             var message = url ?? (file != null ? Path.GetFileName(file) : $"{image.PixelSize.Width} × {image.PixelSize.Height}");
-            message += $"\n{char.ToUpper(done[0][0])}{string.Join(" · ", done)[1..]}";
+            var summary = string.Join(" · ", done.Select(L.T));
+            message += $"\n{char.ToUpper(summary[0])}{summary[1..]}";
             Notify(title, message, image, url ?? file);
         }
     }

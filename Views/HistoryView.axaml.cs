@@ -24,6 +24,7 @@ public partial class HistoryView : UserControl
     {
         InitializeComponent();
         this.FindControl<TextBox>("SearchBox")!.TextChanged += (_, _) => Refresh();
+        L.Apply(this);
     }
 
     public void Refresh()
@@ -41,7 +42,7 @@ public partial class HistoryView : UserControl
         foreach (var item in items)
             panel.Children.Add(CreateCard(item));
 
-        this.FindControl<TextBlock>("CountText")!.Text = all.Count == 1 ? "1 capture" : $"{all.Count} captures";
+        this.FindControl<TextBlock>("CountText")!.Text = all.Count == 1 ? L.T("1 capture") : L.F("{0} captures", all.Count);
         this.FindControl<StackPanel>("EmptyState")!.IsVisible = items.Count == 0;
     }
 
@@ -62,7 +63,7 @@ public partial class HistoryView : UserControl
         {
             Data = (Geometry)Application.Current!.FindResource("IconImage")!,
             Width = 28, Height = 28,
-            Foreground = new SolidColorBrush(Color.FromRgb(70, 72, 90))
+            Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
         };
 
         var actions = new StackPanel
@@ -91,32 +92,34 @@ public partial class HistoryView : UserControl
 
         var kindBadge = new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(200, 15, 16, 22)),
-            CornerRadius = new CornerRadius(5),
-            Padding = new Thickness(6, 2),
-            Margin = new Thickness(8),
+            Background = new SolidColorBrush(Color.FromRgb(255, 255, 225)),
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(4, 1),
+            Margin = new Thickness(4),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Bottom,
-            Child = new TextBlock { Text = item.Url != null ? $"{item.Kind} · uploaded" : item.Kind, FontSize = 10, Foreground = Brushes.White }
+            Child = new TextBlock { Text = item.Url != null ? L.F("{0} · uploaded", L.T(item.Kind)) : L.T(item.Kind), FontSize = 10, Foreground = Brushes.Black }
         };
 
-        double thumbHeight = compact ? 112 : 128;
-        var thumb = new Panel
+        double thumbHeight = compact ? 100 : 120;
+        var thumb = new Border
         {
             Height = thumbHeight,
-            Background = new SolidColorBrush(Color.FromRgb(18, 19, 26)),
-            Children = { placeholder, image, kindBadge, actions }
+            Classes = { "sunken-deep" },
+            Padding = new Thickness(2),
+            Child = new Panel { ClipToBounds = true, Children = { placeholder, image, kindBadge, actions } }
         };
 
         var info = new StackPanel
         {
-            Margin = new Thickness(12, 9, 12, 11),
+            Margin = new Thickness(2, 4, 2, 1),
             Spacing = 2,
             Children =
             {
                 new TextBlock
                 {
-                    Text = item.DisplayName, FontSize = 12, FontWeight = FontWeight.Medium,
+                    Text = item.DisplayName, FontSize = 11, FontWeight = FontWeight.Bold,
                     Foreground = (IBrush)Application.Current!.FindResource("TextPrimaryBrush")!,
                     TextTrimming = TextTrimming.CharacterEllipsis
                 },
@@ -134,7 +137,7 @@ public partial class HistoryView : UserControl
             ContextMenu = BuildContextMenu(item)
         };
         card.Classes.Add("history-card");
-        if (compact) card.Width = 214;
+        if (compact) card.Width = 172;
 
         card.PointerPressed += (_, e) =>
         {
@@ -164,7 +167,7 @@ public partial class HistoryView : UserControl
         var menu = new ContextMenu();
         void Add(string header, Action action, bool enabled = true)
         {
-            var mi = new MenuItem { Header = header, IsEnabled = enabled };
+            var mi = new MenuItem { Header = L.T(header), IsEnabled = enabled };
             mi.Click += (_, _) => action();
             menu.Items.Add(mi);
         }
@@ -193,7 +196,7 @@ public partial class HistoryView : UserControl
         };
         btn.Classes.Add("icon-btn");
         if (danger) btn.Classes.Add("danger");
-        ToolTip.SetTip(btn, tip);
+        ToolTip.SetTip(btn, L.T(tip));
         btn.Click += (_, e) =>
         {
             e.Handled = true;
@@ -250,10 +253,10 @@ public partial class HistoryView : UserControl
     private static string RelativeTime(DateTime t)
     {
         var d = DateTime.Now - t;
-        if (d.TotalMinutes < 1) return "just now";
-        if (d.TotalHours < 1) return $"{(int)d.TotalMinutes} min ago";
-        if (d.TotalDays < 1) return $"{(int)d.TotalHours} h ago";
-        if (d.TotalDays < 7) return $"{(int)d.TotalDays} d ago";
-        return t.ToString("d MMM yyyy");
+        if (d.TotalMinutes < 1) return L.T("just now");
+        if (d.TotalHours < 1) return L.F("{0} min ago", (int)d.TotalMinutes);
+        if (d.TotalDays < 1) return L.F("{0} h ago", (int)d.TotalHours);
+        if (d.TotalDays < 7) return L.F("{0} d ago", (int)d.TotalDays);
+        return t.ToString("d MMM yyyy", System.Globalization.CultureInfo.CurrentUICulture);
     }
 }

@@ -40,12 +40,13 @@ public class PinWindow : Window
         _view = new Image { Source = image, Stretch = Stretch.Fill };
         RenderOptions.SetBitmapInterpolationMode(_view, BitmapInterpolationMode.HighQuality);
 
-        _zoomText = new TextBlock { Foreground = Brushes.White, FontSize = 11 };
+        _zoomText = new TextBlock { Foreground = Brushes.Black, FontSize = 11 };
         _zoomBadge = new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(200, 15, 16, 22)),
-            CornerRadius = new CornerRadius(6),
-            Padding = new Thickness(7, 3),
+            Background = new SolidColorBrush(Color.FromRgb(255, 255, 225)),
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(4, 1),
             Margin = new Thickness(6),
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
@@ -55,8 +56,8 @@ public class PinWindow : Window
 
         _frame = new Border
         {
-            BorderBrush = new SolidColorBrush(Color.FromRgb(0x4C, 0x8D, 0xFF)),
-            BorderThickness = new Thickness(1.5),
+            BorderBrush = new SolidColorBrush(Color.FromRgb(0, 0, 128)),
+            BorderThickness = new Thickness(2),
             Child = new Panel { Children = { _view, _zoomBadge } }
         };
         Content = _frame;
@@ -86,15 +87,15 @@ public class PinWindow : Window
 
     private ContextMenu BuildMenu()
     {
-        var copy = new MenuItem { Header = "Copy" };
+        var copy = new MenuItem { Header = L.T("Copy") };
         copy.Click += (_, _) => ClipboardService.CopyImage(_image);
 
-        var save = new MenuItem { Header = "Save as…" };
+        var save = new MenuItem { Header = L.T("Save as…") };
         save.Click += async (_, _) =>
         {
             var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
             {
-                Title = "Save Pinned Image",
+                Title = L.T("Save Pinned Image"),
                 SuggestedFileName = $"EagleShot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}",
                 DefaultExtension = "png",
                 FileTypeChoices = new[]
@@ -108,13 +109,13 @@ public class PinWindow : Window
                 await File.WriteAllBytesAsync(path, ImageHelper.Encode(_image, ImageHelper.FormatFromExtension(path)));
         };
 
-        var reset = new MenuItem { Header = "Actual size (100%)" };
+        var reset = new MenuItem { Header = L.T("Actual size (100%)") };
         reset.Click += (_, _) => SetZoom(1);
 
-        var topmost = new MenuItem { Header = "Always on top", ToggleType = MenuItemToggleType.CheckBox, IsChecked = true };
+        var topmost = new MenuItem { Header = L.T("Always on top"), ToggleType = MenuItemToggleType.CheckBox, IsChecked = true };
         topmost.Click += (_, _) => { Topmost = !Topmost; topmost.IsChecked = Topmost; };
 
-        var close = new MenuItem { Header = "Close" };
+        var close = new MenuItem { Header = L.T("Close") };
         close.Click += (_, _) => Close();
 
         return new ContextMenu { Items = { copy, save, new Separator(), reset, topmost, new Separator(), close } };
@@ -132,7 +133,7 @@ public class PinWindow : Window
     {
         _zoom = Math.Clamp(zoom, 0.1, 8);
         ApplyZoom();
-        _zoomText.Text = $"{Math.Round(_zoom * 100)}%  ·  {Math.Round(Opacity * 100)}% opacity";
+        _zoomText.Text = L.F("{0}%  ·  {1}% opacity", Math.Round(_zoom * 100), Math.Round(Opacity * 100));
         _zoomBadge.IsVisible = true;
         var shownAt = _badgeShownAt = DateTime.Now;
         Avalonia.Threading.DispatcherTimer.RunOnce(() =>

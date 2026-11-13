@@ -43,6 +43,10 @@ jobs:
           name: EagleShot-${{ matrix.rid }}
           path: publish/${{ matrix.rid }}
 
+      - name: Clipboard smoke test
+        if: matrix.rid == 'win-x64'
+        run: dotnet run --project tests/ClipboardSmoke -c Release
+
       # Windows only: make sure the bundled tools download and the installer compiles
       - name: Bundle ffmpeg and Tesseract
         if: matrix.rid == 'win-x64'

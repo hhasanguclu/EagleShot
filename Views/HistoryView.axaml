@@ -1,8 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="EagleShot.Views.HistoryView">
-    <DockPanel Margin="36,32,22,0">
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,14,20">
+    <DockPanel Margin="10,10,4,0">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,6,10">
             <StackPanel>
                 <TextBlock Classes="h1" Text="History"/>
                 <TextBlock Classes="sub" Name="CountText" Margin="0,4,0,0" Text="0 captures"/>
@@ -26,7 +26,7 @@
 
         <Panel>
             <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                <WrapPanel Name="ItemsPanel" Margin="0,0,0,24"/>
+                <WrapPanel Name="ItemsPanel" Margin="0,0,0,10"/>
             </ScrollViewer>
             <StackPanel Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Margin="0,0,0,80">
                 <Border Classes="icon-badge" Width="56" Height="56" CornerRadius="16" HorizontalAlignment="Center">

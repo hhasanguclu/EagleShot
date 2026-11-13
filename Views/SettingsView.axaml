@@ -2,8 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="EagleShot.Views.SettingsView">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="36,32,36,32" MaxWidth="820" HorizontalAlignment="Left">
-            <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,22">
+        <StackPanel Margin="10,10,10,10" MaxWidth="820" HorizontalAlignment="Left">
+            <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
                 <StackPanel>
                     <TextBlock Classes="h1" Text="Settings"/>
                     <TextBlock Classes="sub" Margin="0,4,0,0" Text="Changes are saved automatically."/>
@@ -18,6 +18,13 @@
                     <CheckBox Name="StartWithSystem" Content="Start EagleShot when I sign in"/>
                     <CheckBox Name="ShowMainOnStartup" Content="Open this window on startup (otherwise start in the tray)"/>
                     <CheckBox Name="ShowSplash" Content="Show splash screen"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
+                        <TextBlock Classes="label" Text="Language"/>
+                        <ComboBox Name="LanguageBox" Width="210"/>
+                        <TextBlock Name="LanguageNote" Classes="muted" VerticalAlignment="Center" IsVisible="False"
+                                   Text="Restart EagleShot to use the new language."/>
+                        <Button Name="RestartButton" Classes="ghost" Content="Restart now" IsVisible="False" Click="OnRestartClick"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
@@ -235,7 +242,7 @@
                     </Grid>
                     <Grid ColumnDefinitions="150,*" Classes="form">
                         <TextBlock Classes="label" Text="OCR languages"/>
-                        <TextBox Grid.Column="1" Name="OcrLanguages" Watermark="Automatic (eng+tur when installed), e.g. eng+deu"/>
+                        <TextBox Grid.Column="1" Name="OcrLanguages" Watermark="Automatic (English + the app language when installed), e.g. eng+deu"/>
                     </Grid>
                     <Grid ColumnDefinitions="150,Auto,Auto,Auto" Classes="form">
                         <TextBlock Classes="label" Text="Scrolling: max / delay ms"/>
@@ -259,6 +266,7 @@
                 <StackPanel Spacing="6">
                     <TextBlock Classes="h2" Text="Hotkeys"/>
                     <TextBlock Classes="muted" Text="Click a box and press the new key combination. Esc cancels, the × button clears."/>
+                    <CheckBox Name="TakeOverPrintScreen" Content="Windows: use the PrintScreen key for EagleShot instead of the Snipping Tool"/>
                     <Grid Name="HotkeyGrid" ColumnDefinitions="200,Auto,Auto"/>
                     <TextBlock Classes="muted" Name="HotkeyStatus"/>
                     <TextBlock Classes="muted" TextWrapping="Wrap"

@@ -116,6 +116,7 @@ public partial class OverlayWindow : Window
         PopulateColorGrid();
         PopulateWidths();
         UpdateUndoButtons();
+        L.Apply(this);
     }
 
     private PixelRect _desktop;
@@ -298,7 +299,7 @@ public partial class OverlayWindow : Window
         var panel = this.FindControl<StackPanel>("WidthPanel")!;
         foreach (var w in PenWidths)
         {
-            var dot = new Ellipse { Width = 3 + w * 1.3, Height = 3 + w * 1.3, Fill = Brushes.White };
+            var dot = new Ellipse { Width = 3 + w * 1.3, Height = 3 + w * 1.3, Fill = Brushes.Black };
             var btn = new Button { Content = dot, Tag = w };
             ToolTip.SetTip(btn, $"{w}px");
             btn.Classes.Add("width-btn");
@@ -400,7 +401,7 @@ public partial class OverlayWindow : Window
         Topmost = false;
         var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Save Screenshot",
+            Title = L.T("Save Screenshot"),
             SuggestedFileName = $"EagleShot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}",
             DefaultExtension = "png",
             ShowOverwritePrompt = true,
@@ -520,14 +521,15 @@ public partial class OverlayWindow : Window
             FontWeight = FontWeight.SemiBold,
             Foreground = new SolidColorBrush(color),
             Background = new SolidColorBrush(Color.FromArgb(70, 0, 0, 0)),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(0x4C, 0x8D, 0xFF)),
+            BorderBrush = new SolidColorBrush(Color.FromRgb(0, 0, 128)),
             BorderThickness = new Thickness(1.5),
-            CornerRadius = new CornerRadius(4),
+            CornerRadius = new CornerRadius(0),
             Padding = new Thickness(4, 2),
             AcceptsReturn = true,
             Text = existing?.Text ?? "",
-            Watermark = "Type here…  (Enter to place, Shift+Enter for new line)"
+            Watermark = L.T("Type here…  (Enter to place, Shift+Enter for new line)")
         };
+        _activeTextBox.Classes.Add("canvas-text");
 
         _activeTextBox.AddHandler(KeyDownEvent, (_, e) =>
         {
@@ -550,7 +552,7 @@ public partial class OverlayWindow : Window
         _textSizeLabel = new TextBlock
         {
             Text = $"{(int)_fontSize}",
-            Foreground = Brushes.White,
+            Foreground = Brushes.Black,
             FontSize = 11,
             MinWidth = 18,
             TextAlignment = TextAlignment.Center,
@@ -570,9 +572,10 @@ public partial class OverlayWindow : Window
                 _activeTextBox,
                 new Border
                 {
-                    Background = new SolidColorBrush(Color.FromArgb(230, 20, 21, 30)),
-                    CornerRadius = new CornerRadius(7),
-                    Padding = new Thickness(3),
+                    Background = new SolidColorBrush(Color.FromRgb(192, 192, 192)),
+                    BorderBrush = Brushes.Black,
+                    BorderThickness = new Thickness(1),
+                    Padding = new Thickness(2),
                     HorizontalAlignment = HorizontalAlignment.Left,
                     Child = new StackPanel
                     {
