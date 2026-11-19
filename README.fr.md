@@ -19,6 +19,8 @@
 
 EagleShot est un outil de capture d'écran gratuit et open source. Il allie la rapidité de Lightshot à un fonctionnement à la ShareX : modes de capture, éditeur d'annotations, tâches après capture, envois, historique et captures épinglées. Il enregistre aussi l'écran en MP4 ou GIF, capture les pages défilantes, lit le texte par OCR et scanne les codes QR. Son interface ressemble à un programme classique de Windows 9x/2000 : barre de menus, barre d'outils, onglets, boutons en relief et barre d'état. Il est disponible en 11 langues.
 
+Depuis la version 4.0, EagleShot est écrit en Rust : un seul petit programme, rien d'autre à installer.
+
 ## 📸 Captures d'écran
 
 | | |
@@ -104,7 +106,9 @@ English · Türkçe · 简体中文 · 繁體中文 · 日本語 · 한국어 ·
 eagleshot --region | --fullscreen | --monitor | --window | --delay | --repeat | --color | --show
 eagleshot --record | --gif | --scroll | --ocr | --qr | --ruler
 eagleshot --editor [image]       # ouvrir une image dans l'éditeur
+eagleshot --pin [image]          # épingler une image à l'écran
 eagleshot --upload <fichiers…>   # envoyer des fichiers
+eagleshot --minimized | --quit   # démarrer dans la zone de notification / quitter l'instance en cours
 ```
 
 `--record` et `--gif` démarrent un enregistrement ; relancez la même commande pour l'arrêter. Si EagleShot est déjà ouvert, la commande est transmise à cette instance.
@@ -115,7 +119,7 @@ Téléchargez le fichier correspondant à votre système sur la page [Versions](
 
 ### Windows
 
-1. Lancez `EagleShot_Setup_v3.3.0_win-x64.exe`. L'installateur inclut FFmpeg (enregistrement) et Tesseract OCR (reconnaissance de texte).
+1. Lancez `EagleShot_Setup_v4.0.0_win-x64.exe`. L'installateur inclut FFmpeg (enregistrement) et Tesseract OCR (reconnaissance de texte).
 2. Laissez cochée l'option **« Utiliser la touche Impr. écran pour EagleShot »** pour que la touche ouvre EagleShot au lieu de l'Outil Capture d'écran.
 3. Si SmartScreen vous avertit, cliquez sur **Informations complémentaires → Exécuter quand même** (l'application n'est pas signée).
 
@@ -133,24 +137,27 @@ Pour l'enregistrement et l'OCR : `brew install ffmpeg tesseract tesseract-lang`
 ### Linux
 
 ```bash
-tar xzf EagleShot_v3.3.0_linux-x64.tar.gz
-cd EagleShot_v3.3.0_linux-x64
+tar xzf EagleShot_v4.0.0_linux-x64.tar.gz
+cd EagleShot_v4.0.0_linux-x64
 ./installers/linux/install.sh
 ```
 
-- Capture d'écran : `scrot`, `maim` ou ImageMagick (X11). Sous Wayland, EagleShot utilise xdg-desktop-portal (GNOME, KDE) ou `grim` / `gnome-screenshot`.
-- Presse-papiers : `xclip` (X11) ou `wl-clipboard` (Wayland)
-- Facultatif : `ffmpeg` (enregistrement, X11) et `tesseract-ocr` (reconnaissance de texte)
+- Fonctionne sous X11 et Wayland (GNOME, KDE). Sous Wayland, les captures passent par xdg-desktop-portal et les fenêtres tournent via XWayland.
+- Les raccourcis globaux nécessitent le focus sur une fenêtre X11 ou XWayland ; sous Wayland pur, associez un raccourci du bureau à `eagleshot --region`.
+- L'icône de la zone de notification utilise StatusNotifierItem (KDE, la plupart des bureaux ; sous GNOME, installez l'extension AppIndicator).
+- Facultatif : `ffmpeg` (enregistrement, X11), `tesseract-ocr` (reconnaissance de texte), `wl-clipboard` ou `xclip` (presse-papiers).
 
 ### Compiler depuis les sources
+
+Il vous faut [Rust](https://rustup.rs) 1.85 ou plus récent.
 
 ```bash
 git clone https://github.com/hhasanguclu/EagleShot.git
 cd EagleShot
-dotnet run
+cargo run --release
 ```
 
-Pour compiler toutes les plateformes d'un coup : `./scripts/build-all.ps1` (PowerShell) ou `./scripts/build-all.sh` (Bash).
+Sous Debian / Ubuntu, installez d'abord les paquets de compilation avec `./scripts/linux-build-deps.sh`. Lancez les tests avec `cargo test`.
 
 ## 🎮 Utilisation
 
@@ -165,26 +172,28 @@ Pour compiler toutes les plateformes d'un coup : `./scripts/build-all.ps1` (Powe
 
 | | |
 |---|---|
-| Langage | C# / .NET 9 |
-| Interface | Avalonia UI 11.2 avec un thème Windows classique sur mesure |
-| Raccourcis globaux | SharpHook |
-| Images | SkiaSharp |
-| Enregistrement / OCR / QR | ffmpeg / Tesseract / QRCoder + ZXing.Net |
+| Langage | Rust |
+| Interface | egui / eframe avec un thème Windows classique dessiné à la main |
+| Capture d'écran | xcap (Windows, macOS, X11, portail Wayland) |
+| Zone de notification / raccourcis | tray-icon, global-hotkey |
+| Images | image, tiny-skia, ab_glyph |
+| Enregistrement / OCR / QR | ffmpeg / Tesseract / qrcode + rxing |
 | Traductions | `Resources/i18n/*.json` (la clé est le texte anglais) |
 
 ## 📁 Structure du projet
 
 ```
 EagleShot/
-├── Core/                  # Capture, enregistrement, OCR, envois, raccourcis, paramètres, traduction
-├── Views/                 # Fenêtre principale, éditeur, paramètres, outils, notifications
-├── Styles/                # Classic.axaml (thème Windows classique), AppStyles.axaml (couleurs, icônes)
+├── src/core/              # Capture, enregistrement, OCR, envois, presse-papiers, paramètres, historique (sans interface)
+├── src/ui/                # Widgets Windows classiques, fenêtre principale, éditeur, épingles, notifications
+├── src/app/               # Zone de notification, raccourcis, déroulement des captures, tâches après capture
+├── src/main.rs            # Point d'entrée et ligne de commande
 ├── Resources/i18n/        # Traductions : tr, zh-CN, zh-TW, ja, ko, de, fr, pl, uk, ru
+├── vendor/eframe/         # eframe 0.37 avec deux petits correctifs (voir Cargo.toml)
 ├── installers/            # Windows (Inno Setup), macOS (.app / .dmg), Linux (install.sh)
-├── scripts/               # Scripts de compilation, outils Windows embarqués
-├── docs/                  # Site web (GitHub Pages) et captures d'écran
-├── App.axaml(.cs)         # Démarrage de l'application, zone de notification, commandes
-└── Program.cs             # Point d'entrée
+├── scripts/               # Paquets de compilation Linux, test de fumée, outils Windows embarqués
+├── tests/                 # Test de couverture des traductions
+└── docs/                  # Site web (GitHub Pages) et captures d'écran
 ```
 
 ## 🤝 Traductions
@@ -193,4 +202,4 @@ Les traductions se trouvent dans `Resources/i18n/<langue>.json`. Chaque fichier 
 
 ## 📝 Licence
 
-Licence MIT.
+Licence MIT. Voir [LICENSE](LICENSE).

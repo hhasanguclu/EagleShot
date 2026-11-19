@@ -1,0 +1,20 @@
+pub mod capture;
+#[cfg(all(unix, not(target_os = "macos")))]
+pub mod capture_linux;
+pub mod clipboard;
+pub mod codes;
+pub mod draw;
+pub mod effects;
+pub mod filename;
+pub mod history;
+pub mod hotkeys;
+pub mod ipc;
+pub mod ocr;
+pub mod paths;
+pub mod platform;
+pub mod record;
+pub mod scrolling;
+pub mod settings;
+pub mod shapes;
+pub mod tools;
+pub mod upload;

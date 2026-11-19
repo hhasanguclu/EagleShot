@@ -19,6 +19,8 @@
 
 EagleShot 是一款免费开源的截图工具。它兼具 Lightshot 的速度和 ShareX 式的工作流程：多种截图模式、标注编辑器、截图后任务、上传、历史记录和钉图。它还能把屏幕录制为 MP4 或 GIF，截取滚动页面，用 OCR 识别文字，并扫描二维码。界面就像经典的 Windows 9x/2000 程序：菜单栏、工具栏、选项卡、立体按钮和状态栏。支持 11 种语言。
 
+从 4.0 版起，EagleShot 用 Rust 编写：只有一个小巧的程序，无需安装任何其他组件。
+
 ## 📸 截图
 
 | | |
@@ -104,7 +106,9 @@ English · Türkçe · 简体中文 · 繁體中文 · 日本語 · 한국어 ·
 eagleshot --region | --fullscreen | --monitor | --window | --delay | --repeat | --color | --show
 eagleshot --record | --gif | --scroll | --ocr | --qr | --ruler
 eagleshot --editor [图片]       # 在编辑器中打开图片
+eagleshot --pin [图片]          # 把图片钉在屏幕上
 eagleshot --upload <文件…>      # 上传文件
+eagleshot --minimized | --quit  # 启动到托盘 / 退出正在运行的 EagleShot
 ```
 
 `--record` 和 `--gif` 开始录制，再次运行同一命令即停止。如果 EagleShot 已在运行，命令会发送给该实例。
@@ -115,7 +119,7 @@ eagleshot --upload <文件…>      # 上传文件
 
 ### Windows
 
-1. 运行 `EagleShot_Setup_v3.3.0_win-x64.exe`。安装程序已包含 FFmpeg（录屏）和 Tesseract OCR（文字识别）。
+1. 运行 `EagleShot_Setup_v4.0.0_win-x64.exe`。安装程序已包含 FFmpeg（录屏）和 Tesseract OCR（文字识别）。
 2. 保持勾选 **“将 PrintScreen 键用于 EagleShot”**，这样按 PrintScreen 会打开 EagleShot 而不是截图工具。
 3. 如果 SmartScreen 发出警告，点击 **更多信息 → 仍要运行**（程序未签名）。
 
@@ -133,24 +137,27 @@ eagleshot --upload <文件…>      # 上传文件
 ### Linux
 
 ```bash
-tar xzf EagleShot_v3.3.0_linux-x64.tar.gz
-cd EagleShot_v3.3.0_linux-x64
+tar xzf EagleShot_v4.0.0_linux-x64.tar.gz
+cd EagleShot_v4.0.0_linux-x64
 ./installers/linux/install.sh
 ```
 
-- 截图：`scrot`、`maim` 或 ImageMagick（X11）。在 Wayland 下，EagleShot 使用 xdg-desktop-portal（GNOME、KDE）或 `grim` / `gnome-screenshot`。
-- 剪贴板：`xclip`（X11）或 `wl-clipboard`（Wayland）
-- 可选：`ffmpeg`（录屏，X11）和 `tesseract-ocr`（文字识别）
+- 支持 X11 和 Wayland（GNOME、KDE）。在 Wayland 下，截图通过 xdg-desktop-portal 完成，窗口通过 XWayland 运行。
+- 全局快捷键需要 X11 或 XWayland 窗口处于焦点；在纯 Wayland 下，请在桌面设置中为 `eagleshot --region` 绑定一个快捷键。
+- 托盘图标使用 StatusNotifierItem（KDE 和大多数桌面环境；GNOME 需安装 AppIndicator 扩展）。
+- 可选：`ffmpeg`（录屏，X11）、`tesseract-ocr`（文字识别）、`wl-clipboard` 或 `xclip`（剪贴板）。
 
 ### 从源码构建
+
+需要 [Rust](https://rustup.rs) 1.85 或更高版本。
 
 ```bash
 git clone https://github.com/hhasanguclu/EagleShot.git
 cd EagleShot
-dotnet run
+cargo run --release
 ```
 
-一次构建所有平台：`./scripts/build-all.ps1`（PowerShell）或 `./scripts/build-all.sh`（Bash）。
+在 Debian / Ubuntu 上，先用 `./scripts/linux-build-deps.sh` 安装构建所需的软件包。用 `cargo test` 运行测试。
 
 ## 🎮 使用方法
 
@@ -165,26 +172,28 @@ dotnet run
 
 | | |
 |---|---|
-| 语言 | C# / .NET 9 |
-| 界面 | Avalonia UI 11.2 + 自制经典 Windows 主题 |
-| 全局快捷键 | SharpHook |
-| 图像处理 | SkiaSharp |
-| 录屏 / OCR / 二维码 | ffmpeg / Tesseract / QRCoder + ZXing.Net |
+| 语言 | Rust |
+| 界面 | egui / eframe + 手绘的经典 Windows 主题 |
+| 截图 | xcap（Windows、macOS、X11、Wayland portal） |
+| 托盘 / 快捷键 | tray-icon, global-hotkey |
+| 图像处理 | image, tiny-skia, ab_glyph |
+| 录屏 / OCR / 二维码 | ffmpeg / Tesseract / qrcode + rxing |
 | 翻译 | `Resources/i18n/*.json`（键为英文原文） |
 
 ## 📁 项目结构
 
 ```
 EagleShot/
-├── Core/                  # 截图、录屏、OCR、上传、快捷键、设置、本地化
-├── Views/                 # 主窗口、编辑器、设置、工具、通知
-├── Styles/                # Classic.axaml（经典 Windows 主题）、AppStyles.axaml（颜色、图标）
+├── src/core/              # 截图、录屏、OCR、上传、剪贴板、设置、历史记录（不含界面）
+├── src/ui/                # 经典 Windows 控件、主窗口、编辑器、钉图、通知
+├── src/app/               # 托盘、快捷键、截图流程、截图后任务
+├── src/main.rs            # 程序入口和命令行
 ├── Resources/i18n/        # 翻译：tr, zh-CN, zh-TW, ja, ko, de, fr, pl, uk, ru
+├── vendor/eframe/         # eframe 0.37，含两个小补丁（见 Cargo.toml）
 ├── installers/            # Windows (Inno Setup)、macOS (.app / .dmg)、Linux (install.sh)
-├── scripts/               # 构建脚本、Windows 工具打包
-├── docs/                  # 网站（GitHub Pages）和截图
-├── App.axaml(.cs)         # 程序入口、托盘、命令
-└── Program.cs             # 主入口
+├── scripts/               # Linux 构建依赖、冒烟测试、Windows 工具打包
+├── tests/                 # 翻译覆盖率测试
+└── docs/                  # 网站（GitHub Pages）和截图
 ```
 
 ## 🤝 翻译
@@ -193,4 +202,4 @@ EagleShot/
 
 ## 📝 许可证
 
-MIT 许可证。
+MIT 许可证。详见 [LICENSE](LICENSE)。

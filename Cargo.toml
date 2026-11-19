@@ -1,0 +1,78 @@
+[package]
+name = "eagleshot"
+version = "4.0.0"
+edition = "2021"
+rust-version = "1.85"
+description = "Screenshots, screen recording and capture tools with a classic Windows 98 look"
+license = "MIT"
+repository = "https://github.com/hhasanguclu/EagleShot"
+homepage = "https://hhasanguclu.github.io/EagleShot/"
+build = "build.rs"
+
+[[bin]]
+name = "eagleshot"
+path = "src/main.rs"
+
+[dependencies]
+eframe = { version = "0.37.0", default-features = false, features = ["glow", "wgpu", "default_fonts", "x11", "wayland"] }
+egui = "0.37.0"
+winit = { version = "0.30.13", default-features = false, features = ["rwh_06", "x11", "wayland"] }
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "gif", "bmp", "webp", "tiff"] }
+tray-icon = { version = "0.26.1", default-features = false, features = ["ksni"] }
+global-hotkey = "0.10.0"
+arboard = { version = "3.7.0", features = ["wayland-data-control"] }
+rxing = { version = "0.9.4", default-features = false, features = ["encoding_rs", "decoders", "multi_barcode_readers", "full_barcode_format_support"] }
+qrcode = { version = "0.15.0", default-features = false }
+tiny-skia = "0.12.0"
+ab_glyph = "0.2.32"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+dirs = "7.0.0"
+ureq = { version = "3.5.2", features = ["json"] }
+md-5 = "0.11.0"
+sha1 = "0.11.0"
+sha2 = "0.11.1"
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
+enigo = "0.6.1"
+sys-locale = "0.3"
+base64 = "0.23"
+regex = "1"
+open = "5"
+rfd = "0.18"
+env_logger = { version = "0.11.11", default-features = false, features = ["auto-color", "humantime"] }
+
+[target.'cfg(any(windows, target_os = "macos"))'.dependencies]
+xcap = "0.9.10"
+
+[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
+x11rb = { version = "0.13", features = ["randr"] }
+ashpd = { version = "0.14.1", default-features = false, features = ["async-io", "screenshot"] }
+pollster = "1"
+percent-encoding = "2"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.56"
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_System_Threading", "Win32_UI_HiDpi", "Win32_Graphics_Gdi", "Win32_System_Console", "Win32_System_DataExchange", "Win32_System_Memory"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3", features = ["NSApplication", "NSRunningApplication"] }
+objc2-foundation = "0.3"
+
+[build-dependencies]
+winresource = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+strip = true
+panic = "unwind"
+
+[profile.dev.package."*"]
+opt-level = 2
+
+# eframe 0.37 with one fix: hidden windows paint inside the event loop context
+# (see vendor/eframe/src/native/run.rs, "EagleShot patch").
+[patch.crates-io]
+eframe = { path = "vendor/eframe" }

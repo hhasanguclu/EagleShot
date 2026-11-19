@@ -19,6 +19,8 @@
 
 EagleShot is a free, open-source screenshot tool. It pairs the speed of Lightshot with a ShareX-style workflow: capture modes, an annotation editor, after-capture tasks, uploads, history and pinned screenshots. It also records the screen to MP4 or GIF, captures scrolling pages, reads text with OCR and scans QR codes. The interface looks like a classic Windows 9x/2000 program: a menu bar, a toolbar, tabs, 3D buttons and a status bar. It is available in 11 languages.
 
+Since version 4.0, EagleShot is written in Rust: one small program with nothing else to install.
+
 ## 📸 Screenshots
 
 | | |
@@ -102,7 +104,9 @@ English · Türkçe · 简体中文 · 繁體中文 · 日本語 · 한국어 ·
 eagleshot --region | --fullscreen | --monitor | --window | --delay | --repeat | --color | --show
 eagleshot --record | --gif | --scroll | --ocr | --qr | --ruler
 eagleshot --editor [image]      # open an image in the editor
+eagleshot --pin [image]         # pin an image to the screen
 eagleshot --upload <files…>     # upload files
+eagleshot --minimized | --quit  # start in the tray / exit the running EagleShot
 ```
 
 `--record` and `--gif` start a recording; run the same command again to stop it. If EagleShot is already running, the command goes to that instance.
@@ -113,7 +117,7 @@ Download the file for your system from [Releases](https://github.com/hhasanguclu
 
 ### Windows
 
-1. Run `EagleShot_Setup_v3.3.0_win-x64.exe`. The installer includes FFmpeg (recording) and Tesseract OCR (text recognition).
+1. Run `EagleShot_Setup_v4.0.0_win-x64.exe`. The installer includes FFmpeg (recording) and Tesseract OCR (text recognition).
 2. Keep **"Use the PrintScreen key for EagleShot"** checked so PrintScreen opens EagleShot instead of the Snipping Tool.
 3. If SmartScreen warns you, click **More info → Run anyway** (the app isn't code-signed).
 
@@ -131,24 +135,27 @@ For recording and OCR: `brew install ffmpeg tesseract tesseract-lang`
 ### Linux
 
 ```bash
-tar xzf EagleShot_v3.3.0_linux-x64.tar.gz
-cd EagleShot_v3.3.0_linux-x64
+tar xzf EagleShot_v4.0.0_linux-x64.tar.gz
+cd EagleShot_v4.0.0_linux-x64
 ./installers/linux/install.sh
 ```
 
-- Screen capture: `scrot`, `maim` or ImageMagick (X11). On Wayland, EagleShot uses xdg-desktop-portal (GNOME, KDE) or `grim` / `gnome-screenshot`.
-- Clipboard: `xclip` (X11) or `wl-clipboard` (Wayland)
-- Optional: `ffmpeg` (recording, X11) and `tesseract-ocr` (text recognition)
+- Works on X11 and Wayland (GNOME, KDE). On Wayland, screenshots go through xdg-desktop-portal and the windows run through XWayland.
+- Global hotkeys need X11 or XWayland focus; on pure Wayland, bind a desktop shortcut to `eagleshot --region`.
+- The tray icon uses StatusNotifierItem (KDE, most desktops; on GNOME install the AppIndicator extension).
+- Optional: `ffmpeg` (recording, X11), `tesseract-ocr` (text recognition), `wl-clipboard` or `xclip` (clipboard).
 
 ### Build from source
+
+You need [Rust](https://rustup.rs) 1.85 or newer.
 
 ```bash
 git clone https://github.com/hhasanguclu/EagleShot.git
 cd EagleShot
-dotnet run
+cargo run --release
 ```
 
-Build every platform at once with `./scripts/build-all.ps1` (PowerShell) or `./scripts/build-all.sh` (Bash).
+On Debian / Ubuntu, install the build packages first with `./scripts/linux-build-deps.sh`. Run the tests with `cargo test`.
 
 ## 🎮 Usage
 
@@ -163,26 +170,28 @@ Build every platform at once with `./scripts/build-all.ps1` (PowerShell) or `./s
 
 | | |
 |---|---|
-| Language | C# / .NET 9 |
-| UI | Avalonia UI 11.2 with a custom classic Windows theme |
-| Global hotkeys | SharpHook |
-| Imaging | SkiaSharp |
-| Recording / OCR / QR | ffmpeg / Tesseract / QRCoder + ZXing.Net |
+| Language | Rust |
+| UI | egui / eframe with a hand-drawn classic Windows theme |
+| Screen capture | xcap (Windows, macOS, X11, Wayland portal) |
+| Tray / hotkeys | tray-icon, global-hotkey |
+| Imaging | image, tiny-skia, ab_glyph |
+| Recording / OCR / QR | ffmpeg / Tesseract / qrcode + rxing |
 | Translations | `Resources/i18n/*.json` (English text is the key) |
 
 ## 📁 Project structure
 
 ```
 EagleShot/
-├── Core/                  # Capture, recording, OCR, uploads, hotkeys, settings, localization
-├── Views/                 # Main window, editor overlay, settings, tools, notifications
-├── Styles/                # Classic.axaml (classic Windows theme), AppStyles.axaml (palette, icons)
+├── src/core/              # Capture, recording, OCR, uploads, clipboard, settings, history (no UI)
+├── src/ui/                # Classic Windows widgets, main window, editor overlay, pins, notifications
+├── src/app/               # Tray, hotkeys, capture flows, after-capture tasks
+├── src/main.rs            # Entry point and command line
 ├── Resources/i18n/        # Translations: tr, zh-CN, zh-TW, ja, ko, de, fr, pl, uk, ru
+├── vendor/eframe/         # eframe 0.37 with two small patches (see Cargo.toml)
 ├── installers/            # Windows (Inno Setup), macOS (.app / .dmg), Linux (install.sh)
-├── scripts/               # Build scripts, Windows tool bundling
-├── docs/                  # Website (GitHub Pages) and screenshots
-├── App.axaml(.cs)         # App entry, tray, commands
-└── Program.cs             # Main entry point
+├── scripts/               # Linux build packages, smoke test, Windows tool bundling
+├── tests/                 # Translation coverage test
+└── docs/                  # Website (GitHub Pages) and screenshots
 ```
 
 ## 🤝 Translations
@@ -191,4 +200,4 @@ Translations live in `Resources/i18n/<language>.json`. Each file maps the Englis
 
 ## 📝 License
 
-MIT License.
+MIT License. See [LICENSE](LICENSE).

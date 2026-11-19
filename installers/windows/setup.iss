@@ -1,6 +1,6 @@
 ﻿#define MyAppName "EagleShot"
 #ifndef MyAppVersion
-  #define MyAppVersion "3.3.0"
+  #define MyAppVersion "4.0.0"
 #endif
 #define MyAppPublisher "Hasan Guclu"
 #define MyAppURL "https://github.com/hhasanguclu/EagleShot"
@@ -141,7 +141,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 ; Windows 11 opens the Snipping Tool on PrintScreen; turn that off so only EagleShot reacts.
 ; Removing the value on uninstall restores the Windows default.
 Root: HKCU; Subkey: "Control Panel\Keyboard"; ValueType: dword; ValueName: "PrintScreenKeyForSnippingEnabled"; ValueData: 0; Flags: uninsdeletevalue; Tasks: printscreen
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: startup
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\{#MyAppExeName}"" --minimized"; Flags: uninsdeletevalue; Tasks: startup
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

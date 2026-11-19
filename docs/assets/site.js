@@ -49,7 +49,6 @@
       (lang === "en" ? "README.md" : "README." + lang + ".md") + "#build-from-source";
     if (d["meta.description"]) document.querySelector('meta[name="description"]').content = d["meta.description"];
     updateDownloads();
-    renderGallery();
   }
 
   function setLang(lang) {
@@ -58,65 +57,6 @@
   }
 
   document.getElementById("lang-select").addEventListener("change", function (e) { setLang(e.target.value); });
-
-  // ── Language gallery: a screenshot of the app in every language ──
-  function renderGallery() {
-    var g = document.getElementById("lang-gallery");
-    g.innerHTML = "";
-    LANGS.forEach(function (l) {
-      var a = document.createElement("a");
-      a.href = "#top";
-      a.className = "langcard" + (l[0] === root.lang ? " current" : "");
-      a.innerHTML = '<span class="sunken"><img loading="lazy" width="790" height="600" src="screenshots/languages/' + l[0] +
-        '.png" alt="EagleShot – ' + l[1] + '"></span><span class="name">' + l[1] + "</span>";
-      a.addEventListener("click", function () { setLang(l[0]); });
-      g.appendChild(a);
-    });
-  }
-
-  // ── Clock in the tray ──
-  var clock = document.getElementById("clock");
-  function tick() {
-    var d = new Date();
-    clock.textContent = d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0");
-  }
-  tick(); setInterval(tick, 15000);
-
-  // ── Start menu ──
-  var start = document.getElementById("start-btn"), menu = document.getElementById("startmenu");
-  function toggleMenu(open) {
-    menu.classList.toggle("open", open);
-    start.classList.toggle("pressed", open);
-    start.setAttribute("aria-expanded", open ? "true" : "false");
-  }
-  start.addEventListener("click", function (e) { e.stopPropagation(); toggleMenu(!menu.classList.contains("open")); });
-  document.addEventListener("click", function (e) { if (!menu.contains(e.target)) toggleMenu(false); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") toggleMenu(false); });
-  menu.addEventListener("click", function (e) { if (e.target.closest("a")) toggleMenu(false); });
-
-  // ── Screenshot tabs ──
-  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
-  function select(tab) {
-    tabs.forEach(function (x) {
-      var on = x === tab;
-      x.setAttribute("aria-selected", on ? "true" : "false");
-      x.tabIndex = on ? 0 : -1;
-      document.getElementById(x.getAttribute("aria-controls")).hidden = !on;
-    });
-  }
-  tabs.forEach(function (x, i) {
-    x.addEventListener("click", function () { select(x); });
-    x.addEventListener("keydown", function (e) {
-      var n = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-      if (!n) return;
-      var next = tabs[(i + n + tabs.length) % tabs.length];
-      select(next); next.focus();
-    });
-  });
-
-  // ── Decorative block progress bar in the setup window ──
-  var bar = document.getElementById("progress");
-  for (var i = 0; i < 60; i++) bar.appendChild(document.createElement("i"));
 
   // ── The visitor's platform goes first ──
   var ua = (navigator.userAgent || "").toLowerCase();
@@ -141,8 +81,6 @@
 
   function updateDownloads() {
     if (!latest) return;
-    var status = document.getElementById("status-text");
-    status.textContent = t("status.latest", "Ready. Latest release: v{0}").replace("{0}", latest.version);
     if (os && latest.urls[primaryFor[os]]) {
       document.getElementById("hero-primary").href = latest.urls[primaryFor[os]];
       document.getElementById("hero-primary-sub").textContent = t(forKey[os][0], forKey[os][1]) + " · v" + latest.version;

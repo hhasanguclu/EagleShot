@@ -1,9 +1,10 @@
 #!/bin/bash
-# EagleShot v3.3.0 - macOS .app Bundle & DMG Creator
+# EagleShot - macOS .app bundle and DMG creator.
+# Expects the binaries at publish/osx-arm64/EagleShot and publish/osx-x64/EagleShot.
 set -e
 
 APP_NAME="EagleShot"
-VERSION="${VERSION:-3.3.0}"
+VERSION="${VERSION:-4.0.0}"
 BUNDLE_ID="com.eagleshot.app"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -29,7 +30,7 @@ for RID in osx-x64 osx-arm64; do
 
     if [ ! -d "$PUBLISH_DIR" ]; then
         echo "Publish directory not found: $PUBLISH_DIR"
-        echo "Run scripts/build-all.sh first."
+        echo "Build it first: cargo build --release --target aarch64-apple-darwin (or x86_64-apple-darwin)"
         continue
     fi
 
