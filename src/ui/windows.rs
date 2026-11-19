@@ -261,7 +261,7 @@ impl About {
 
     pub fn show(&mut self, ctx: &egui::Context) -> bool {
         let mut open = true;
-        let b = builder(&t("About EagleShot"), vec2(380.0, 230.0), vec2(380.0, 230.0), false).with_always_on_top();
+        let b = builder(&t("About EagleShot"), vec2(380.0, 172.0), vec2(380.0, 172.0), false).with_always_on_top();
         ctx.show_viewport_immediate(self.id, b, |ui, _| {
             let ctx = ui.ctx().clone();
             let close = chrome(ui, &t("About EagleShot"), false, |ui| {
