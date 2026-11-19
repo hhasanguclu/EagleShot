@@ -1,21 +1,17 @@
 # Build output
-[Bb]in/
-[Oo]bj/
+/target/
 publish/
 dist/
 
 # IDE
 .vs/
 .vscode/
-*.user
-*.suo
+.idea/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# .NET
-*.pdb
-project.lock.json
-*.nuget.props
-*.nuget.targets
+# .NET leftovers
+bin/
+obj/
