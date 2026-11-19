@@ -47,22 +47,51 @@ fn main() {
         .with_decorations(!ui::windows::classic_caption())
         .with_drag_and_drop(true);
 
-    let mut options = eframe::NativeOptions { viewport, centered: true, ..Default::default() };
-    options.renderer = eframe::Renderer::Glow;
-    #[cfg(all(unix, not(target_os = "macos")))]
-    {
-        // Use X11 (XWayland on Wayland desktops): windows can be hidden, positioned and kept on top.
-        if std::env::var("DISPLAY").map(|d| !d.is_empty()).unwrap_or(false) && std::env::var("EAGLESHOT_WAYLAND").is_err() {
-            options.event_loop_builder = Some(Box::new(|b| {
-                use winit::platform::x11::EventLoopBuilderExtX11;
-                b.with_x11();
-            }));
+    // Windows / macOS: DirectX 12 / Metal first; Linux: OpenGL first. The other one is the fallback
+    // (e.g. a virtual machine or Remote Desktop session without OpenGL drivers).
+    let wgpu_first = match std::env::var("EAGLESHOT_RENDERER").as_deref() {
+        Ok("wgpu") => true,
+        Ok("glow") => false,
+        _ => cfg!(any(windows, target_os = "macos")),
+    };
+    let renderers = if wgpu_first { [eframe::Renderer::Wgpu, eframe::Renderer::Glow] } else { [eframe::Renderer::Glow, eframe::Renderer::Wgpu] };
+    eframe::KEEP_ROOT_HIDDEN.store(!show_main, std::sync::atomic::Ordering::Relaxed);
+    let opts = std::cell::RefCell::new(Some((settings, app::StartOptions { show_main, splash, command })));
+    let mut last_error = String::new();
+    for renderer in renderers {
+        #[allow(unused_mut)]
+        let mut options = eframe::NativeOptions { viewport: viewport.clone(), centered: true, renderer, ..Default::default() };
+        #[cfg(all(unix, not(target_os = "macos")))]
+        {
+            // Use X11 (XWayland on Wayland desktops): windows can be hidden, positioned and kept on top.
+            if std::env::var("DISPLAY").map(|d| !d.is_empty()).unwrap_or(false) && std::env::var("EAGLESHOT_WAYLAND").is_err() {
+                options.event_loop_builder = Some(Box::new(|b| {
+                    use winit::platform::x11::EventLoopBuilderExtX11;
+                    b.with_x11();
+                }));
+            }
+        }
+        let opts = &opts;
+        let result = eframe::run_native(
+            "EagleShot",
+            options,
+            Box::new(move |cc| {
+                let (settings, start) = opts.borrow_mut().take().ok_or("already started")?;
+                Ok(Box::new(app::App::new(cc, settings, start)))
+            }),
+        );
+        match result {
+            Ok(()) => return,
+            Err(e) => {
+                eprintln!("EagleShot: the {renderer:?} renderer could not start: {e}");
+                last_error = e.to_string();
+                // the app was created: this was not a start-up failure
+                if opts.borrow().is_none() {
+                    break;
+                }
+            }
         }
     }
-    eframe::KEEP_ROOT_HIDDEN.store(!show_main, std::sync::atomic::Ordering::Relaxed);
-    let opts = app::StartOptions { show_main, splash, command };
-    if let Err(e) = eframe::run_native("EagleShot", options, Box::new(move |cc| Ok(Box::new(app::App::new(cc, settings, opts))))) {
-        eprintln!("EagleShot could not start: {e}");
-        std::process::exit(1);
-    }
+    eprintln!("EagleShot could not start: {last_error}");
+    std::process::exit(1);
 }

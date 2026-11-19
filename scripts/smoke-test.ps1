@@ -11,9 +11,12 @@ $shots = (Resolve-Path "$work/shots").Path -replace '\\', '\\'
 Set-Content "$work/config/settings.json" "{ `"SaveFolder`": `"$shots`", `"ShowSplash`": false, `"TakeOverPrintScreen`": false, `"AfterCapture`": { `"CopyToClipboard`": true, `"SaveToFile`": true, `"ShowNotification`": true } }"
 
 & $Exe --version | Out-Host
-$p = Start-Process $Exe -ArgumentList "--minimized" -PassThru
-Start-Sleep -Seconds 5
-if ($p.HasExited) { throw "EagleShot exited early (code $($p.ExitCode))" }
+$p = Start-Process $Exe -ArgumentList "--minimized" -PassThru -RedirectStandardError "$work/stderr.txt" -RedirectStandardOutput "$work/stdout.txt"
+Start-Sleep -Seconds 6
+if ($p.HasExited) {
+  Get-Content "$work/stderr.txt", "$work/stdout.txt" -ErrorAction SilentlyContinue | Out-Host
+  throw "EagleShot exited early (code $($p.ExitCode))"
+}
 
 Start-Process $Exe -ArgumentList "--fullscreen" -Wait
 $ok = $false
@@ -22,7 +25,10 @@ for ($i = 0; $i -lt 40; $i++) {
   if ($png -and (Test-Path "$work/config/history.json")) { $ok = $true; break }
   Start-Sleep -Milliseconds 500
 }
-if (-not $ok) { Stop-Process -Id $p.Id -Force; throw "no screenshot was saved" }
+if (-not $ok) {
+  Get-Content "$work/stderr.txt" -ErrorAction SilentlyContinue | Out-Host
+  Stop-Process -Id $p.Id -Force; throw "no screenshot was saved"
+}
 Write-Host "saved $($png.FullName) ($($png.Length) bytes)"
 if (-not (Select-String -Path "$work/config/history.json" -Pattern '"Kind":"Full screen"' -Quiet)) { throw "history entry missing" }
 
