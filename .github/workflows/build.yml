@@ -57,6 +57,28 @@ jobs:
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
 
+      - name: Windows smoke test
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/smoke-test.ps1 -Exe target/${{ matrix.target }}/release/eagleshot.exe
+
+      - name: macOS smoke test
+        if: runner.os == 'macOS'
+        run: |
+          EXE=target/${{ matrix.target }}/release/eagleshot
+          export EAGLESHOT_CONFIG_DIR="$RUNNER_TEMP/eagleshot" EAGLESHOT_PORT=47557
+          mkdir -p "$EAGLESHOT_CONFIG_DIR"
+          echo '{ "ShowSplash": false }' > "$EAGLESHOT_CONFIG_DIR/settings.json"
+          $EXE --version
+          $EXE --minimized > "$RUNNER_TEMP/eagleshot.log" 2>&1 &
+          PID=$!
+          sleep 15
+          if ! kill -0 $PID 2>/dev/null; then echo "EagleShot exited early:"; cat "$RUNNER_TEMP/eagleshot.log"; exit 1; fi
+          $EXE --quit
+          for i in $(seq 1 30); do kill -0 $PID 2>/dev/null || break; sleep 0.5; done
+          if kill -0 $PID 2>/dev/null; then echo "EagleShot did not quit"; cat "$RUNNER_TEMP/eagleshot.log"; kill $PID; exit 1; fi
+          echo "smoke test passed"
+
       - uses: actions/upload-artifact@v4
         with:
           name: EagleShot-${{ matrix.target }}
