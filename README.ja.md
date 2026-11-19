@@ -19,6 +19,8 @@
 
 EagleShot は無料のオープンソースのスクリーンショットツールです。Lightshot の速さと ShareX のようなワークフローを組み合わせています: キャプチャモード、注釈エディター、キャプチャ後のタスク、アップロード、履歴、ピン留め。画面を MP4 や GIF で録画し、スクロールするページをキャプチャし、OCR で文字を読み取り、QR コードをスキャンすることもできます。見た目はクラシックな Windows 9x/2000 のプログラムそのもの: メニューバー、ツールバー、タブ、立体的なボタン、ステータスバー。11 か国語に対応しています。
 
+バージョン 4.0 から EagleShot は Rust で書かれています。小さなプログラムがひとつだけで、ほかに何もインストールする必要はありません。
+
 ## 📸 スクリーンショット
 
 | | |
@@ -104,7 +106,9 @@ English · Türkçe · 简体中文 · 繁體中文 · 日本語 · 한국어 ·
 eagleshot --region | --fullscreen | --monitor | --window | --delay | --repeat | --color | --show
 eagleshot --record | --gif | --scroll | --ocr | --qr | --ruler
 eagleshot --editor [画像]        # 画像をエディターで開く
+eagleshot --pin [画像]           # 画像を画面にピン留め
 eagleshot --upload <ファイル…>   # ファイルをアップロード
+eagleshot --minimized | --quit   # トレイで起動 / 起動中の EagleShot を終了
 ```
 
 `--record` と `--gif` は録画を開始し、同じコマンドをもう一度実行すると停止します。EagleShot がすでに起動していれば、コマンドはそのインスタンスに渡されます。
@@ -115,7 +119,7 @@ eagleshot --upload <ファイル…>   # ファイルをアップロード
 
 ### Windows
 
-1. `EagleShot_Setup_v3.3.0_win-x64.exe` を実行します。インストーラーには FFmpeg (録画) と Tesseract OCR (文字認識) が含まれています。
+1. `EagleShot_Setup_v4.0.0_win-x64.exe` を実行します。インストーラーには FFmpeg (録画) と Tesseract OCR (文字認識) が含まれています。
 2. PrintScreen キーで Snipping Tool ではなく EagleShot が開くよう、**「PrintScreen キーを EagleShot で使う」**をオンのままにします。
 3. SmartScreen の警告が出たら **詳細情報 → 実行** をクリックします (アプリは署名されていません)。
 
@@ -133,24 +137,27 @@ eagleshot --upload <ファイル…>   # ファイルをアップロード
 ### Linux
 
 ```bash
-tar xzf EagleShot_v3.3.0_linux-x64.tar.gz
-cd EagleShot_v3.3.0_linux-x64
+tar xzf EagleShot_v4.0.0_linux-x64.tar.gz
+cd EagleShot_v4.0.0_linux-x64
 ./installers/linux/install.sh
 ```
 
-- 画面キャプチャ: `scrot`、`maim`、または ImageMagick (X11)。Wayland では xdg-desktop-portal (GNOME、KDE) または `grim` / `gnome-screenshot` を使います。
-- クリップボード: `xclip` (X11) または `wl-clipboard` (Wayland)
-- 任意: `ffmpeg` (録画、X11) と `tesseract-ocr` (文字認識)
+- X11 と Wayland (GNOME、KDE) で動作します。Wayland ではスクリーンショットを xdg-desktop-portal 経由で取得し、ウィンドウは XWayland で動きます。
+- グローバルホットキーには X11 または XWayland のフォーカスが必要です。純粋な Wayland では、デスクトップのショートカットに `eagleshot --region` を割り当ててください。
+- トレイアイコンは StatusNotifierItem を使います (KDE とほとんどのデスクトップ。GNOME では AppIndicator 拡張機能をインストールしてください)。
+- 任意: `ffmpeg` (録画、X11)、`tesseract-ocr` (文字認識)、`wl-clipboard` または `xclip` (クリップボード)
 
 ### ソースからビルド
+
+[Rust](https://rustup.rs) 1.85 以降が必要です。
 
 ```bash
 git clone https://github.com/hhasanguclu/EagleShot.git
 cd EagleShot
-dotnet run
+cargo run --release
 ```
 
-全プラットフォームを一度にビルド: `./scripts/build-all.ps1` (PowerShell) または `./scripts/build-all.sh` (Bash)。
+Debian / Ubuntu では、先に `./scripts/linux-build-deps.sh` でビルドに必要なパッケージをインストールしてください。テストは `cargo test` で実行します。
 
 ## 🎮 使い方
 
@@ -165,26 +172,28 @@ dotnet run
 
 | | |
 |---|---|
-| 言語 | C# / .NET 9 |
-| UI | Avalonia UI 11.2 + 独自のクラシック Windows テーマ |
-| グローバルホットキー | SharpHook |
-| 画像処理 | SkiaSharp |
-| 録画 / OCR / QR | ffmpeg / Tesseract / QRCoder + ZXing.Net |
+| 言語 | Rust |
+| UI | egui / eframe + 手描きのクラシック Windows テーマ |
+| 画面キャプチャ | xcap (Windows、macOS、X11、Wayland ポータル) |
+| トレイ / ホットキー | tray-icon, global-hotkey |
+| 画像処理 | image, tiny-skia, ab_glyph |
+| 録画 / OCR / QR | ffmpeg / Tesseract / qrcode + rxing |
 | 翻訳 | `Resources/i18n/*.json` (キーは英語の文字列) |
 
 ## 📁 プロジェクト構成
 
 ```
 EagleShot/
-├── Core/                  # キャプチャ、録画、OCR、アップロード、ホットキー、設定、翻訳
-├── Views/                 # メインウィンドウ、エディター、設定、ツール、通知
-├── Styles/                # Classic.axaml (クラシック Windows テーマ)、AppStyles.axaml (色、アイコン)
+├── src/core/              # キャプチャ、録画、OCR、アップロード、クリップボード、設定、履歴 (UI なし)
+├── src/ui/                # クラシック Windows ウィジェット、メインウィンドウ、エディター、ピン、通知
+├── src/app/               # トレイ、ホットキー、キャプチャの流れ、キャプチャ後のタスク
+├── src/main.rs            # エントリーポイントとコマンドライン
 ├── Resources/i18n/        # 翻訳: tr, zh-CN, zh-TW, ja, ko, de, fr, pl, uk, ru
+├── vendor/eframe/         # 小さなパッチを 2 つ当てた eframe 0.37 (Cargo.toml を参照)
 ├── installers/            # Windows (Inno Setup)、macOS (.app / .dmg)、Linux (install.sh)
-├── scripts/               # ビルドスクリプト、Windows 用ツールの同梱
-├── docs/                  # ウェブサイト (GitHub Pages) とスクリーンショット
-├── App.axaml(.cs)         # アプリの起動、トレイ、コマンド
-└── Program.cs             # エントリーポイント
+├── scripts/               # Linux のビルド用パッケージ、スモークテスト、Windows 用ツールの同梱
+├── tests/                 # 翻訳カバレッジのテスト
+└── docs/                  # ウェブサイト (GitHub Pages) とスクリーンショット
 ```
 
 ## 🤝 翻訳
@@ -193,4 +202,4 @@ EagleShot/
 
 ## 📝 ライセンス
 
-MIT ライセンス。
+MIT ライセンス。[LICENSE](LICENSE) を参照してください。

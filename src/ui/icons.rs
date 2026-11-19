@@ -215,6 +215,10 @@ fn arc_to(pb: &mut PathBuilder, x1: f32, y1: f32, rx: f32, ry: f32, rot: f32, la
     let ang = |ux: f32, uy: f32, vx: f32, vy: f32| (ux * vy - uy * vx).atan2(ux * vx + uy * vy);
     let t1 = ang(1.0, 0.0, (x1p - cxp) / rx, (y1p - cyp) / ry);
     let mut dt = ang((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry);
+    // a half circle: atan2 can return +π or -π here, so let the sweep flag decide
+    if (dt.abs() - std::f32::consts::PI).abs() < 1e-3 {
+        dt = if sweep { std::f32::consts::PI } else { -std::f32::consts::PI };
+    }
     if !sweep && dt > 0.0 {
         dt -= std::f32::consts::TAU;
     } else if sweep && dt < 0.0 {

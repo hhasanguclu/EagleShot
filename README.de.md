@@ -19,6 +19,8 @@
 
 EagleShot ist ein kostenloses Open-Source-Screenshot-Werkzeug. Es verbindet die Geschwindigkeit von Lightshot mit einem Arbeitsablauf wie in ShareX: Aufnahmemodi, ein Editor zum Beschriften, Aufgaben nach der Aufnahme, Uploads, Verlauf und angeheftete Screenshots. Außerdem nimmt es den Bildschirm als MP4 oder GIF auf, erfasst scrollende Seiten, liest Text per OCR und scannt QR-Codes. Die Oberfläche sieht aus wie ein klassisches Programm aus Windows 9x/2000: Menüleiste, Symbolleiste, Registerkarten, 3D-Schaltflächen und Statusleiste. EagleShot gibt es in 11 Sprachen.
 
+Seit Version 4.0 ist EagleShot in Rust geschrieben: ein einziges kleines Programm, sonst muss nichts installiert werden.
+
 ## 📸 Screenshots
 
 | | |
@@ -104,7 +106,9 @@ English · Türkçe · 简体中文 · 繁體中文 · 日本語 · 한국어 ·
 eagleshot --region | --fullscreen | --monitor | --window | --delay | --repeat | --color | --show
 eagleshot --record | --gif | --scroll | --ocr | --qr | --ruler
 eagleshot --editor [bild]       # Bild im Editor öffnen
+eagleshot --pin [bild]          # Bild auf dem Bildschirm anheften
 eagleshot --upload <dateien…>   # Dateien hochladen
+eagleshot --minimized | --quit  # im Infobereich starten / laufendes EagleShot beenden
 ```
 
 `--record` und `--gif` starten eine Aufnahme; derselbe Befehl beendet sie wieder. Läuft EagleShot bereits, geht der Befehl an diese Instanz.
@@ -115,7 +119,7 @@ Laden Sie die Datei für Ihr System unter [Releases](https://github.com/hhasangu
 
 ### Windows
 
-1. `EagleShot_Setup_v3.3.0_win-x64.exe` ausführen. Das Installationsprogramm enthält FFmpeg (Aufnahme) und Tesseract OCR (Texterkennung).
+1. `EagleShot_Setup_v4.0.0_win-x64.exe` ausführen. Das Installationsprogramm enthält FFmpeg (Aufnahme) und Tesseract OCR (Texterkennung).
 2. **„Druck-Taste für EagleShot verwenden“** aktiviert lassen, damit die Taste EagleShot statt des Snipping Tools öffnet.
 3. Bei einer SmartScreen-Warnung **Weitere Informationen → Trotzdem ausführen** wählen (die App ist nicht signiert).
 
@@ -133,24 +137,27 @@ Für Aufnahme und OCR: `brew install ffmpeg tesseract tesseract-lang`
 ### Linux
 
 ```bash
-tar xzf EagleShot_v3.3.0_linux-x64.tar.gz
-cd EagleShot_v3.3.0_linux-x64
+tar xzf EagleShot_v4.0.0_linux-x64.tar.gz
+cd EagleShot_v4.0.0_linux-x64
 ./installers/linux/install.sh
 ```
 
-- Bildschirmaufnahme: `scrot`, `maim` oder ImageMagick (X11). Unter Wayland nutzt EagleShot xdg-desktop-portal (GNOME, KDE) oder `grim` / `gnome-screenshot`.
-- Zwischenablage: `xclip` (X11) oder `wl-clipboard` (Wayland)
-- Optional: `ffmpeg` (Aufnahme, X11) und `tesseract-ocr` (Texterkennung)
+- Läuft unter X11 und Wayland (GNOME, KDE). Unter Wayland laufen Screenshots über xdg-desktop-portal, die Fenster über XWayland.
+- Globale Tastenkürzel brauchen den Fokus in X11 oder XWayland; unter reinem Wayland ein Tastenkürzel der Arbeitsumgebung auf `eagleshot --region` legen.
+- Das Symbol im Infobereich nutzt StatusNotifierItem (KDE, die meisten Desktops; unter GNOME die Erweiterung AppIndicator installieren).
+- Optional: `ffmpeg` (Aufnahme, X11), `tesseract-ocr` (Texterkennung), `wl-clipboard` oder `xclip` (Zwischenablage).
 
 ### Aus dem Quellcode bauen
+
+Benötigt wird [Rust](https://rustup.rs) 1.85 oder neuer.
 
 ```bash
 git clone https://github.com/hhasanguclu/EagleShot.git
 cd EagleShot
-dotnet run
+cargo run --release
 ```
 
-Alle Plattformen auf einmal bauen: `./scripts/build-all.ps1` (PowerShell) oder `./scripts/build-all.sh` (Bash).
+Unter Debian / Ubuntu zuerst die Build-Pakete mit `./scripts/linux-build-deps.sh` installieren. Die Tests laufen mit `cargo test`.
 
 ## 🎮 Verwendung
 
@@ -165,26 +172,28 @@ Alle Plattformen auf einmal bauen: `./scripts/build-all.ps1` (PowerShell) oder `
 
 | | |
 |---|---|
-| Sprache | C# / .NET 9 |
-| Oberfläche | Avalonia UI 11.2 mit eigenem klassischem Windows-Theme |
-| Globale Tastenkürzel | SharpHook |
-| Bildverarbeitung | SkiaSharp |
-| Aufnahme / OCR / QR | ffmpeg / Tesseract / QRCoder + ZXing.Net |
+| Sprache | Rust |
+| Oberfläche | egui / eframe mit selbst gezeichnetem klassischem Windows-Theme |
+| Bildschirmaufnahme | xcap (Windows, macOS, X11, Wayland-Portal) |
+| Infobereich / Tastenkürzel | tray-icon, global-hotkey |
+| Bildverarbeitung | image, tiny-skia, ab_glyph |
+| Aufnahme / OCR / QR | ffmpeg / Tesseract / qrcode + rxing |
 | Übersetzungen | `Resources/i18n/*.json` (Schlüssel ist der englische Text) |
 
 ## 📁 Projektstruktur
 
 ```
 EagleShot/
-├── Core/                  # Aufnahme, Recording, OCR, Uploads, Tastenkürzel, Einstellungen, Übersetzung
-├── Views/                 # Hauptfenster, Editor, Einstellungen, Werkzeuge, Benachrichtigungen
-├── Styles/                # Classic.axaml (klassisches Windows-Theme), AppStyles.axaml (Farben, Symbole)
+├── src/core/              # Aufnahme, Recording, OCR, Uploads, Zwischenablage, Einstellungen, Verlauf (ohne UI)
+├── src/ui/                # Klassische Windows-Steuerelemente, Hauptfenster, Editor, angeheftete Bilder, Benachrichtigungen
+├── src/app/               # Infobereich, Tastenkürzel, Aufnahmeabläufe, Aufgaben nach der Aufnahme
+├── src/main.rs            # Einstiegspunkt und Befehlszeile
 ├── Resources/i18n/        # Übersetzungen: tr, zh-CN, zh-TW, ja, ko, de, fr, pl, uk, ru
+├── vendor/eframe/         # eframe 0.37 mit zwei kleinen Patches (siehe Cargo.toml)
 ├── installers/            # Windows (Inno Setup), macOS (.app / .dmg), Linux (install.sh)
-├── scripts/               # Build-Skripte, Bündeln der Windows-Werkzeuge
-├── docs/                  # Website (GitHub Pages) und Screenshots
-├── App.axaml(.cs)         # App-Einstieg, Infobereich, Befehle
-└── Program.cs             # Haupteinstiegspunkt
+├── scripts/               # Linux-Build-Pakete, Smoke-Test, Bündeln der Windows-Werkzeuge
+├── tests/                 # Test der Übersetzungsabdeckung
+└── docs/                  # Website (GitHub Pages) und Screenshots
 ```
 
 ## 🤝 Übersetzungen
@@ -193,4 +202,4 @@ Die Übersetzungen liegen in `Resources/i18n/<sprache>.json`. Jede Datei ordnet 
 
 ## 📝 Lizenz
 
-MIT-Lizenz.
+MIT-Lizenz. Siehe [LICENSE](LICENSE).

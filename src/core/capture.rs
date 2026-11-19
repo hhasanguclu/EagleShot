@@ -85,6 +85,12 @@ impl ScreenCapture {
     }
 }
 
+#[cfg(all(unix, not(target_os = "macos")))]
+pub fn monitors() -> Vec<Monitor> {
+    super::capture_linux::monitors()
+}
+
+#[cfg(any(windows, target_os = "macos"))]
 pub fn monitors() -> Vec<Monitor> {
     let mut v: Vec<Monitor> = xcap::Monitor::all()
         .unwrap_or_default()
@@ -112,12 +118,21 @@ pub fn mouse_position() -> Option<(i32, i32)> {
 
 /// Capture every monitor into one image.
 pub fn grab() -> Result<ScreenCapture, String> {
+    #[cfg(all(unix, not(target_os = "macos")))]
+    {
+        use super::capture_linux as l;
+        // On Wayland the X server (XWayland) can't see other windows: ask the portal first.
+        let r = if l::wayland_session() { l::grab_portal().or_else(|e| l::grab_x11().map_err(|_| e)) } else { l::grab_x11() };
+        r.or_else(|e| grab_with_tools().ok_or(e))
+    }
+    #[cfg(any(windows, target_os = "macos"))]
     match grab_xcap() {
         Ok(c) => Ok(c),
         Err(e) => grab_with_tools().ok_or(e),
     }
 }
 
+#[cfg(any(windows, target_os = "macos"))]
 fn grab_xcap() -> Result<ScreenCapture, String> {
     let mons = xcap::Monitor::all().map_err(|e| e.to_string())?;
     let mut shots = Vec::new();
@@ -133,6 +148,7 @@ fn grab_xcap() -> Result<ScreenCapture, String> {
 }
 
 /// Put monitor images on one canvas. Positions are in screen units; images may be larger (HiDPI).
+#[cfg_attr(all(unix, not(target_os = "macos")), allow(dead_code))]
 pub fn compose(shots: Vec<(i32, i32, u32, u32, RgbaImage)>) -> ScreenCapture {
     let min_x = shots.iter().map(|s| s.0).min().unwrap();
     let min_y = shots.iter().map(|s| s.1).min().unwrap();
@@ -166,6 +182,7 @@ pub fn compose(shots: Vec<(i32, i32, u32, u32, RgbaImage)>) -> ScreenCapture {
 }
 
 /// Fallback: external screenshot tools.
+#[cfg_attr(windows, allow(dead_code))]
 fn grab_with_tools() -> Option<ScreenCapture> {
     let tmp = super::paths::temp_file("", "png");
     let t = tmp.to_string_lossy().into_owned();
@@ -222,6 +239,21 @@ pub fn failure_hint() -> &'static str {
 }
 
 /// Visible windows (topmost first) in capture pixels.
+#[cfg(all(unix, not(target_os = "macos")))]
+pub fn windows(cap: &ScreenCapture) -> Vec<Rect> {
+    if super::capture_linux::wayland_session() {
+        return vec![];
+    }
+    super::capture_linux::windows()
+        .into_iter()
+        .map(|(x, y, w, h)| {
+            let (cx, cy) = cap.to_capture(x, y);
+            Rect { x: cx, y: cy, w: w as f32 * cap.scale, h: h as f32 * cap.scale }
+        })
+        .collect()
+}
+
+#[cfg(any(windows, target_os = "macos"))]
 pub fn windows(cap: &ScreenCapture) -> Vec<Rect> {
     let own = std::process::id();
     let Ok(all) = xcap::Window::all() else { return vec![] };

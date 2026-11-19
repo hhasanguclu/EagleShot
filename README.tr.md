@@ -19,6 +19,8 @@
 
 EagleShot ücretsiz ve açık kaynaklı bir ekran görüntüsü aracıdır. Lightshot'ın hızını ShareX tarzı bir iş akışıyla birleştirir: yakalama modları, düzenleme editörü, yakalama sonrası görevler, yükleme, geçmiş ve ekrana sabitleme. Ekranı MP4 veya GIF olarak kaydeder, kaydırmalı sayfaları yakalar, OCR ile metin okur ve QR kod tarar. Arayüzü klasik bir Windows 9x/2000 programına benzer: menü çubuğu, araç çubuğu, sekmeler, 3D butonlar ve durum çubuğu. 11 dilde kullanılabilir.
 
+4.0 sürümünden itibaren EagleShot Rust ile yazılmıştır: kurulacak başka hiçbir şey gerektirmeyen tek, küçük bir program.
+
 ## 📸 Ekran görüntüleri
 
 | | |
@@ -104,7 +106,9 @@ English · Türkçe · 简体中文 · 繁體中文 · 日本語 · 한국어 ·
 eagleshot --region | --fullscreen | --monitor | --window | --delay | --repeat | --color | --show
 eagleshot --record | --gif | --scroll | --ocr | --qr | --ruler
 eagleshot --editor [resim]      # resmi editörde aç
+eagleshot --pin [resim]         # resmi ekrana sabitle
 eagleshot --upload <dosyalar…>  # dosyaları yükle
+eagleshot --minimized | --quit  # tepside başlat / çalışan EagleShot'ı kapat
 ```
 
 `--record` ve `--gif` kaydı başlatır; aynı komutu tekrar çalıştırınca durur. EagleShot zaten açıksa komut o örneğe gider.
@@ -115,7 +119,7 @@ Sisteminize uygun dosyayı [Sürümler](https://github.com/hhasanguclu/EagleShot
 
 ### Windows
 
-1. `EagleShot_Setup_v3.3.0_win-x64.exe` dosyasını çalıştırın. Kurulum FFmpeg (kayıt) ve Tesseract OCR (metin tanıma) içerir.
+1. `EagleShot_Setup_v4.0.0_win-x64.exe` dosyasını çalıştırın. Kurulum FFmpeg (kayıt) ve Tesseract OCR (metin tanıma) içerir.
 2. PrintScreen'in Ekran Alıntısı Aracı yerine EagleShot'ı açması için **"PrintScreen tuşunu EagleShot için kullan"** seçeneğini açık bırakın.
 3. SmartScreen uyarı verirse **Ek bilgi → Yine de çalıştır**'a tıklayın (uygulama imzalı değil).
 
@@ -133,24 +137,27 @@ Kayıt ve OCR için: `brew install ffmpeg tesseract tesseract-lang`
 ### Linux
 
 ```bash
-tar xzf EagleShot_v3.3.0_linux-x64.tar.gz
-cd EagleShot_v3.3.0_linux-x64
+tar xzf EagleShot_v4.0.0_linux-x64.tar.gz
+cd EagleShot_v4.0.0_linux-x64
 ./installers/linux/install.sh
 ```
 
-- Ekran yakalama: `scrot`, `maim` veya ImageMagick (X11). Wayland'de EagleShot xdg-desktop-portal (GNOME, KDE) ya da `grim` / `gnome-screenshot` kullanır.
-- Pano: `xclip` (X11) veya `wl-clipboard` (Wayland)
-- İsteğe bağlı: `ffmpeg` (kayıt, X11) ve `tesseract-ocr` (metin tanıma)
+- X11 ve Wayland'de (GNOME, KDE) çalışır. Wayland'de ekran görüntüleri xdg-desktop-portal üzerinden alınır, pencereler XWayland ile çalışır.
+- Genel kısayollar X11 ya da XWayland odağı gerektirir; saf Wayland'de `eagleshot --region` komutuna bir masaüstü kısayolu atayın.
+- Tepsi simgesi StatusNotifierItem kullanır (KDE ve çoğu masaüstü; GNOME'da AppIndicator eklentisini kurun).
+- İsteğe bağlı: `ffmpeg` (kayıt, X11), `tesseract-ocr` (metin tanıma), `wl-clipboard` veya `xclip` (pano).
 
 ### Kaynaktan derleme
+
+[Rust](https://rustup.rs) 1.85 veya daha yeni bir sürüm gerekir.
 
 ```bash
 git clone https://github.com/hhasanguclu/EagleShot.git
 cd EagleShot
-dotnet run
+cargo run --release
 ```
 
-Tüm platformları tek seferde derlemek için `./scripts/build-all.ps1` (PowerShell) veya `./scripts/build-all.sh` (Bash).
+Debian / Ubuntu'da önce derleme paketlerini `./scripts/linux-build-deps.sh` ile kurun. Testleri `cargo test` ile çalıştırın.
 
 ## 🎮 Kullanım
 
@@ -165,26 +172,28 @@ Tüm platformları tek seferde derlemek için `./scripts/build-all.ps1` (PowerSh
 
 | | |
 |---|---|
-| Dil | C# / .NET 9 |
-| Arayüz | Avalonia UI 11.2, özel klasik Windows teması |
-| Genel kısayollar | SharpHook |
-| Görüntü işleme | SkiaSharp |
-| Kayıt / OCR / QR | ffmpeg / Tesseract / QRCoder + ZXing.Net |
+| Dil | Rust |
+| Arayüz | egui / eframe, elle çizilmiş klasik Windows teması |
+| Ekran yakalama | xcap (Windows, macOS, X11, Wayland portalı) |
+| Tepsi / kısayollar | tray-icon, global-hotkey |
+| Görüntü işleme | image, tiny-skia, ab_glyph |
+| Kayıt / OCR / QR | ffmpeg / Tesseract / qrcode + rxing |
 | Çeviriler | `Resources/i18n/*.json` (anahtar İngilizce metindir) |
 
 ## 📁 Proje yapısı
 
 ```
 EagleShot/
-├── Core/                  # Yakalama, kayıt, OCR, yükleme, kısayollar, ayarlar, çeviri
-├── Views/                 # Ana pencere, editör, ayarlar, araçlar, bildirimler
-├── Styles/                # Classic.axaml (klasik Windows teması), AppStyles.axaml (renkler, simgeler)
+├── src/core/              # Yakalama, kayıt, OCR, yükleme, pano, ayarlar, geçmiş (arayüz yok)
+├── src/ui/                # Klasik Windows bileşenleri, ana pencere, editör, sabitlenen görüntüler, bildirimler
+├── src/app/               # Tepsi, kısayollar, yakalama akışları, yakalama sonrası görevler
+├── src/main.rs            # Giriş noktası ve komut satırı
 ├── Resources/i18n/        # Çeviriler: tr, zh-CN, zh-TW, ja, ko, de, fr, pl, uk, ru
+├── vendor/eframe/         # İki küçük yamayla eframe 0.37 (bkz. Cargo.toml)
 ├── installers/            # Windows (Inno Setup), macOS (.app / .dmg), Linux (install.sh)
-├── scripts/               # Derleme betikleri, Windows araç paketleme
-├── docs/                  # Web sitesi (GitHub Pages) ve ekran görüntüleri
-├── App.axaml(.cs)         # Uygulama girişi, tepsi, komutlar
-└── Program.cs             # Ana giriş noktası
+├── scripts/               # Linux derleme paketleri, duman testi, Windows araç paketleme
+├── tests/                 # Çeviri kapsamı testi
+└── docs/                  # Web sitesi (GitHub Pages) ve ekran görüntüleri
 ```
 
 ## 🤝 Çeviriler
@@ -193,4 +202,4 @@ EagleShot/
 
 ## 📝 Lisans
 
-MIT Lisansı.
+MIT Lisansı. Ayrıntılar için [LICENSE](LICENSE).

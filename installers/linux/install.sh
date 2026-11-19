@@ -1,5 +1,5 @@
 #!/bin/bash
-# EagleShot v3.3.0 - Linux Installer
+# EagleShot - Linux installer (per user, no root needed)
 set -e
 
 APP_NAME="EagleShot"
@@ -50,7 +50,7 @@ cat > "$AUTOSTART_DIR/$APP_ID.desktop" << EOF
 [Desktop Entry]
 Type=Application
 Name=$APP_NAME
-Exec=$INSTALL_DIR/EagleShot
+Exec=$INSTALL_DIR/EagleShot --minimized
 Hidden=false
 X-GNOME-Autostart-enabled=true
 EOF
@@ -60,5 +60,12 @@ echo "=== Installation complete! ==="
 echo "  Run:  eagleshot"
 echo "  Or find '$APP_NAME' in your application menu."
 echo "  Press PrintScreen to take a screenshot."
+case ":$PATH:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) echo "  Note: add ~/.local/bin to your PATH to use the 'eagleshot' command." ;;
+esac
+for tool in ffmpeg tesseract; do
+  command -v "$tool" >/dev/null 2>&1 || echo "  Optional: install '$tool' (recording / text recognition)."
+done
 echo ""
 echo "To uninstall, run: $SCRIPT_DIR/uninstall.sh"

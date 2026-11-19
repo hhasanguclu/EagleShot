@@ -19,6 +19,8 @@
 
 EagleShot은 무료 오픈 소스 스크린샷 도구입니다. Lightshot의 속도와 ShareX 같은 작업 흐름을 결합했습니다: 캡처 모드, 주석 편집기, 캡처 후 작업, 업로드, 기록, 화면 고정. 화면을 MP4나 GIF로 녹화하고, 스크롤되는 페이지를 캡처하고, OCR로 텍스트를 읽고, QR 코드를 스캔할 수도 있습니다. 인터페이스는 클래식한 Windows 9x/2000 프로그램처럼 생겼습니다: 메뉴 모음, 도구 모음, 탭, 입체 버튼, 상태 표시줄. 11개 언어를 지원합니다.
 
+버전 4.0부터 EagleShot은 Rust로 작성되었습니다: 따로 설치할 것이 없는 작은 프로그램 하나입니다.
+
 ## 📸 스크린샷
 
 | | |
@@ -104,7 +106,9 @@ English · Türkçe · 简体中文 · 繁體中文 · 日本語 · 한국어 ·
 eagleshot --region | --fullscreen | --monitor | --window | --delay | --repeat | --color | --show
 eagleshot --record | --gif | --scroll | --ocr | --qr | --ruler
 eagleshot --editor [이미지]      # 편집기에서 이미지 열기
+eagleshot --pin [이미지]         # 이미지를 화면에 고정
 eagleshot --upload <파일…>       # 파일 업로드
+eagleshot --minimized | --quit   # 트레이에서 시작 / 실행 중인 EagleShot 종료
 ```
 
 `--record`와 `--gif`는 녹화를 시작하고, 같은 명령을 다시 실행하면 멈춥니다. EagleShot이 이미 실행 중이면 명령은 그 인스턴스로 전달됩니다.
@@ -115,7 +119,7 @@ eagleshot --upload <파일…>       # 파일 업로드
 
 ### Windows
 
-1. `EagleShot_Setup_v3.3.0_win-x64.exe`를 실행합니다. 설치 프로그램에는 FFmpeg (녹화)와 Tesseract OCR (텍스트 인식)이 포함되어 있습니다.
+1. `EagleShot_Setup_v4.0.0_win-x64.exe`를 실행합니다. 설치 프로그램에는 FFmpeg (녹화)와 Tesseract OCR (텍스트 인식)이 포함되어 있습니다.
 2. PrintScreen 키가 캡처 도구 대신 EagleShot을 열도록 **"PrintScreen 키를 EagleShot에 사용"**을 켜 둡니다.
 3. SmartScreen 경고가 나오면 **추가 정보 → 실행**을 클릭합니다 (앱이 서명되지 않았습니다).
 
@@ -133,24 +137,27 @@ eagleshot --upload <파일…>       # 파일 업로드
 ### Linux
 
 ```bash
-tar xzf EagleShot_v3.3.0_linux-x64.tar.gz
-cd EagleShot_v3.3.0_linux-x64
+tar xzf EagleShot_v4.0.0_linux-x64.tar.gz
+cd EagleShot_v4.0.0_linux-x64
 ./installers/linux/install.sh
 ```
 
-- 화면 캡처: `scrot`, `maim` 또는 ImageMagick (X11). Wayland에서는 xdg-desktop-portal (GNOME, KDE)이나 `grim` / `gnome-screenshot`을 사용합니다.
-- 클립보드: `xclip` (X11) 또는 `wl-clipboard` (Wayland)
-- 선택: `ffmpeg` (녹화, X11)와 `tesseract-ocr` (텍스트 인식)
+- X11과 Wayland (GNOME, KDE)에서 동작합니다. Wayland에서는 xdg-desktop-portal로 스크린샷을 찍고, 창은 XWayland로 실행됩니다.
+- 전역 단축키는 X11 또는 XWayland 창에 포커스가 있어야 작동합니다. 순수 Wayland에서는 데스크톱 단축키에 `eagleshot --region`을 지정하세요.
+- 트레이 아이콘은 StatusNotifierItem을 사용합니다 (KDE와 대부분의 데스크톱; GNOME에서는 AppIndicator 확장을 설치하세요).
+- 선택: `ffmpeg` (녹화, X11), `tesseract-ocr` (텍스트 인식), `wl-clipboard` 또는 `xclip` (클립보드)
 
 ### 소스에서 빌드
+
+[Rust](https://rustup.rs) 1.85 이상이 필요합니다.
 
 ```bash
 git clone https://github.com/hhasanguclu/EagleShot.git
 cd EagleShot
-dotnet run
+cargo run --release
 ```
 
-모든 플랫폼을 한 번에 빌드: `./scripts/build-all.ps1` (PowerShell) 또는 `./scripts/build-all.sh` (Bash).
+Debian / Ubuntu에서는 먼저 `./scripts/linux-build-deps.sh`로 빌드 패키지를 설치하세요. 테스트는 `cargo test`로 실행합니다.
 
 ## 🎮 사용법
 
@@ -165,26 +172,28 @@ dotnet run
 
 | | |
 |---|---|
-| 언어 | C# / .NET 9 |
-| UI | Avalonia UI 11.2 + 자체 클래식 Windows 테마 |
-| 전역 단축키 | SharpHook |
-| 이미지 처리 | SkiaSharp |
-| 녹화 / OCR / QR | ffmpeg / Tesseract / QRCoder + ZXing.Net |
+| 언어 | Rust |
+| UI | egui / eframe + 직접 그린 클래식 Windows 테마 |
+| 화면 캡처 | xcap (Windows, macOS, X11, Wayland 포털) |
+| 트레이 / 단축키 | tray-icon, global-hotkey |
+| 이미지 처리 | image, tiny-skia, ab_glyph |
+| 녹화 / OCR / QR | ffmpeg / Tesseract / qrcode + rxing |
 | 번역 | `Resources/i18n/*.json` (키는 영어 문장) |
 
 ## 📁 프로젝트 구조
 
 ```
 EagleShot/
-├── Core/                  # 캡처, 녹화, OCR, 업로드, 단축키, 설정, 번역
-├── Views/                 # 기본 창, 편집기, 설정, 도구, 알림
-├── Styles/                # Classic.axaml (클래식 Windows 테마), AppStyles.axaml (색상, 아이콘)
+├── src/core/              # 캡처, 녹화, OCR, 업로드, 클립보드, 설정, 기록 (UI 없음)
+├── src/ui/                # 클래식 Windows 위젯, 기본 창, 편집기, 고정 이미지, 알림
+├── src/app/               # 트레이, 단축키, 캡처 흐름, 캡처 후 작업
+├── src/main.rs            # 진입점과 명령줄
 ├── Resources/i18n/        # 번역: tr, zh-CN, zh-TW, ja, ko, de, fr, pl, uk, ru
+├── vendor/eframe/         # 작은 패치 두 개를 적용한 eframe 0.37 (Cargo.toml 참고)
 ├── installers/            # Windows (Inno Setup), macOS (.app / .dmg), Linux (install.sh)
-├── scripts/               # 빌드 스크립트, Windows 도구 번들링
-├── docs/                  # 웹사이트 (GitHub Pages)와 스크린샷
-├── App.axaml(.cs)         # 앱 시작, 트레이, 명령
-└── Program.cs             # 진입점
+├── scripts/               # Linux 빌드 패키지, 스모크 테스트, Windows 도구 번들링
+├── tests/                 # 번역 누락 검사 테스트
+└── docs/                  # 웹사이트 (GitHub Pages)와 스크린샷
 ```
 
 ## 🤝 번역
@@ -193,4 +202,4 @@ EagleShot/
 
 ## 📝 라이선스
 
-MIT 라이선스.
+MIT 라이선스. [LICENSE](LICENSE)를 참고하세요.

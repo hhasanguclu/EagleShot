@@ -1,4 +1,6 @@
 pub mod capture;
+#[cfg(all(unix, not(target_os = "macos")))]
+pub mod capture_linux;
 pub mod clipboard;
 pub mod codes;
 pub mod draw;

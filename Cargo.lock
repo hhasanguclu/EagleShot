@@ -1027,6 +1027,7 @@ version = "4.0.0"
 dependencies = [
  "ab_glyph",
  "arboard",
+ "ashpd",
  "base64",
  "chrono",
  "dirs",
@@ -1041,6 +1042,8 @@ dependencies = [
  "objc2-app-kit 0.3.2",
  "objc2-foundation 0.3.2",
  "open",
+ "percent-encoding",
+ "pollster",
  "qrcode",
  "regex",
  "rfd",
@@ -1057,6 +1060,7 @@ dependencies = [
  "winit",
  "winreg",
  "winresource",
+ "x11rb",
  "xcap",
 ]
 
