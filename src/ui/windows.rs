@@ -392,9 +392,13 @@ pub struct RecordBar {
     pub request_stop: bool,
     pub request_cancel: bool,
     placed: bool,
+    #[cfg_attr(windows, allow(dead_code))]
     frame_ids: [egui::ViewportId; 4],
+    #[cfg(windows)]
+    native_frame: Option<super::rec_frame::NativeFrame>,
 }
 
+#[cfg(not(windows))]
 /// Screen units per egui point for the monitor that holds this screen point.
 fn scale_at(x: i32, y: i32) -> f32 {
     if cfg!(target_os = "macos") {
@@ -418,11 +422,27 @@ impl RecordBar {
             request_cancel: false,
             placed: false,
             frame_ids: [next_id("recframe"), next_id("recframe"), next_id("recframe"), next_id("recframe")],
+            #[cfg(windows)]
+            native_frame: None,
         }
     }
 
     /// A frame just outside the recorded area, so you can see what is being recorded.
     /// It stays out of the recording and lets the mouse pass through.
+    #[cfg(windows)]
+    fn frame(&mut self, _ctx: &egui::Context) {
+        // Native windows in exact physical pixels: egui windows get rounded by the DPI scale and
+        // Windows can make them larger than asked, so they would not line up with the area.
+        let r = self.region;
+        let red = self.state == RecordState::Recording;
+        let rect = (r.x, r.y, r.w as i32, r.h as i32);
+        if self.native_frame.as_ref().is_none_or(|f| f.red != red || f.rect != rect) {
+            self.native_frame = None;
+            self.native_frame = Some(super::rec_frame::NativeFrame::new(rect.0, rect.1, rect.2, rect.3, red));
+        }
+    }
+
+    #[cfg(not(windows))]
     fn frame(&self, ctx: &egui::Context) {
         let r = self.region;
         let s = scale_at(r.x + r.w as i32 / 2, r.y + r.h as i32 / 2);
