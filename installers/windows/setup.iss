@@ -1,6 +1,6 @@
 ﻿#define MyAppName "EagleShot"
 #ifndef MyAppVersion
-  #define MyAppVersion "4.0.1"
+  #define MyAppVersion "4.0.2"
 #endif
 #define MyAppPublisher "Hasan Guclu"
 #define MyAppURL "https://github.com/hhasanguclu/EagleShot"

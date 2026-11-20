@@ -4,6 +4,8 @@ pub mod icons;
 pub mod main_window;
 pub mod overlay;
 pub mod pin;
+#[cfg(windows)]
+pub mod rec_frame;
 pub mod toast;
 pub mod win98;
 pub mod windows;
