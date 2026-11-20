@@ -149,13 +149,13 @@
       <p data-i18n="dl.mac">Apple Silicon (M1/M2/M3/M4) and Intel</p>
       <a class="button primary" data-asset="mac-arm" href="https://github.com/hhasanguclu/EagleShot/releases/latest">Apple Silicon (.dmg)</a>
       <a class="button" data-asset="mac-x64" href="https://github.com/hhasanguclu/EagleShot/releases/latest">Intel (.dmg)</a>
-      <details>
+      <details open>
         <summary data-i18n="dl.howmac">Installing on macOS</summary>
         <ol>
-          <li data-i18n-html="dl.mac1">Open the <code>.dmg</code> and drag <b>EagleShot</b> to <b>Applications</b>.</li>
-          <li data-i18n-html="dl.mac2">First launch: right-click EagleShot → <b>Open</b>. On macOS 15 and later use <b>System Settings → Privacy &amp; Security → Open Anyway</b>.</li>
-          <li data-i18n-html="dl.mac3">Allow <b>Screen Recording</b> and <b>Accessibility</b> (for hotkeys).</li>
-          <li data-i18n-html="dl.mac4">If macOS says the app is “damaged”: <code>xattr -cr /Applications/EagleShot.app</code></li>
+          <li data-i18n-html="dl.mac1">Easiest: open <b>Terminal</b> and run <code class="copy">curl -fsSL https://hhasanguclu.github.io/EagleShot/install-macos.sh | bash</code> It installs EagleShot without the security warning.</li>
+          <li data-i18n-html="dl.mac2">With the <code>.dmg</code>: drag <b>EagleShot</b> to <b>Applications</b>.</li>
+          <li data-i18n-html="dl.mac3">If macOS offers <b>Move to Trash</b> (“can't be verified” or “damaged”), click <b>Done</b>, then <b>System Settings → Privacy &amp; Security → Open Anyway</b>. EagleShot isn't signed with a paid Apple certificate.</li>
+          <li data-i18n-html="dl.mac4">Allow <b>Screen Recording</b> and <b>Accessibility</b> (for hotkeys).</li>
         </ol>
       </details>
     </div>

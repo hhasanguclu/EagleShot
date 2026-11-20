@@ -123,3 +123,13 @@ h3 { font-size: 17px; margin: 0 0 4px; }
   h1 { font-size: 36px; }
   .grid, .platforms, .shots { grid-template-columns: 1fr; }
 }
+
+/* Copyable install command */
+code.copy {
+  display: block;
+  margin: 6px 0;
+  padding: 6px 8px;
+  white-space: normal;
+  word-break: break-all;
+  user-select: all;
+}

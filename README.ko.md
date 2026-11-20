@@ -127,10 +127,19 @@ eagleshot --minimized | --quit   # 트레이에서 시작 / 실행 중인 EagleS
 
 ### macOS
 
-1. `.dmg` (Apple Silicon 또는 Intel)를 열고 **EagleShot**을 **응용 프로그램**으로 드래그합니다.
-2. 처음 실행: EagleShot을 오른쪽 클릭 → **열기**. macOS 15 이상에서는 **시스템 설정 → 개인정보 보호 및 보안 → 그래도 열기**.
+**가장 쉬운 방법:** **터미널**을 열고 다음을 실행합니다
+
+```bash
+curl -fsSL https://hhasanguclu.github.io/EagleShot/install-macos.sh | bash
+```
+
+Mac에 맞는 버전(Apple Silicon 또는 Intel)을 내려받아 **응용 프로그램**에 설치하고, 보안 경고 없이 실행합니다.
+
+**`.dmg`로 설치:**
+
+1. `.dmg`를 열고 **EagleShot**을 **응용 프로그램**으로 드래그합니다.
+2. EagleShot은 유료 Apple 개발자 인증서로 서명되지 않았기 때문에 macOS가 "열 수 없음", "확인할 수 없음" 또는 "손상되었음"이라고 표시하며 **휴지통으로 이동**을 제안합니다. (휴지통으로 이동이 아니라) **완료**를 클릭한 다음 **시스템 설정 → 개인정보 보호 및 보안**으로 가서 **그래도 열기**를 클릭합니다. 또는 터미널에서 `xattr -cr /Applications/EagleShot.app`를 실행합니다.
 3. **화면 기록**과 **손쉬운 사용** (단축키용) 권한을 허용합니다.
-4. 앱이 "손상되었다"고 나오면: `xattr -cr /Applications/EagleShot.app`
 
 녹화와 OCR에는: `brew install ffmpeg tesseract tesseract-lang`
 
