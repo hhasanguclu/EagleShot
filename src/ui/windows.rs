@@ -21,6 +21,14 @@ pub fn classic_caption() -> bool {
     cfg!(windows) || std::env::var("EAGLESHOT_CLASSIC_CAPTION").is_ok_and(|v| v == "1")
 }
 
+/// Top-left corner (points) that centers a window of `size` on the primary monitor.
+pub fn centered_pos(size: Vec2) -> Option<egui::Pos2> {
+    let m = crate::core::capture::monitors().into_iter().next()?;
+    let s = if cfg!(target_os = "macos") { 1.0 } else { m.scale.max(0.5) };
+    let c = pos2((m.x as f32 + m.w as f32 / 2.0) / s, (m.y as f32 + m.h as f32 / 2.0) / s);
+    Some(pos2((c.x - size.x / 2.0).max(m.x as f32 / s), (c.y - size.y / 2.0).max(m.y as f32 / s)))
+}
+
 pub fn builder(title: &str, size: Vec2, min: Vec2, resizable: bool) -> egui::ViewportBuilder {
     let mut b = egui::ViewportBuilder::default()
         .with_title(title)
@@ -28,6 +36,9 @@ pub fn builder(title: &str, size: Vec2, min: Vec2, resizable: bool) -> egui::Vie
         .with_min_inner_size(min)
         .with_resizable(resizable)
         .with_icon(super::app_icon());
+    if let Some(p) = centered_pos(size) {
+        b = b.with_position(p);
+    }
     if classic_caption() {
         b = b.with_decorations(false);
     }

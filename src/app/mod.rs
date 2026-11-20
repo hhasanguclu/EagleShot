@@ -1074,6 +1074,8 @@ impl App {
 
 impl eframe::App for App {
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        #[cfg(all(unix, not(target_os = "macos")))]
+        crate::core::capture_linux::set_ui_scale(ctx.pixels_per_point());
         self.process(ctx);
         if !self.main_visible && self.has_windows() {
             // the main window is hidden: still run `ui` so the other windows get painted

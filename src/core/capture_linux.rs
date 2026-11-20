@@ -20,6 +20,17 @@ pub fn wayland_session() -> bool {
     std::env::var("WAYLAND_DISPLAY").map(|v| !v.is_empty()).unwrap_or(false) || std::env::var("XDG_SESSION_TYPE").map(|v| v == "wayland").unwrap_or(false)
 }
 
+/// egui points → X pixels (the X server has no per-monitor scale; winit uses one for all).
+static SCALE: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0x3F80_0000); // 1.0
+
+pub fn set_ui_scale(s: f32) {
+    SCALE.store(s.max(0.5).to_bits(), std::sync::atomic::Ordering::Relaxed);
+}
+
+fn ui_scale() -> f32 {
+    f32::from_bits(SCALE.load(std::sync::atomic::Ordering::Relaxed))
+}
+
 pub fn monitors() -> Vec<Monitor> {
     let Some((conn, screen)) = x11() else { return vec![] };
     let root = conn.setup().roots[screen].root;
@@ -29,11 +40,14 @@ pub fn monitors() -> Vec<Monitor> {
         .ok()
         .and_then(|c| c.reply().ok())
         .map(|r| {
-            r.monitors.iter().map(|m| Monitor { x: m.x as i32, y: m.y as i32, w: m.width as u32, h: m.height as u32, scale: 1.0, primary: m.primary }).collect()
+            r.monitors
+                .iter()
+                .map(|m| Monitor { x: m.x as i32, y: m.y as i32, w: m.width as u32, h: m.height as u32, scale: ui_scale(), primary: m.primary })
+                .collect()
         })
         .unwrap_or_default();
     if v.is_empty() {
-        v.push(Monitor { x: 0, y: 0, w: sw, h: sh, scale: 1.0, primary: true });
+        v.push(Monitor { x: 0, y: 0, w: sw, h: sh, scale: ui_scale(), primary: true });
     }
     v.sort_by_key(|m| !m.primary);
     v
