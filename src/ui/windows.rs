@@ -392,6 +392,16 @@ pub struct RecordBar {
     pub request_stop: bool,
     pub request_cancel: bool,
     placed: bool,
+    frame_ids: [egui::ViewportId; 4],
+}
+
+/// Screen units per egui point for the monitor that holds this screen point.
+fn scale_at(x: i32, y: i32) -> f32 {
+    if cfg!(target_os = "macos") {
+        return 1.0;
+    }
+    let mons = crate::core::capture::monitors();
+    mons.iter().find(|m| x >= m.x && y >= m.y && x < m.x + m.w as i32 && y < m.y + m.h as i32).or(mons.first()).map(|m| m.scale.max(0.5)).unwrap_or(1.0)
 }
 
 impl RecordBar {
@@ -407,6 +417,43 @@ impl RecordBar {
             request_stop: false,
             request_cancel: false,
             placed: false,
+            frame_ids: [next_id("recframe"), next_id("recframe"), next_id("recframe"), next_id("recframe")],
+        }
+    }
+
+    /// A frame just outside the recorded area, so you can see what is being recorded.
+    /// It stays out of the recording and lets the mouse pass through.
+    fn frame(&self, ctx: &egui::Context) {
+        let r = self.region;
+        let s = scale_at(r.x + r.w as i32 / 2, r.y + r.h as i32 / 2);
+        let (x, y, w, h) = (r.x as f32 / s, r.y as f32 / s, r.w as f32 / s, r.h as f32 / s);
+        let t = 3.0; // thickness in points
+        let gap = 1.0; // keep the frame off the captured pixels
+        let color = match self.state {
+            RecordState::Recording => Color32::from_rgb(0xFF, 0x30, 0x30),
+            _ => Color32::from_rgb(0x30, 0x8C, 0xFF),
+        };
+        let edges = [
+            (pos2(x - gap - t, y - gap - t), vec2(w + 2.0 * (gap + t), t)),
+            (pos2(x - gap - t, y + h + gap), vec2(w + 2.0 * (gap + t), t)),
+            (pos2(x - gap - t, y - gap), vec2(t, h + 2.0 * gap)),
+            (pos2(x + w + gap, y - gap), vec2(t, h + 2.0 * gap)),
+        ];
+        for (id, (pos, size)) in self.frame_ids.iter().zip(edges) {
+            let b = egui::ViewportBuilder::default()
+                .with_title("EagleShot Recording Area")
+                .with_decorations(false)
+                .with_taskbar(false)
+                .with_resizable(false)
+                .with_active(false)
+                .with_mouse_passthrough(true)
+                .with_window_level(egui::WindowLevel::AlwaysOnTop)
+                .with_position(pos)
+                .with_inner_size(size)
+                .with_min_inner_size(size);
+            ctx.show_viewport_immediate(*id, b, |ui, _| {
+                ui.painter().rect_filled(ui.max_rect().expand(2.0), 0.0, color);
+            });
         }
     }
 
@@ -417,6 +464,7 @@ impl RecordBar {
     }
 
     pub fn show(&mut self, ctx: &egui::Context) {
+        self.frame(ctx);
         let size = vec2(380.0, 66.0);
         let b = egui::ViewportBuilder::default()
             .with_title("EagleShot Recording")

@@ -127,10 +127,19 @@ eagleshot --minimized | --quit   # トレイで起動 / 起動中の EagleShot �
 
 ### macOS
 
-1. `.dmg` (Apple Silicon または Intel) を開き、**EagleShot** を**アプリケーション**にドラッグします。
-2. 初回起動: EagleShot を右クリック → **開く**。macOS 15 以降では **システム設定 → プライバシーとセキュリティ → このまま開く**。
+**いちばん簡単な方法:** **ターミナル**を開いて次を実行します
+
+```bash
+curl -fsSL https://hhasanguclu.github.io/EagleShot/install-macos.sh | bash
+```
+
+お使いの Mac に合ったバージョン (Apple Silicon または Intel) をダウンロードして**アプリケーション**にインストールし、セキュリティ警告なしで開きます。
+
+**`.dmg` を使う場合:**
+
+1. `.dmg` を開き、**EagleShot** を**アプリケーション**にドラッグします。
+2. EagleShot は有料の Apple デベロッパ証明書で署名されていないため、macOS は「開けません」「検証できません」「壊れている」と表示し、**ゴミ箱に入れる**を提案します。(ゴミ箱に入れるではなく) **完了**をクリックし、**システム設定 → プライバシーとセキュリティ**で**このまま開く**をクリックします。またはターミナルで `xattr -cr /Applications/EagleShot.app` を実行します。
 3. **画面収録**と**アクセシビリティ** (ホットキー用) を許可します。
-4. 「壊れている」と表示されたら: `xattr -cr /Applications/EagleShot.app`
 
 録画と OCR には: `brew install ffmpeg tesseract tesseract-lang`
 

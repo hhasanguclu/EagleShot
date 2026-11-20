@@ -127,10 +127,19 @@ Dostępna jest też wersja przenośna `.zip`.
 
 ### macOS
 
-1. Otwórz `.dmg` (Apple Silicon lub Intel) i przeciągnij **EagleShot** do **Aplikacji**.
-2. Pierwsze uruchomienie: prawy przycisk na EagleShot → **Otwórz**. Od macOS 15: **Ustawienia systemowe → Prywatność i ochrona → Otwórz mimo to**.
+**Najprościej:** otwórz **Terminal** i uruchom
+
+```bash
+curl -fsSL https://hhasanguclu.github.io/EagleShot/install-macos.sh | bash
+```
+
+Polecenie pobiera właściwą wersję dla Twojego Maca (Apple Silicon lub Intel), instaluje ją w **Aplikacjach** i otwiera, bez ostrzeżenia bezpieczeństwa.
+
+**Z pliku `.dmg`:**
+
+1. Otwórz `.dmg` i przeciągnij **EagleShot** do **Aplikacji**.
+2. EagleShot nie jest podpisany płatnym certyfikatem dewelopera Apple, więc macOS informuje, że aplikacji „nie można otworzyć”, „nie można zweryfikować” lub że jest „uszkodzona”, i proponuje **Przenieś do kosza**. Kliknij **Gotowe** (nie Przenieś do kosza), a następnie przejdź do **Ustawienia systemowe → Prywatność i ochrona** i kliknij **Otwórz mimo to**. Możesz też uruchomić `xattr -cr /Applications/EagleShot.app` w Terminalu.
 3. Zezwól na **Nagrywanie ekranu** i **Dostępność** (dla skrótów).
-4. Jeśli macOS twierdzi, że aplikacja jest „uszkodzona”: `xattr -cr /Applications/EagleShot.app`
 
 Do nagrywania i OCR: `brew install ffmpeg tesseract tesseract-lang`
 

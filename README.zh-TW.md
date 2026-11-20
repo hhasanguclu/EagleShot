@@ -127,10 +127,19 @@ eagleshot --minimized | --quit  # 啟動到系統匣 / 結束正在執行的 Eag
 
 ### macOS
 
-1. 開啟 `.dmg`（Apple Silicon 或 Intel），將 **EagleShot** 拖到 **應用程式** 中。
-2. 首次啟動：右鍵點選 EagleShot → **開啟**。macOS 15 及以上：**系統設定 → 隱私與安全性 → 仍要開啟**。
+**最簡單：** 開啟 **終端機** 並執行
+
+```bash
+curl -fsSL https://hhasanguclu.github.io/EagleShot/install-macos.sh | bash
+```
+
+它會為你的 Mac 下載合適的版本（Apple Silicon 或 Intel），安裝到 **應用程式** 並開啟，不會出現安全性警告。
+
+**使用 `.dmg`：**
+
+1. 開啟 `.dmg`，將 **EagleShot** 拖到 **應用程式** 中。
+2. EagleShot 沒有使用付費的 Apple 開發者憑證簽署，因此 macOS 會提示應用程式「無法打開」、「無法驗證」或「已損毀」，並提供 **丟到垃圾桶**。請按一下 **完成**（不要按丟到垃圾桶），然後前往 **系統設定 → 隱私與安全性**，按一下 **仍要開啟**。也可以在終端機中執行 `xattr -cr /Applications/EagleShot.app`。
 3. 授予 **螢幕錄製** 和 **輔助功能**（用於快捷鍵）許可權。
-4. 如果 macOS 提示應用“已損壞”：`xattr -cr /Applications/EagleShot.app`
 
 錄影和 OCR 需要：`brew install ffmpeg tesseract tesseract-lang`
 

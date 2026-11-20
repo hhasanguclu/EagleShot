@@ -1,6 +1,6 @@
 [package]
 name = "eagleshot"
-version = "4.0.0"
+version = "4.0.1"
 edition = "2021"
 rust-version = "1.85"
 description = "Screenshots, screen recording and capture tools with a classic Windows 98 look"

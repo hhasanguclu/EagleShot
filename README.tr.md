@@ -127,10 +127,19 @@ Taşınabilir `.zip` sürümü de var.
 
 ### macOS
 
-1. `.dmg` dosyasını (Apple Silicon veya Intel) açın ve **EagleShot**'ı **Uygulamalar** klasörüne sürükleyin.
-2. İlk açılışta EagleShot'a sağ tıklayıp **Aç**'ı seçin. macOS 15 ve sonrasında **Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç**.
+**En kolayı:** **Terminal**'i açın ve şunu çalıştırın
+
+```bash
+curl -fsSL https://hhasanguclu.github.io/EagleShot/install-macos.sh | bash
+```
+
+Mac'inize uygun sürümü (Apple Silicon veya Intel) indirir, **Uygulamalar** klasörüne kurar ve güvenlik uyarısı olmadan açar.
+
+**`.dmg` ile:**
+
+1. `.dmg` dosyasını açın ve **EagleShot**'ı **Uygulamalar** klasörüne sürükleyin.
+2. EagleShot ücretli bir Apple geliştirici sertifikasıyla imzalanmadığı için macOS uygulamanın "açılamadığını", "doğrulanamadığını" veya "hasarlı" olduğunu söyler ve **Çöp Sepetine Taşı** seçeneğini sunar. **Bitti**'ye tıklayın (Çöp Sepetine Taşı'ya değil), ardından **Sistem Ayarları → Gizlilik ve Güvenlik**'e gidip **Yine de Aç**'a tıklayın. Ya da Terminal'de `xattr -cr /Applications/EagleShot.app` komutunu çalıştırın.
 3. **Ekran Kaydı** ve **Erişilebilirlik** (kısayollar için) izinlerini verin.
-4. macOS uygulamanın "hasarlı" olduğunu söylerse: `xattr -cr /Applications/EagleShot.app`
 
 Kayıt ve OCR için: `brew install ffmpeg tesseract tesseract-lang`
 
